@@ -1,5 +1,4 @@
 import "./App.css";
-import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Connector } from "./Screens/Connector";
 import { OpenAPI } from "api";
