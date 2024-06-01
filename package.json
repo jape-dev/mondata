@@ -34,6 +34,8 @@
   },
   "devDependencies": {
     "@mondaycom/apps-cli": "^2.0.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "concurrently": "^5.2.0",
     "cross-port-killer": "^1.2.1",
     "eslint-config-react-app": "^7.0.1",
