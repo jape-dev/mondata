@@ -8,7 +8,7 @@ export const RouterPath = {
 };
 
 function App() {
-  OpenAPI.BASE = process.env.REACT_APP_BASE_URL || "http://localhost:80";
+  OpenAPI.BASE = process.env.REACT_APP_DOMAIN_URL || "http://localhost:80";
 
   return (
     <>
