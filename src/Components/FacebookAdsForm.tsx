@@ -2,7 +2,15 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import { Dropdown, Button } from "monday-ui-react-core";
+import {
+  Dropdown,
+  Button,
+  Tooltip,
+  Icon,
+  Modal,
+  ModalContent,
+} from "monday-ui-react-core";
+import { Info } from "monday-ui-react-core/icons";
 import {
   FacebookService,
   User,
@@ -44,9 +52,14 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>();
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [date, setDate] = useState<Option>();
+  const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
+  const getImageUrl = (imgPath: string) => {
+    return require(`../Static/images/${imgPath}.png`);
+  };
 
   const handleRunClick = () => {
     setLoading(true);
@@ -78,19 +91,33 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
           query: queryData,
           user: user,
         };
-        FacebookService.facebookFetchData(body).then((data: ColumnData[]) => {
-          if (user.monday_token) {
-            MondayService.mondayAddData(
-              user?.monday_token,
-              selectedBoardOption.value,
-              data
-            ).then(() => {
-              setLoading(false);
-              setSuccess(true);
-            });
-          }
-        });
+        FacebookService.facebookFetchData(body)
+          .then((data: ColumnData[]) => {
+            if (user.monday_token) {
+              MondayService.mondayAddData(
+                user?.monday_token,
+                selectedBoardOption.value,
+                data
+              )
+                .then(() => {
+                  setLoading(false);
+                  setSuccess(true);
+                })
+                .catch(() => {
+                  setLoading(false);
+                  setSuccess(false);
+                });
+            }
+          })
+          .catch(() => {
+            setLoading(false);
+            setSuccess(false);
+          });
       });
+    } else {
+      setShowModal(true);
+      setLoading(false);
+      setSuccess(false);
     }
   };
 
@@ -133,7 +160,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
       { value: 30, label: "Last 30 Days" },
       { value: 90, label: "Last 90 Days" },
       { value: 365, label: "Last 12 Months" },
-      { value: 730, label: "Last 24 Months" },
+      { value: 730, label: "All time" },
     ],
     []
   );
@@ -187,16 +214,32 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
   }, [selectedBoardOption]);
 
   return (
-    <div className="p-2">
+    <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
-        <p className="font-bold text-gray-500 text-sm">* Account</p>
+        <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Account</p>
+          <Tooltip
+            content="The ad account to fetch data from."
+            position={Tooltip.positions.TOP}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
         <Dropdown
           placeholder="Select an account"
           className="mb-2"
           options={accountOptions}
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
-        <p className="font-bold text-gray-500 text-sm">* Fields</p>
+        <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Metrics</p>
+          <Tooltip
+            content="Fields to import. Each field will create a new column in your board."
+            position={Tooltip.positions.TOP}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
         <Dropdown
           placeholder="Select fields"
           multi
@@ -207,37 +250,75 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
         />
       </div>
       <div className="border-2 border-gray rounded-md p-5">
-        <p className="font-bold text-gray-500 text-sm">* Board</p>
+        <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Board</p>
+          <Tooltip
+            content="The board to import metrics into."
+            position={Tooltip.positions.TOP}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
         <Dropdown
           options={boards}
           placeholder="Select a board"
           className="mb-2"
           onOptionSelect={(e: Option) => setSelectedBoardOption(e)}
         />
-        <p className="font-bold text-gray-500 text-sm">* Id Column</p>
+        <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Ad Id Column</p>
+          <Tooltip
+            title="The column containing the Facebook Ad Id, Adset Id or Campaign Id"
+            content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Facebook Posts connector."
+            position={Tooltip.positions.TOP}
+            image={getImageUrl("ad-ids")}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
         <Dropdown
           options={boardColumns}
           onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
           placeholder="Select column"
           className="mb-2"
+          menuPlacement={"top"}
         />
-        <p className="font-bold text-gray-500 text-sm">* Date</p>
+        <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Date range</p>
+          <Tooltip
+            content="Date range to calculate metrics over."
+            position={Tooltip.positions.TOP}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
         <Dropdown
           placeholder="Select a date range"
           options={dateOptions}
           className="mb-2"
           onOptionSelect={(e: Option) => setDate(e)}
+          menuPlacement={"top"}
+          value={date}
         />
       </div>
       <Button
         onClick={handleRunClick}
         loading={loading}
         success={success}
-        successText="Run Complete"
+        successText="Run Complete - Go to Board"
         className="mt-2"
       >
         Run
       </Button>
+      <Modal
+        title="Error: Required Fields"
+        onClose={() => setShowModal(false)}
+        show={showModal}
+      >
+        <ModalContent>
+          <p>Ensure all required options are selected before running.</p>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

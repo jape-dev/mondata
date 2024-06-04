@@ -2,7 +2,15 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import { Dropdown, Button } from "monday-ui-react-core";
+import {
+  Dropdown,
+  Button,
+  Tooltip,
+  Icon,
+  Modal,
+  ModalContent,
+} from "monday-ui-react-core";
+import { Info } from "monday-ui-react-core/icons";
 import {
   FacebookService,
   User,
@@ -48,6 +56,10 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const getImageUrl = (imgPath: string) => {
+    return require(`../Static/images/${imgPath}.png`);
+  };
 
   const handleRunClick = () => {
     setLoading(true);
@@ -182,16 +194,32 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   }, [selectedBoardOption]);
 
   return (
-    <div className="p-2">
+    <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
-        <p className="font-bold text-gray-500 text-sm">* Page</p>
+        <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Page</p>
+          <Tooltip
+            content="The Facebook page to fetch data from."
+            position={Tooltip.positions.TOP}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
         <Dropdown
           placeholder="Select a page"
           className="mb-2"
           options={pageOptions}
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
-        <p className="font-bold text-gray-500 text-sm">* Fields</p>
+        <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Metrics</p>
+          <Tooltip
+            content="Fields to import. Each field will create a new column in your board."
+            position={Tooltip.positions.TOP}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
         <Dropdown
           placeholder="Select fields"
           multi
@@ -202,14 +230,32 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         />
       </div>
       <div className="border-2 border-gray rounded-md p-5">
-        <p className="font-bold text-gray-500 text-sm">* Board</p>
+        <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Board</p>
+          <Tooltip
+            content="The board to import metrics into."
+            position={Tooltip.positions.TOP}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
         <Dropdown
           options={boards}
           placeholder="Select a board"
           className="mb-2"
           onOptionSelect={(e: Option) => setSelectedBoardOption(e)}
         />
-        <p className="font-bold text-gray-500 text-sm">* Url Column</p>
+        <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Post Url Column</p>
+          <Tooltip
+            title="The column containing the url of post"
+            content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Facebook Ads application."
+            position={Tooltip.positions.TOP}
+            image={getImageUrl("post-urls")}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
         <Dropdown
           options={boardColumns}
           onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
@@ -221,7 +267,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         onClick={handleRunClick}
         loading={loading}
         success={success}
-        successText="Run Complete"
+        successText="Run Complete - Go to Board"
         className="mt-2"
       >
         Run

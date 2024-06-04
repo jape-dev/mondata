@@ -15,7 +15,7 @@
     "@mondaycom/apps-sdk": "^2.1.2",
     "@nangohq/frontend": "^0.39.28",
     "monday-sdk-js": "^0.5.0",
-    "monday-ui-react-core": "^1.54.0"
+    "monday-ui-react-core": "^2.111.1"
   },
   "eslintConfig": {
     "extends": "react-app"
