@@ -80,7 +80,7 @@ export const Connector = () => {
   });
 
   const connect = () => {
-    if (connector === "facebook") {
+    if (connector === "facebook" || connector === "facebook_pages") {
       nango
         .auth("facebook", "test-connection-id", {
           authorization_params: { config_id: "728465868571401" },
@@ -120,7 +120,7 @@ export const Connector = () => {
     } else {
       setConnected(false);
     }
-  }, [connector]);
+  }, [connector, user?.facebook_token]);
 
   return (
     <div className="p-2">
