@@ -2,27 +2,26 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Message } from '../models/Message';
+import type { Run } from '../models/Run';
+import type { RunBase } from '../models/RunBase';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
-export class UtilsService {
+export class RunService {
     /**
-     * Test Email
-     * Test emails.
-     * @param emailTo
-     * @returns Message Successful Response
+     * Run
+     * @param requestBody
+     * @returns Run Successful Response
      * @throws ApiError
      */
-    public static utilsTestEmail(
-        emailTo: string,
-    ): CancelablePromise<Message> {
+    public static runRun(
+        requestBody: RunBase,
+    ): CancelablePromise<Run> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/utils/test-email/',
-            query: {
-                'email_to': emailTo,
-            },
+            url: '/api/v1/run/run',
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

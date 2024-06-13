@@ -18,6 +18,8 @@ import {
   QueryData,
   ColumnData,
   MondayItem,
+  RunService,
+  RunBase,
 } from "../api";
 
 const monday = mondaySdk();
@@ -64,6 +66,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   const handleRunClick = () => {
     setLoading(true);
     if (
+      user.id &&
       user?.monday_token &&
       selectedBoardOption &&
       selectedColumnOption &&
@@ -90,6 +93,13 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
                 selectedBoardOption.value,
                 data
               ).then(() => {
+                if (user.id) {
+                  const run: RunBase = {
+                    user_id: user.id,
+                    board_id: selectedBoardOption.value,
+                  };
+                  RunService.runRun(run);
+                }
                 setLoading(false);
                 setSuccess(true);
               });

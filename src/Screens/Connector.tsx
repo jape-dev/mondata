@@ -12,6 +12,8 @@ import {
 } from "../api";
 import { FacebookAdsForm } from "../Components/FacebookAdsForm";
 import { FacebookPagesForm } from "../Components/FacebookPagesForm";
+import { Guide } from "../Components/Modals/OnboardingGuideModal";
+import { ViewerModal } from "../Components/Modals/ViewerUserModal";
 
 const monday = mondaySdk();
 
@@ -62,6 +64,8 @@ export const Connector = () => {
   async function updateUser(connectionId: string) {
     const sessionToken = await getSessionToken();
 
+    // TODO: add the isViewOnly
+
     const requestBody: HTTPAuthorizationCredentials = {
       scheme: "Bearer",
       credentials: sessionToken,
@@ -101,7 +105,6 @@ export const Connector = () => {
         if (sessionToken) {
           UsersService.usersReadUserByMondaySession(sessionToken).then(
             (user: User) => {
-              console.log(user);
               setUser(user);
             }
           );
@@ -123,29 +126,33 @@ export const Connector = () => {
   }, [connector, user?.facebook_token]);
 
   return (
-    <div className="p-2">
-      <div className="border-2 border-gray rounded-md p-5 mb-2">
-        <p className="font-bold text-gray-500 text-sm">* Application</p>
-        <Dropdown
-          placeholder="Select an application"
-          options={options}
-          onOptionSelect={(e: any) => setConnector(e.value)}
-        />
-        {connected === false && (
-          <Button onClick={() => connect()} className="mt-2">
-            Connect
-          </Button>
-        )}
-      </div>
-      {connected && user && (
-        <>
-          {connector === "facebook" ? (
-            <FacebookAdsForm user={user} />
-          ) : (
-            <FacebookPagesForm user={user} />
+    <>
+      <div className="p-2">
+        <div className="border-2 border-gray rounded-md p-5 mb-2">
+          <p className="font-bold text-gray-500 text-sm">* Application</p>
+          <Dropdown
+            placeholder="Select an application"
+            options={options}
+            onOptionSelect={(e: any) => setConnector(e.value)}
+          />
+          {connected === false && (
+            <Button onClick={() => connect()} className="mt-2">
+              Connect
+            </Button>
           )}
-        </>
-      )}
-    </div>
+        </div>
+        {connected && user && (
+          <>
+            {connector === "facebook" ? (
+              <FacebookAdsForm user={user} />
+            ) : (
+              <FacebookPagesForm user={user} />
+            )}
+          </>
+        )}
+        <Guide />
+        <ViewerModal />
+      </div>
+    </>
   );
 };

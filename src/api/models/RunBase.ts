@@ -2,8 +2,8 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type NewPassword = {
-    token: string;
-    new_password: string;
+export type RunBase = {
+    user_id: number;
+    board_id: string;
 };
 
