@@ -103,11 +103,13 @@ export const Connector = () => {
     const fetchUser = async () => {
       await getSessionToken().then((sessionToken) => {
         if (sessionToken) {
-          UsersService.usersReadUserByMondaySession(sessionToken).then(
-            (user: User) => {
+          UsersService.usersReadUserByMondaySession(sessionToken)
+            .then((user: User) => {
               setUser(user);
-            }
-          );
+            })
+            .catch((err) => {
+              console.log(err);
+            });
         }
       });
     };

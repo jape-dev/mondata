@@ -2,9 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type MondayItem = {
-    item_id: (string | null);
-    column_id: (string | null);
-    value: null;
-};
-
+export enum Plan {
+    FREE = 'free',
+    PRO = 'pro',
+}

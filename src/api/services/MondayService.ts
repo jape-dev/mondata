@@ -8,6 +8,17 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class MondayService {
     /**
+     * Test
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static mondayTest(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/monday/test',
+        });
+    }
+    /**
      * Login
      * @returns any Successful Response
      * @throws ApiError
@@ -131,6 +142,33 @@ export class MondayService {
             query: {
                 'access_token': accessToken,
                 'board_id': boardId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Create Board With Data
+     * @param accessToken
+     * @param boardName
+     * @param requestBody
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static mondayCreateBoardWithData(
+        accessToken: string,
+        boardName: string,
+        requestBody: Array<ColumnData>,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/monday/create-board',
+            query: {
+                'access_token': accessToken,
+                'board_name': boardName,
             },
             body: requestBody,
             mediaType: 'application/json',

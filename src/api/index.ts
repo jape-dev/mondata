@@ -12,6 +12,7 @@ export type { ColumnData } from './models/ColumnData';
 export type { HTTPAuthorizationCredentials } from './models/HTTPAuthorizationCredentials';
 export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { MondayItem } from './models/MondayItem';
+export { Plan } from './models/Plan';
 export type { QueryData } from './models/QueryData';
 export type { Run } from './models/Run';
 export type { RunBase } from './models/RunBase';

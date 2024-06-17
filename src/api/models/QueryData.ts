@@ -4,9 +4,10 @@
 /* eslint-disable */
 import type { MondayItem } from './MondayItem';
 export type QueryData = {
-    monday_items: Array<MondayItem>;
-    account_id: string;
     metrics: Array<string>;
+    monday_items?: (Array<MondayItem> | null);
+    account_id?: (string | null);
+    dimensions?: (Array<string> | null);
     start_date?: (string | null);
     end_date?: (string | null);
 };

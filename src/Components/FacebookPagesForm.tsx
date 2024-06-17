@@ -2,14 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import {
-  Dropdown,
-  Button,
-  Tooltip,
-  Icon,
-  Modal,
-  ModalContent,
-} from "monday-ui-react-core";
+import { Dropdown, Button, Tooltip, Icon } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
   FacebookService,
