@@ -20,4 +20,4 @@ export declare const SKELETON_SIZES: {
     RECTANGLE: {};
     TEXT: typeof TextSkeletonSize;
 };
-export declare type SkeletonSizeType = TextSkeletonSize | typeof SKELETON_CUSTOM_SIZE;
+export type SkeletonSizeType = TextSkeletonSize | typeof SKELETON_CUSTOM_SIZE;

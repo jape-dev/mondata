@@ -8,6 +8,6 @@ export declare enum ColorShapes {
     SQUARE = "square",
     CIRCLE = "circle"
 }
-export declare type ColorPickerValueOnly = CONTENT_COLORS_VALUES | string;
-export declare type ColorPickerArrayValueOnly = CONTENT_COLORS_VALUES[] | string[];
-export declare type ColorPickerValue = ColorPickerValueOnly | ColorPickerArrayValueOnly;
+export type ColorPickerValueOnly = CONTENT_COLORS_VALUES | string;
+export type ColorPickerArrayValueOnly = CONTENT_COLORS_VALUES[] | string[];
+export type ColorPickerValue = ColorPickerValueOnly | ColorPickerArrayValueOnly;

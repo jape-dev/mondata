@@ -1,5 +1,5 @@
 import moment from "moment";
-export declare type Moment = moment.Moment;
+export type Moment = moment.Moment;
 export declare enum FocusInput {
     startDate = "startDate",
     endDate = "endDate"

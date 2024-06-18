@@ -10,4 +10,4 @@ export declare enum LoaderSizes {
     MEDIUM = 40,
     LARGE = 64
 }
-export declare type LoaderSize = typeof LoaderSizes | number;
+export type LoaderSize = typeof LoaderSizes | number;
