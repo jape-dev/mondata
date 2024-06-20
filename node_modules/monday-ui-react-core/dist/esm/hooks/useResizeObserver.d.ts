@@ -1,5 +1,5 @@
 import { RefObject } from "react";
-declare type ResizeCallback = ({ borderBoxSize }: {
+type ResizeCallback = ({ borderBoxSize }: {
     borderBoxSize: ResizeObserverSize;
 }) => void;
 export default function useResizeObserver({ ref, callback, debounceTime }: {

@@ -1,5 +1,5 @@
 import { FocusEvent } from "react";
-declare type Result = {
+type Result = {
     focusWithinProps?: {
         onFocus?: (e: FocusEvent) => void;
         onBlur?: (e: FocusEvent) => void;

@@ -1,5 +1,5 @@
 import { ChangeEvent, Dispatch, SetStateAction } from "react";
-export declare type UseDebounceResult = {
+export type UseDebounceResult = {
     inputValue: string;
     onEventChanged: (event: ChangeEvent<Partial<HTMLInputElement> | Partial<HTMLTextAreaElement>>) => void;
     clearValue: () => void;
