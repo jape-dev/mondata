@@ -7,6 +7,7 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { Body_facebook_fetch_all_data } from './models/Body_facebook_fetch_all_data';
 export type { Body_facebook_fetch_data } from './models/Body_facebook_fetch_data';
 export type { ColumnData } from './models/ColumnData';
 export type { HTTPAuthorizationCredentials } from './models/HTTPAuthorizationCredentials';

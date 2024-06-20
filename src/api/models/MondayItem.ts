@@ -5,6 +5,7 @@
 export type MondayItem = {
     item_id: (string | null);
     column_id: (string | null);
+    column_name?: (string | null);
     value: null;
 };
 

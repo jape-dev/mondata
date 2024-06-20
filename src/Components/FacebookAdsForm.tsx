@@ -19,6 +19,8 @@ import {
   ColumnData,
   MondayItem,
   Body_facebook_fetch_data,
+  RunService,
+  RunBase,
 } from "../api";
 
 const monday = mondaySdk();
@@ -103,6 +105,13 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
                   data
                 )
                   .then(() => {
+                    if (user.id) {
+                      const run: RunBase = {
+                        user_id: user.id,
+                        board_id: selectedBoardOption.value,
+                      };
+                      RunService.runRun(run);
+                    }
                     // Send valueCreatedForUser event when data has been loaded into board
                     monday.execute("valueCreatedForUser");
                     setLoading(false);
@@ -131,25 +140,27 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
           query: queryData,
           user: user,
         };
-        FacebookService.facebookFetchData(body)
-          .then((data: ColumnData[]) => {
+        FacebookService.facebookFetchAllData(body).then(
+          (data: ColumnData[]) => {
             if (user.monday_token) {
               MondayService.mondayCreateBoardWithData(
                 user?.monday_token,
                 "Facebook Ads",
                 data
-              ).then(() => {
-                // Send valueCreatedForUser event when data has been loaded into board
-                monday.execute("valueCreatedForUser");
-                setLoading(false);
-                setSuccess(true);
-              });
+              )
+                .then(() => {
+                  // Send valueCreatedForUser event when data has been loaded into board
+                  monday.execute("valueCreatedForUser");
+                  setLoading(false);
+                  setSuccess(true);
+                })
+                .catch(() => {
+                  setLoading(false);
+                  setSuccess(false);
+                });
             }
-          })
-          .catch(() => {
-            setLoading(false);
-            setSuccess(false);
-          });
+          }
+        );
       }
     } else {
       setShowModal(true);

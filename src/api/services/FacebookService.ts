@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Body_facebook_fetch_all_data } from '../models/Body_facebook_fetch_all_data';
 import type { Body_facebook_fetch_data } from '../models/Body_facebook_fetch_data';
 import type { ColumnData } from '../models/ColumnData';
 import type { HTTPAuthorizationCredentials } from '../models/HTTPAuthorizationCredentials';
@@ -86,6 +87,25 @@ export class FacebookService {
         });
     }
     /**
+     * Fetch All Data
+     * @param requestBody
+     * @returns ColumnData Successful Response
+     * @throws ApiError
+     */
+    public static facebookFetchAllData(
+        requestBody: Body_facebook_fetch_all_data,
+    ): CancelablePromise<Array<ColumnData>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/facebook/fetch-all-data',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Pages
      * @param accessToken
      * @returns any Successful Response
@@ -114,6 +134,30 @@ export class FacebookService {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/facebook/pages/fields',
+        });
+    }
+    /**
+     * Pages Fetch All Data
+     * @param accessToken
+     * @param requestBody
+     * @returns ColumnData Successful Response
+     * @throws ApiError
+     */
+    public static facebookPagesFetchAllData(
+        accessToken: string,
+        requestBody: QueryData,
+    ): CancelablePromise<Array<ColumnData>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/facebook/pages/fetch-all-data',
+            query: {
+                'access_token': accessToken,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
     /**
