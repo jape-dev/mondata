@@ -5,7 +5,7 @@ import "monday-ui-react-core/dist/main.css";
 import { Dropdown, Button, Tooltip, Icon } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
-  FacebookService,
+  InstagramService,
   User,
   MondayService,
   QueryData,
@@ -34,13 +34,11 @@ interface BoardColumn {
   type: string;
 }
 
-export interface FacebookPagesFormProps {
+export interface InstagramPostsForm {
   user: User;
 }
 
-export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
-  user,
-}) => {
+export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
@@ -76,7 +74,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           metrics: selectedFields.map((field) => field.value),
         };
         if (selectedAccount.access_token) {
-          FacebookService.facebookPagesFetchData(
+          InstagramService.instagramPagesFetchData(
             selectedAccount.access_token,
             queryData
           ).then((data: ColumnData[]) => {
@@ -103,19 +101,21 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         }
       });
     } else {
+      console.log("IN THE ELSE");
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
       if (selectedAccount?.access_token) {
-        FacebookService.facebookPagesFetchAllData(
+        console.log("ABOUT TO FETCH THE DATA");
+        InstagramService.instagramPagesFetchAllData(
           selectedAccount.access_token,
           queryData
         ).then((data: ColumnData[]) => {
           if (user.monday_token) {
             MondayService.mondayCreateBoardWithData(
               user?.monday_token,
-              "Facebook Posts",
+              "Instagram Posts",
               data
             ).then(() => {
               // Send valueCreatedForUser event when data has been loaded into board
@@ -163,7 +163,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
 
   useEffect(() => {
     if (user?.facebook_token) {
-      FacebookService.facebookPages(user.facebook_token).then((pages) => {
+      InstagramService.instagramPages(user.facebook_token).then((pages) => {
         const accountOptions: Option[] = pages.map((page) => ({
           label: page.label,
           value: page.value,
@@ -171,7 +171,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         }));
         setPageOptions(accountOptions);
       });
-      FacebookService.facebookPagesFields().then((fields) => {
+      InstagramService.instagramFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
           value: field.value,
@@ -232,7 +232,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         <div className="flex items-center gap-1">
           <p className="font-bold text-gray-500 text-sm">* Page</p>
           <Tooltip
-            content="The Facebook page to fetch data from."
+            content="The Instagram page to fetch data from."
             position={Tooltip.positions.TOP}
           >
             <Icon icon={Info} className="text-gray-500" />
@@ -287,7 +287,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
                 </p>
                 <Tooltip
                   title="The column containing the url of post"
-                  content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Facebook Ads application."
+                  content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Instagram Ads application."
                   position={Tooltip.positions.TOP}
                   image={getImageUrl("post-urls")}
                 >

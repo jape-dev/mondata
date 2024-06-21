@@ -27,6 +27,7 @@ export type { UserUpdateMe } from './models/UserUpdateMe';
 export type { ValidationError } from './models/ValidationError';
 
 export { FacebookService } from './services/FacebookService';
+export { InstagramService } from './services/InstagramService';
 export { MondayService } from './services/MondayService';
 export { RunService } from './services/RunService';
 export { UsersService } from './services/UsersService';

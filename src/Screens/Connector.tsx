@@ -12,6 +12,7 @@ import {
 } from "../api";
 import { FacebookAdsForm } from "../Components/FacebookAdsForm";
 import { FacebookPagesForm } from "../Components/FacebookPagesForm";
+import { InstagramPostsForm } from "../Components/InstagramPostsForm";
 import { Guide } from "../Components/Modals/OnboardingGuideModal";
 import { ViewerModal } from "../Components/Modals/ViewerUserModal";
 
@@ -40,19 +41,19 @@ export const Connector = () => {
       },
       {
         value: "instagram",
-        label: "Instagram",
+        label: "Instagram Posts",
         leftAvatar: getIconUrl("instagram-icon"),
       },
-      {
-        value: "google",
-        label: "Google Ads",
-        leftAvatar: getIconUrl("google-ads-icon"),
-      },
-      {
-        value: "google-analytics",
-        label: "Google Analytics",
-        leftAvatar: getIconUrl("google-analytics-icon"),
-      },
+      // {
+      //   value: "google",
+      //   label: "Google Ads",
+      //   leftAvatar: getIconUrl("google-ads-icon"),
+      // },
+      // {
+      //   value: "google-analytics",
+      //   label: "Google Analytics",
+      //   leftAvatar: getIconUrl("google-analytics-icon"),
+      // },
     ],
     []
   );
@@ -84,7 +85,11 @@ export const Connector = () => {
   });
 
   const connect = () => {
-    if (connector === "facebook" || connector === "facebook_pages") {
+    if (
+      connector === "facebook" ||
+      connector === "facebook_pages" ||
+      connector === "instagram"
+    ) {
       nango
         .auth("facebook", "test-connection-id", {
           authorization_params: { config_id: "728465868571401" },
@@ -118,7 +123,9 @@ export const Connector = () => {
 
   useEffect(() => {
     if (
-      (connector === "facebook" || connector === "facebook_pages") &&
+      (connector === "facebook" ||
+        connector === "facebook_pages" ||
+        connector === "instagram") &&
       user?.facebook_token
     ) {
       setConnected(true);
@@ -147,9 +154,11 @@ export const Connector = () => {
           <>
             {connector === "facebook" ? (
               <FacebookAdsForm user={user} />
-            ) : (
+            ) : connector === "facebook_pages" ? (
               <FacebookPagesForm user={user} />
-            )}
+            ) : connector === "instagram" ? (
+              <InstagramPostsForm user={user} />
+            ) : null}
           </>
         )}
         <Guide />
