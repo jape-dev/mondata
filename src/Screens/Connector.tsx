@@ -2,10 +2,11 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import { Dropdown, Button, Link } from "monday-ui-react-core";
+import { Dropdown, Button } from "monday-ui-react-core";
 import Nango from "@nangohq/frontend";
 import {
   FacebookService,
+  GoogleService,
   HTTPAuthorizationCredentials,
   User,
   UsersService,
@@ -13,6 +14,7 @@ import {
 import { FacebookAdsForm } from "../Components/FacebookAdsForm";
 import { FacebookPagesForm } from "../Components/FacebookPagesForm";
 import { InstagramPostsForm } from "../Components/InstagramPostsForm";
+import { GoogleAdsForm } from "../Components/GoogleAdsForm";
 import { Guide } from "../Components/Modals/OnboardingGuideModal";
 import { ViewerModal } from "../Components/Modals/ViewerUserModal";
 
@@ -45,11 +47,11 @@ export const Connector = () => {
         label: "Instagram Posts",
         leftAvatar: getIconUrl("instagram-icon"),
       },
-      // {
-      //   value: "google",
-      //   label: "Google Ads",
-      //   leftAvatar: getIconUrl("google-ads-icon"),
-      // },
+      {
+        value: "google_ads",
+        label: "Google Ads",
+        leftAvatar: getIconUrl("google-ads-icon"),
+      },
       // {
       //   value: "google-analytics",
       //   label: "Google Analytics",
@@ -73,11 +75,23 @@ export const Connector = () => {
       credentials: sessionToken,
     };
 
-    FacebookService.facebookLogin(connectionId, requestBody).then(
-      (user: User) => {
-        setUser(user);
-      }
-    );
+    if (
+      connector === "facebook" ||
+      connector === "facebook_pages" ||
+      connector === "instagram"
+    ) {
+      FacebookService.facebookLogin(connectionId, requestBody).then(
+        (user: User) => {
+          setUser(user);
+        }
+      );
+    } else {
+      GoogleService.googleLogin(connectionId, requestBody).then(
+        (user: User) => {
+          setUser(user);
+        }
+      );
+    }
   }
 
   const nango = new Nango({
@@ -92,12 +106,20 @@ export const Connector = () => {
       connector === "instagram"
     ) {
       nango
-        .auth("facebook", "test-connection-id", {
+        .auth("facebook", "facebook-prod", {
           authorization_params: { config_id: "728465868571401" },
         })
         .then((result) => {
           updateUser(result.connectionId);
-          // save id to the database.
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (connector === "google_ads") {
+      nango
+        .auth("google", "google-prod")
+        .then((result) => {
+          updateUser(result.connectionId);
         })
         .catch((err) => {
           console.log(err);
@@ -133,10 +155,10 @@ export const Connector = () => {
       user?.facebook_token
     ) {
       setConnected(true);
-    } else {
-      setConnected(false);
+    } else if (connector === "google_ads" && user?.google_token) {
+      setConnected(true);
     }
-  }, [connector, user?.facebook_token]);
+  }, [connector, user?.facebook_token, user?.google_token]);
 
   const openGuideClick = () => {
     setShowModal(true);
@@ -151,7 +173,7 @@ export const Connector = () => {
             className="absolute right-3 top-2 text-sm text-gray-500 font-bold"
             onClick={openGuideClick}
           >
-            How to use?
+            How to use
           </Button>
           <p className="font-bold text-gray-500 text-sm">* Application</p>
           <Dropdown
@@ -173,6 +195,8 @@ export const Connector = () => {
               <FacebookPagesForm user={user} />
             ) : connector === "instagram" ? (
               <InstagramPostsForm user={user} />
+            ) : connector === "google_ads" ? (
+              <GoogleAdsForm user={user} />
             ) : null}
           </>
         )}

@@ -5,20 +5,20 @@ import "monday-ui-react-core/dist/main.css";
 import {
   Dropdown,
   Button,
+  Tooltip,
   Icon,
   Modal,
   ModalContent,
 } from "monday-ui-react-core";
-import { Tooltip } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
-  FacebookService,
+  GoogleAdsService,
   User,
   MondayService,
   QueryData,
   ColumnData,
   MondayItem,
-  Body_facebook_fetch_data,
+  Body_google_ads_fetch_all_data,
   RunService,
   RunBase,
 } from "../api";
@@ -41,11 +41,11 @@ interface BoardColumn {
   type: string;
 }
 
-export interface FacebookAdFormProps {
+export interface GoogleAdsFormProps {
   user: User;
 }
 
-export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
+export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
   const [accountOptions, setAccountOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
@@ -62,9 +62,9 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
 
   const groupingOptions = useMemo(() => {
     return [
-      { value: "campaign", label: "Campaign" },
-      { value: "adset", label: "Adset" },
-      { value: "ad", label: "Ad" },
+      { value: "campaign.name", label: "Campaign" },
+      { value: "ad_group.name", label: "Ad Group" },
+      { value: "ad_group_ad.ad.id", label: "Ad" },
     ];
   }, []);
 
@@ -92,11 +92,12 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
             start_date: startDate.toISOString().split("T")[0],
             end_date: endDate.toISOString().split("T")[0],
           };
-          const body: Body_facebook_fetch_data = {
+          const body: Body_google_ads_fetch_all_data = {
             query: queryData,
             user: user,
           };
-          FacebookService.facebookFetchData(body)
+          console.log(body);
+          GoogleAdsService.googleAdsFetchData(body)
             .then((data: ColumnData[]) => {
               if (user.monday_token) {
                 MondayService.mondayAddData(
@@ -136,16 +137,17 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
         };
-        const body: Body_facebook_fetch_data = {
+        const body: Body_google_ads_fetch_all_data = {
           query: queryData,
           user: user,
         };
-        FacebookService.facebookFetchAllData(body).then(
+        console.log(body);
+        GoogleAdsService.googleAdsFetchAllData(body).then(
           (data: ColumnData[]) => {
             if (user.monday_token) {
               MondayService.mondayCreateBoardWithData(
                 user?.monday_token,
-                "Facebook Ads",
+                "Google Ads",
                 data
               )
                 .then(() => {
@@ -220,17 +222,18 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
   );
 
   useEffect(() => {
-    if (user?.facebook_token) {
-      FacebookService.facebookAdAccounts(user.facebook_token).then(
+    if (user?.google_token) {
+      GoogleAdsService.googleAdsAdAccounts(user.google_token).then(
         (accounts) => {
           const accountOptions: Option[] = accounts.map((account) => ({
             label: account.label,
             value: account.value,
           }));
+          console.log(accountOptions);
           setAccountOptions(accountOptions);
         }
       );
-      FacebookService.facebookFields().then((fields) => {
+      GoogleAdsService.googleAdsFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
           value: field.value,
@@ -361,7 +364,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">* Split by</p>
               <Tooltip
-                content="Choose whether metrics should be split by Facebook Ad Id, Adset Id or Campaign Id"
+                content="Choose whether metrics should be split by Google Ad Id, Adset Id or Campaign Id"
                 position={Tooltip.positions.TOP}
               >
                 <Icon icon={Info} className="text-gray-500" />
@@ -384,8 +387,8 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
                 * Split by Column
               </p>
               <Tooltip
-                title="The column containing the Facebook Ad Id, Adset Id or Campaign Id to split metrics by."
-                content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Facebook Posts connector."
+                title="The column containing the Google Ad Id, Adset Id or Campaign Id to split metrics by."
+                content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Google Posts connector."
                 position={Tooltip.positions.TOP}
                 image={getImageUrl("ad-ids")}
               >
