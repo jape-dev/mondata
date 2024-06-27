@@ -113,7 +113,10 @@ export const Connector = () => {
               setUser(user);
             })
             .catch((err) => {
-              console.log(err);
+              const url =
+                process.env.REACT_APP_MONDAY_AUTH_URI ||
+                "https://auth.monday.com/oauth2/authorize?client_id=53487600a960bba8f31d355eda2094ef&redirect_uri=http://localhost:80/api/v1/monday/callback";
+              window.location.href = url;
             });
         }
       });
