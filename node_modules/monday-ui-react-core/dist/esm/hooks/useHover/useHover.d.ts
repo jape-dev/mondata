@@ -1,2 +1,0 @@
-import { MutableRefObject } from "react";
-export default function useHover<T extends HTMLElement = HTMLElement>(): [MutableRefObject<T>, boolean];

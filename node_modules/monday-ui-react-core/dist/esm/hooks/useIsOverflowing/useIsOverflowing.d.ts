@@ -1,6 +1,0 @@
-import { RefObject } from "react";
-export default function useIsOverflowing({ ref, ignoreHeightOverflow, tolerance }: {
-    ref: RefObject<HTMLElement>;
-    ignoreHeightOverflow?: boolean;
-    tolerance?: number;
-}): boolean;

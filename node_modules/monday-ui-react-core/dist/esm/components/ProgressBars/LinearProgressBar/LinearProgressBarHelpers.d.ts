@@ -1,4 +1,0 @@
-import { SIZES } from "./../../../constants/sizes";
-export type Size = (typeof SIZES)[keyof typeof SIZES];
-export declare const calculatePercentage: (value: number, min: number, max: number) => number;
-export declare const getProgressBarClassNames: (value: number) => string;
