@@ -13,6 +13,7 @@ export type UserUpdate = {
     monday_workspace_id?: (string | null);
     monday_token?: (string | null);
     facebook_token?: (string | null);
+    google_token?: (string | null);
     password?: (string | null);
 };
 

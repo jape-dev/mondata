@@ -4,7 +4,7 @@
 /* eslint-disable */
 import type { Plan } from './Plan';
 export type UserPublic = {
-    email: string;
+    email?: (string | null);
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
@@ -13,6 +13,7 @@ export type UserPublic = {
     monday_workspace_id?: (string | null);
     monday_token?: (string | null);
     facebook_token?: (string | null);
+    google_token?: (string | null);
     id: number;
 };
 
