@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import { Dropdown, Button } from "monday-ui-react-core";
+import { Dropdown, Button, Link } from "monday-ui-react-core";
 import Nango from "@nangohq/frontend";
 import {
   FacebookService,
@@ -21,6 +21,7 @@ const monday = mondaySdk();
 export const Connector = () => {
   const [connector, setConnector] = useState();
   const [connected, setConnected] = useState(false);
+  const [showModal, setShowModal] = useState(true);
   const [user, setUser] = useState<User>();
 
   const getIconUrl = (imgPath: string) => {
@@ -137,10 +138,21 @@ export const Connector = () => {
     }
   }, [connector, user?.facebook_token]);
 
+  const openGuideClick = () => {
+    setShowModal(true);
+  };
+
   return (
     <>
       <div className="p-2">
         <div className="border-2 border-gray rounded-md p-5 mb-2">
+          <Button
+            kind={Button.kinds.TERTIARY}
+            className="absolute right-3 top-2 text-sm text-gray-500 font-bold"
+            onClick={openGuideClick}
+          >
+            How to use?
+          </Button>
           <p className="font-bold text-gray-500 text-sm">* Application</p>
           <Dropdown
             placeholder="Select an application"
@@ -164,7 +176,7 @@ export const Connector = () => {
             ) : null}
           </>
         )}
-        <Guide />
+        <Guide showModal={showModal} setShowModal={setShowModal} />
         <ViewerModal />
       </div>
     </>
