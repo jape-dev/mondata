@@ -10,7 +10,7 @@ const monday = mondaySdk();
 const steps = [<div />, <div />, <div />, <div />, <div />];
 
 const titles = [
-  "Welcome to Metrics",
+  "Welcome to Data Importer",
   "1) Set-up your board",
   "2) Select application ",
   "3) Choose options",
@@ -36,9 +36,16 @@ const content = [
 ];
 const images = ["", "post-urls", "applications", "options", "run-complete"];
 
-export const Guide = () => {
+export interface OnboardingGuideModalProps {
+  showModal: boolean;
+  setShowModal: (showModal: boolean) => void;
+}
+
+export const Guide: React.FC<OnboardingGuideModalProps> = ({
+  showModal,
+  setShowModal,
+}) => {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
-  const [showModal, setShowModal] = useState(true);
 
   useEffect(() => {
     const seenOnboarding = localStorage.getItem("seenOnboarding");
