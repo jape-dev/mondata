@@ -50,7 +50,12 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
   const [selectedAccount, setSelectedAccount] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
   const [selectedFields, setSelectedFields] = useState<Option[]>([]);
-  const [boards, setBoards] = useState<Option[]>([]);
+  const [boards, setBoards] = useState<Option[]>([
+    {
+      value: "new_board",
+      label: "Import into a new board",
+    },
+  ]);
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>();
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
@@ -243,25 +248,25 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (user?.monday_token) {
-      MondayService.mondayBoards(user.monday_token).then((boards: Board[]) => {
-        const boardOptions: Option[] = [
-          {
-            value: "new_board",
-            label: "Import into a new board",
-          },
-        ];
-        boards.forEach((board: Board) => {
-          boardOptions.push({
-            value: board.id,
-            label: board.name,
-          });
-        });
-        setBoards(boardOptions);
-      });
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user?.monday_token) {
+  //     MondayService.mondayBoards(user.monday_token).then((boards: Board[]) => {
+  //       const boardOptions: Option[] = [
+  //         {
+  //           value: "new_board",
+  //           label: "Import into a new board",
+  //         },
+  //       ];
+  //       boards.forEach((board: Board) => {
+  //         boardOptions.push({
+  //           value: board.id,
+  //           label: board.name,
+  //         });
+  //       });
+  //       setBoards(boardOptions);
+  //     });
+  //   }
+  // }, [user]);
 
   useEffect(() => {
     if (
