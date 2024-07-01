@@ -15,7 +15,7 @@ export class MondayService {
     public static mondayTest(): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/monday/test',
+            url: '/api/v1/monday/public_json',
         });
     }
     /**
@@ -155,14 +155,14 @@ export class MondayService {
      * @param accessToken
      * @param boardName
      * @param requestBody
-     * @returns any Successful Response
+     * @returns number Successful Response
      * @throws ApiError
      */
     public static mondayCreateBoardWithData(
         accessToken: string,
         boardName: string,
         requestBody: Array<ColumnData>,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<number> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/monday/create-board',

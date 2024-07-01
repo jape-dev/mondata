@@ -22,6 +22,7 @@ import {
   RunService,
   RunBase,
 } from "../api";
+import { handleSuccessClick } from "../Utils/monday";
 
 const monday = mondaySdk();
 
@@ -59,6 +60,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [subdomain, setSubdomain] = useState("");
 
   const groupingOptions = useMemo(() => {
     return [
@@ -148,7 +150,11 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
                 "Facebook Ads",
                 data
               )
-                .then(() => {
+                .then((board_id) => {
+                  setSelectedBoardOption({
+                    value: board_id,
+                    label: "Facebook Ads",
+                  });
                   // Send valueCreatedForUser event when data has been loaded into board
                   monday.execute("valueCreatedForUser");
                   setLoading(false);
@@ -285,6 +291,34 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
     }
   }, [selectedBoardOption]);
 
+  useEffect(() => {
+    const getSubdomain = () => {
+      monday
+        .get("location")
+        .then((res) => {
+          if (res.data && res.data.href) {
+            const url = new URL(res.data.href);
+            const hostnameParts = url.hostname.split(".");
+
+            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
+              setSubdomain(hostnameParts[0]);
+            } else if (hostnameParts.length > 2) {
+              setSubdomain(hostnameParts[1]);
+            } else {
+              console.error("Unable to determine subdomain");
+            }
+          } else {
+            console.error("Invalid location data");
+          }
+        })
+        .catch((error) => {
+          console.error("Error getting location:", error);
+        });
+    };
+
+    getSubdomain();
+  }, []);
+
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
@@ -403,15 +437,27 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
           </>
         ) : null}
       </div>
-      <Button
-        onClick={handleRunClick}
-        loading={loading}
-        success={success}
-        successText="Run Complete - Go to Board"
-        className="mt-2"
-      >
-        Run
-      </Button>
+      {success ? (
+        <Button
+          onClick={() =>
+            handleSuccessClick(subdomain, selectedBoardOption?.value)
+          }
+          loading={loading}
+          className="mt-2 bg-green-500"
+        >
+          Run Complete - Go to Board
+        </Button>
+      ) : (
+        <Button
+          onClick={handleRunClick}
+          loading={loading}
+          success={success}
+          successText="Run Complete - Go to Board"
+          className="mt-2"
+        >
+          Run
+        </Button>
+      )}
       <Modal
         title="Error: Required Fields"
         onClose={() => setShowModal(false)}
