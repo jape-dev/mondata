@@ -16,7 +16,8 @@
     "@nangohq/frontend": "^0.39.28",
     "dompurify": "^3.1.5",
     "monday-sdk-js": "^0.5.0",
-    "monday-ui-react-core": "^2.115.0"
+    "monday-ui-react-core": "^2.115.0",
+    "parse-gitignore": "^2.0.0"
   },
   "eslintConfig": {
     "extends": "react-app"
