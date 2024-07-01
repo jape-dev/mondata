@@ -1,11 +1,13 @@
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Connector } from "./Screens/Connector";
+import { PublicJson } from "Screens/PublicJson";
 import { OpenAPI } from "api";
 import { SanitizeProvider } from "./Context/SanitizeContext";
 
 export const RouterPath = {
   CONNECT: "/",
+  PUBLIC_JSON: "/public_json",
 };
 
 function App() {
@@ -16,7 +18,9 @@ function App() {
       <SanitizeProvider>
         <Router>
           <Routes>
+            g
             <Route path={RouterPath.CONNECT} element={<Connector />} />
+            <Route path={RouterPath.PUBLIC_JSON} element={<PublicJson />} />
           </Routes>
         </Router>
       </SanitizeProvider>
