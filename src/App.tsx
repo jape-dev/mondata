@@ -18,7 +18,6 @@ function App() {
       <SanitizeProvider>
         <Router>
           <Routes>
-            g
             <Route path={RouterPath.CONNECT} element={<Connector />} />
             <Route path={RouterPath.PUBLIC_JSON} element={<PublicJson />} />
           </Routes>
