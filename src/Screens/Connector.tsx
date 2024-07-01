@@ -15,6 +15,7 @@ import { FacebookAdsForm } from "../Components/FacebookAdsForm";
 import { FacebookPagesForm } from "../Components/FacebookPagesForm";
 import { InstagramPostsForm } from "../Components/InstagramPostsForm";
 import { GoogleAdsForm } from "../Components/GoogleAdsForm";
+import { CustomApiForm } from "Components/CustomApiForm";
 import { Guide } from "../Components/Modals/OnboardingGuideModal";
 import { ViewerModal } from "../Components/Modals/ViewerUserModal";
 
@@ -32,6 +33,11 @@ export const Connector = () => {
 
   const options = useMemo(
     () => [
+      {
+        value: "custom_api",
+        label: "Custom API",
+        leftAvatar: getIconUrl("google-ads-icon"),
+      },
       {
         value: "facebook",
         label: "Facebook Ads",
@@ -52,6 +58,7 @@ export const Connector = () => {
         label: "Google Ads",
         leftAvatar: getIconUrl("google-ads-icon"),
       },
+
       // {
       //   value: "google-analytics",
       //   label: "Google Analytics",
@@ -157,6 +164,8 @@ export const Connector = () => {
       setConnected(true);
     } else if (connector === "google_ads" && user?.google_token) {
       setConnected(true);
+    } else if (connector === "custom_api") {
+      setConnected(true);
     }
   }, [connector, user?.facebook_token, user?.google_token]);
 
@@ -197,6 +206,8 @@ export const Connector = () => {
               <InstagramPostsForm user={user} />
             ) : connector === "google_ads" ? (
               <GoogleAdsForm user={user} />
+            ) : connector === "custom_api" ? (
+              <CustomApiForm user={user} />
             ) : null}
           </>
         )}

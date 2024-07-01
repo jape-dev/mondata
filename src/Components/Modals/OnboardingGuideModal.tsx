@@ -21,7 +21,7 @@ const content = [
   <div className="mt-2">Please view these steps to get started.</div>,
   <div className="mt-2">
     Add your items to the board, including a column for URLs or ids that you
-    want metrics to be imported for.
+    want metrics to be imported for. You can also import into a brand new board.
   </div>,
   <div className="mt-2">
     2) Select an application and authenticate your account.
