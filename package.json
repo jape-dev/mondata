@@ -36,7 +36,7 @@
     ]
   },
   "devDependencies": {
-    "@mondaycom/apps-cli": "^2.0.0",
+    "@mondaycom/apps-cli": "^2.6.1",
     "@types/dompurify": "^3.0.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
