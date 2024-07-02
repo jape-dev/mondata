@@ -12,7 +12,6 @@
     "stop": "kill-port 8301 && kill-port 4049 && kill-port 4040"
   },
   "dependencies": {
-    "@mondaycom/apps-cli": "^3.6.1",
     "@mondaycom/apps-sdk": "^2.1.2",
     "@nangohq/frontend": "^0.39.28",
     "dompurify": "^3.1.5",
