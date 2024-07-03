@@ -7,7 +7,7 @@ import { SanitizeProvider } from "./Context/SanitizeContext";
 
 export const RouterPath = {
   CONNECT: "/",
-  PUBLIC_JSON: "/public_json",
+  PUBLIC_JSON: "/public_json/",
 };
 
 function App() {
