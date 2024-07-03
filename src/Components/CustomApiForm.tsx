@@ -131,7 +131,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
           <TextField
             placeholder="url"
             className="mb-2"
-            onChange={(e) => setUrl(e)}
+            onChange={(e: string) => setUrl(e)}
           />
         </div>
         <div className="border-2 border-grey rounded-md p-5 mb-2">
@@ -155,7 +155,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
             <TextField
               placeholder="Token"
               className="mb-2"
-              onChange={(e) => setAuthValue(e)}
+              onChange={(e: string) => setAuthValue(e)}
             />
           )}
         </div>
@@ -194,7 +194,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
           <TextArea
             placeholder="Body"
             className="mb-2"
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(e: any) => setBody(e.target.value)}
           />
         </div>
 
