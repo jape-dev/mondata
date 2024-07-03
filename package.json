@@ -12,12 +12,11 @@
     "stop": "kill-port 8301 && kill-port 4049 && kill-port 4040"
   },
   "dependencies": {
-    "@mondaycom/apps-cli": "^2.6.1",
     "@mondaycom/apps-sdk": "^2.1.2",
     "@nangohq/frontend": "^0.39.28",
     "dompurify": "^3.1.5",
     "monday-sdk-js": "^0.5.0",
-    "monday-ui-react-core": "^2.111.0",
+    "monday-ui-react-core": "^2.118.0",
     "parse-gitignore": "^2.0.0",
     "patch-package": "^5.0.0"
   },
