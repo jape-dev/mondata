@@ -337,6 +337,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
           multi
           multiline
           options={fields}
+          isLoading={fields.length === 0}
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
@@ -373,6 +374,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
           options={boards}
           placeholder="Select a board"
           className="mb-2"
+          isLoading={boards.length === 0}
           onOptionSelect={(e: Option) => handleBoardSelect(e)}
         />
         {selectedBoardOption?.value === "new_board" ? (
@@ -390,6 +392,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
               placeholder="Select an account"
               className="mb-2"
               options={accountOptions}
+              isLoading={accountOptions.length === 0}
               onOptionSelect={(e: Option) => setSelectedAccount(e)}
             />
             <div className="flex items-center gap-1">

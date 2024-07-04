@@ -276,6 +276,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           placeholder="Select a page"
           className="mb-2"
           options={pageOptions}
+          isLoading={pageOptions.length === 0}
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
         <div className="flex items-center gap-1">
@@ -292,6 +293,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           multi
           multiline
           options={fields}
+          sLoading={fields.length === 0}
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
@@ -310,6 +312,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           options={boards}
           placeholder="Select a board"
           className="mb-2"
+          isLoading={boards.length === 0}
           onOptionSelect={(e: Option) => setSelectedBoardOption(e)}
         />
         {selectedBoardOption?.value &&

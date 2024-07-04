@@ -242,6 +242,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
           placeholder="Select a page"
           className="mb-2"
           options={pageOptions}
+          sLoading={pageOptions.length === 0}
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
         <div className="flex items-center gap-1">
@@ -258,6 +259,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
           multi
           multiline
           options={fields}
+          sLoading={fields.length === 0}
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
@@ -274,6 +276,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
         </div>
         <Dropdown
           options={boards}
+          sLoading={boards.length === 0}
           placeholder="Select a board"
           className="mb-2"
           onOptionSelect={(e: Option) => setSelectedBoardOption(e)}
@@ -296,6 +299,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
               </div>
               <Dropdown
                 options={boardColumns}
+                sLoading={boardColumns.length === 0}
                 onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
                 placeholder="Select column"
                 className="mb-2"

@@ -311,6 +311,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
           multi
           multiline
           options={fields}
+          sLoading={fields.length === 0}
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
@@ -345,6 +346,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
         </div>
         <Dropdown
           options={boards}
+          sLoading={boards.length === 0}
           placeholder="Select a board"
           className="mb-2"
           onOptionSelect={(e: Option) => handleBoardSelect(e)}
@@ -364,6 +366,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
               placeholder="Select an account"
               className="mb-2"
               options={accountOptions}
+              sLoading={accountOptions.length === 0}
               onOptionSelect={(e: Option) => setSelectedAccount(e)}
             />
             <div className="flex items-center gap-1">
@@ -380,6 +383,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
               value={selectedGrouping}
               onOptionSelect={(e: Option) => setSelectedGrouping(e)}
               placeholder="Select column"
+              sLoading={groupingOptions.length === 0}
               className="mb-2"
               menuPlacement={"top"}
             />
