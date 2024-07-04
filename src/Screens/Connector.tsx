@@ -191,27 +191,33 @@ export const Connector = () => {
             options={options}
             onOptionSelect={(e: any) => setConnector(e.value)}
           />
-          {connected === false && (
+        </div>
+        <div>
+          {connected && user && (
+            <>
+              {connector === "facebook" ? (
+                <FacebookAdsForm user={user} />
+              ) : connector === "facebook_pages" ? (
+                <FacebookPagesForm user={user} />
+              ) : connector === "instagram" ? (
+                <InstagramPostsForm user={user} />
+              ) : connector === "google_ads" ? (
+                <GoogleAdsForm user={user} />
+              ) : connector === "custom_api" ? (
+                <CustomApiForm user={user} />
+              ) : null}
+            </>
+          )}
+          {connected === false ? (
             <Button onClick={() => connect()} className="mt-2">
               Connect
             </Button>
+          ) : (
+            <Button onClick={() => connect()} className="mt-2">
+              Connect to different account
+            </Button>
           )}
         </div>
-        {connected && user && (
-          <>
-            {connector === "facebook" ? (
-              <FacebookAdsForm user={user} />
-            ) : connector === "facebook_pages" ? (
-              <FacebookPagesForm user={user} />
-            ) : connector === "instagram" ? (
-              <InstagramPostsForm user={user} />
-            ) : connector === "google_ads" ? (
-              <GoogleAdsForm user={user} />
-            ) : connector === "custom_api" ? (
-              <CustomApiForm user={user} />
-            ) : null}
-          </>
-        )}
         <Guide showModal={showModal} setShowModal={setShowModal} />
         <ViewerModal />
       </div>
