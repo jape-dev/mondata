@@ -33,11 +33,11 @@ export const Connector = () => {
 
   const options = useMemo(
     () => [
-      {
-        value: "custom_api",
-        label: "Custom API",
-        leftAvatar: getIconUrl("google-ads-icon"),
-      },
+      // {
+      //   value: "custom_api",
+      //   label: "Custom API",
+      //   leftAvatar: getIconUrl("google-ads-icon"),
+      // },
       {
         value: "facebook",
         label: "Facebook Ads",
