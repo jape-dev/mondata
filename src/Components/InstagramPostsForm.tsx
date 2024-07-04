@@ -14,6 +14,7 @@ import {
   RunService,
   RunBase,
 } from "../api";
+import { handleSuccessClick } from "../Utils/monday";
 
 const monday = mondaySdk();
 
@@ -49,6 +50,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [subdomain, setSubdomain] = useState("");
 
   const getImageUrl = (imgPath: string) => {
     return require(`../Static/images/${imgPath}.png`);
@@ -117,8 +119,12 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
               user?.monday_token,
               "Instagram Posts",
               data
-            ).then(() => {
+            ).then((board_id) => {
               // Send valueCreatedForUser event when data has been loaded into board
+              setSelectedBoardOption({
+                value: board_id,
+                label: "Instagram Posts",
+              });
               monday.execute("valueCreatedForUser");
               setLoading(false);
               setSuccess(true);
@@ -226,6 +232,34 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
     }
   }, [selectedBoardOption]);
 
+  useEffect(() => {
+    const getSubdomain = () => {
+      monday
+        .get("location")
+        .then((res) => {
+          if (res.data && res.data.href) {
+            const url = new URL(res.data.href);
+            const hostnameParts = url.hostname.split(".");
+
+            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
+              setSubdomain(hostnameParts[0]);
+            } else if (hostnameParts.length > 2) {
+              setSubdomain(hostnameParts[1]);
+            } else {
+              console.error("Unable to determine subdomain");
+            }
+          } else {
+            console.error("Invalid location data");
+          }
+        })
+        .catch((error) => {
+          console.error("Error getting location:", error);
+        });
+    };
+
+    getSubdomain();
+  }, []);
+
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
@@ -307,15 +341,27 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
             </>
           )}
       </div>
-      <Button
-        onClick={handleRunClick}
-        loading={loading}
-        success={success}
-        successText="Run Complete - Go to Board"
-        className="mt-2"
-      >
-        Run
-      </Button>
+      {success ? (
+        <Button
+          onClick={() =>
+            handleSuccessClick(subdomain, selectedBoardOption?.value)
+          }
+          loading={loading}
+          className="mt-2 bg-green-500"
+        >
+          Run Complete - Go to Board
+        </Button>
+      ) : (
+        <Button
+          onClick={handleRunClick}
+          loading={loading}
+          success={success}
+          successText="Run Complete - Go to Board"
+          className="mt-2"
+        >
+          Run
+        </Button>
+      )}
     </div>
   );
 };

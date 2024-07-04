@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
@@ -18,7 +18,8 @@ import {
   User,
   PairValue,
 } from "../api";
-import { PairValueComponent, PairValueProps } from "./PairValue";
+import { PairValueComponent } from "./PairValue";
+import { handleSuccessClick } from "../Utils/monday";
 
 const monday = mondaySdk();
 
@@ -46,6 +47,8 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
   const [headers, setHeaders] = useState<PairValue[]>([{ key: "", value: "" }]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [boardId, setBoardId] = useState<number>();
+  const [subdomain, setSubdomain] = useState("");
 
   const methodOptions = useMemo(() => {
     return [
@@ -84,7 +87,8 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
                   "Custom Request",
                   data
                 )
-                  .then(() => {
+                  .then((board_id) => {
+                    setBoardId(board_id);
                     // Send valueCreatedForUser event when data has been loaded into board
                     monday.execute("valueCreatedForUser");
                     setLoading(false);
@@ -107,6 +111,34 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
         });
     }
   };
+
+  useEffect(() => {
+    const getSubdomain = () => {
+      monday
+        .get("location")
+        .then((res) => {
+          if (res.data && res.data.href) {
+            const url = new URL(res.data.href);
+            const hostnameParts = url.hostname.split(".");
+
+            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
+              setSubdomain(hostnameParts[0]);
+            } else if (hostnameParts.length > 2) {
+              setSubdomain(hostnameParts[1]);
+            } else {
+              console.error("Unable to determine subdomain");
+            }
+          } else {
+            console.error("Invalid location data");
+          }
+        })
+        .catch((error) => {
+          console.error("Error getting location:", error);
+        });
+    };
+
+    getSubdomain();
+  }, []);
 
   return (
     <>
@@ -198,15 +230,25 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
           />
         </div>
 
-        <Button
-          onClick={handleRunClick}
-          loading={loading}
-          success={success}
-          successText="Run Complete - Go to Board"
-          className="mt-2"
-        >
-          Run
-        </Button>
+        {success && boardId ? (
+          <Button
+            onClick={() => handleSuccessClick(subdomain, boardId)}
+            loading={loading}
+            className="mt-2 bg-green-500"
+          >
+            Run Complete - Go to Board
+          </Button>
+        ) : (
+          <Button
+            onClick={handleRunClick}
+            loading={loading}
+            success={success}
+            successText="Run Complete - Go to Board"
+            className="mt-2"
+          >
+            Run
+          </Button>
+        )}
       </div>
     </>
   );
