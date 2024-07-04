@@ -184,6 +184,7 @@ export const Connector = () => {
           >
             How to use
           </Button>
+          <div>"clientID": "53487600a960bba8f31d355eda2094ef"</div>
           <p className="font-bold text-gray-500 text-sm">* Application</p>
           <Dropdown
             placeholder="Select an application"
