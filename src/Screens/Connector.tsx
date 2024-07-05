@@ -158,6 +158,8 @@ export const Connector = () => {
       setConnected(true);
     } else if (connector === "custom_api") {
       setConnected(true);
+    } else {
+      setConnected(false);
     }
   }, [connector, user?.facebook_token, user?.google_token]);
 
