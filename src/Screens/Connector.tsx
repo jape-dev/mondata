@@ -33,11 +33,11 @@ export const Connector = () => {
 
   const options = useMemo(
     () => [
-      // {
-      //   value: "custom_api",
-      //   label: "Custom API",
-      //   leftAvatar: getIconUrl("google-ads-icon"),
-      // },
+      {
+        value: "custom_api",
+        label: "Custom API",
+        leftAvatar: getIconUrl("custom-api-icon"),
+      },
       {
         value: "facebook",
         label: "Facebook Ads",
@@ -58,12 +58,6 @@ export const Connector = () => {
         label: "Google Ads",
         leftAvatar: getIconUrl("google-ads-icon"),
       },
-
-      // {
-      //   value: "google-analytics",
-      //   label: "Google Analytics",
-      //   leftAvatar: getIconUrl("google-analytics-icon"),
-      // },
     ],
     []
   );
@@ -74,8 +68,6 @@ export const Connector = () => {
 
   async function updateUser(connectionId: string) {
     const sessionToken = await getSessionToken();
-
-    // TODO: add the isViewOnly
 
     const requestBody: HTTPAuthorizationCredentials = {
       scheme: "Bearer",
@@ -184,13 +176,26 @@ export const Connector = () => {
           >
             How to use
           </Button>
-          <div>"clientID": "53487600a960bba8f31d355eda2094ef"</div>
-          <p className="font-bold text-gray-500 text-sm">* Application</p>
+          {/* <div>"clientID": "53487600a960bba8f31d355eda2094ef"</div> */}
+          <p className="font-bold text-gray-500 text-xs">* Application</p>
           <Dropdown
             placeholder="Select an application"
             options={options}
             onOptionSelect={(e: any) => setConnector(e.value)}
           />
+          {connected === true && connector !== "custom_api" ? (
+            <Button
+              kind={Button.kinds.TERTIARY}
+              className="text-xs text-gray-500 font-bold underline m-0 p-0 h-0"
+              onClick={() => connect()}
+            >
+              Connect to different account?
+            </Button>
+          ) : connector !== "custom_api" ? (
+            <Button onClick={() => connect()} className="mt-2">
+              Connect
+            </Button>
+          ) : null}
         </div>
         <div>
           {connected && user && (
@@ -207,15 +212,6 @@ export const Connector = () => {
                 <CustomApiForm user={user} />
               ) : null}
             </>
-          )}
-          {connected === false ? (
-            <Button onClick={() => connect()} className="mt-2">
-              Connect
-            </Button>
-          ) : (
-            <Button onClick={() => connect()} className="mt-2">
-              Connect to different account
-            </Button>
           )}
         </div>
         <Guide showModal={showModal} setShowModal={setShowModal} />

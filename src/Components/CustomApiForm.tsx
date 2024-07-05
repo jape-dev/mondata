@@ -41,10 +41,8 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
   });
   const [authValue, setAuthValue] = useState<string>();
   const [body, setBody] = useState<string>();
-  const [paramaters, setParameters] = useState<PairValue[]>([
-    { key: "", value: "" },
-  ]);
-  const [headers, setHeaders] = useState<PairValue[]>([{ key: "", value: "" }]);
+  const [paramaters, setParameters] = useState<PairValue[]>([]);
+  const [headers, setHeaders] = useState<PairValue[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [boardId, setBoardId] = useState<number>();
@@ -64,6 +62,10 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
     ];
   }, []);
 
+  useEffect(() => {
+    console.log(authMethod);
+  }, [authMethod]);
+
   const handleRunClick = () => {
     if (url) {
       setLoading(true);
@@ -75,7 +77,6 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
         params: paramaters,
         headers: headers,
       };
-      console.log(requestBody);
 
       CustomService.customApiRequest(requestBody)
         .then((json) => {
@@ -145,30 +146,37 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
       <div className="mt-2">
         <div className="border-2 border-grey rounded-md p-5 mb-2">
           <div className="flex items-center gap-1">
-            <p className="font-bold text-gray-500 text-sm">* Method</p>
+            <p className="font-bold text-gray-500 text-sm">* Method & Url</p>
             <Tooltip
-              content="Method for your API call"
+              content="Method for your API call and API url"
               position={Tooltip.positions.TOP}
             >
               <Icon icon={Info} className="text-gray-500" />
             </Tooltip>
           </div>
-          <Dropdown
-            placeholder="Select Method"
-            className="mb-2"
-            value={method}
-            options={methodOptions}
-            onOptionSelect={(e: Option) => setMethod(e)}
-          />
-          <TextField
-            placeholder="url"
-            className="mb-2"
-            onChange={(e: string) => setUrl(e)}
-          />
+          <div className="grid grid-cols-8 gap-2 mb-2">
+            <div className="col-span-1 w-full">
+              <Dropdown
+                placeholder="Select Method"
+                value={method}
+                options={methodOptions}
+                onOptionSelect={(e: Option) => setMethod(e)}
+              />
+            </div>
+            <div className="col-span-7 -full">
+              <TextField
+                placeholder="Url"
+                size={TextField.sizes.MEDIUM}
+                onChange={(e: string) => setUrl(e)}
+              />
+            </div>
+          </div>
         </div>
         <div className="border-2 border-grey rounded-md p-5 mb-2">
           <div className="flex items-center gap-1">
-            <p className="font-bold text-gray-500 text-sm">Auhorization</p>
+            <p className="font-bold text-gray-500 text-sm">
+              Auhorization (optional){" "}
+            </p>
             <Tooltip
               content="Auhtorization type"
               position={Tooltip.positions.TOP}
@@ -187,6 +195,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
             <TextField
               placeholder="Token"
               className="mb-2"
+              size={TextField.sizes.MEDIUM}
               onChange={(e: string) => setAuthValue(e)}
             />
           )}
@@ -213,23 +222,24 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
           </div>
           <PairValueComponent pairs={paramaters} setPairs={setParameters} />
         </div>
-        <div className="border-2 border-grey rounded-md p-5 mb-2">
-          <div className="flex items-center gap-1">
-            <p className="font-bold text-gray-500 text-sm">Body (optional)</p>
-            <Tooltip
-              content="JSON Body for your API call"
-              position={Tooltip.positions.TOP}
-            >
-              <Icon icon={Info} className="text-gray-500" />
-            </Tooltip>
+        {method.value === "post" && (
+          <div className="border-2 border-grey rounded-md p-5 mb-2">
+            <div className="flex items-center gap-1">
+              <p className="font-bold text-gray-500 text-sm">Body (optional)</p>
+              <Tooltip
+                content="JSON Body for your API call"
+                position={Tooltip.positions.TOP}
+              >
+                <Icon icon={Info} className="text-gray-500" />
+              </Tooltip>
+            </div>
+            <TextArea
+              placeholder="Body"
+              className="mb-2"
+              onChange={(e: any) => setBody(e.target.value)}
+            />
           </div>
-          <TextArea
-            placeholder="Body"
-            className="mb-2"
-            onChange={(e: any) => setBody(e.target.value)}
-          />
-        </div>
-
+        )}
         {success && boardId ? (
           <Button
             onClick={() => handleSuccessClick(subdomain, boardId)}
