@@ -47,12 +47,16 @@ export const Guide: React.FC<OnboardingGuideModalProps> = ({
 }) => {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
 
-  useEffect(() => {
-    const seenOnboarding = localStorage.getItem("seenOnboarding");
-    if (seenOnboarding === "true") {
-      setShowModal(false);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const seenOnboarding = localStorage.getItem("seenOnboarding");
+  //   if (
+  //     seenOnboarding === undefined ||
+  //     seenOnboarding === "false" ||
+  //     seenOnboarding === null
+  //   ) {
+  //     setShowModal(true);
+  //   }
+  // }, []);
 
   const stepPrev = useCallback(() => {
     setActiveStepIndex((prevState) => prevState - 1);

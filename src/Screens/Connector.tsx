@@ -24,7 +24,7 @@ const monday = mondaySdk();
 export const Connector = () => {
   const [connector, setConnector] = useState();
   const [connected, setConnected] = useState(false);
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [user, setUser] = useState<User>();
   const [sessionToken, setSessionToken] = useState<string>();
 
