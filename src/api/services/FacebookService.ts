@@ -2,8 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_facebook_fetch_all_data } from '../models/Body_facebook_fetch_all_data';
-import type { Body_facebook_fetch_data } from '../models/Body_facebook_fetch_data';
 import type { ColumnData } from '../models/ColumnData';
 import type { HTTPAuthorizationCredentials } from '../models/HTTPAuthorizationCredentials';
 import type { QueryData } from '../models/QueryData';
@@ -38,18 +36,18 @@ export class FacebookService {
     }
     /**
      * Ad Accounts
-     * @param accessToken
+     * @param sessionToken
      * @returns any Successful Response
      * @throws ApiError
      */
     public static facebookAdAccounts(
-        accessToken: string,
+        sessionToken: string,
     ): CancelablePromise<Array<Record<string, any>>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/facebook/ad_accounts',
             query: {
-                'access_token': accessToken,
+                'session_token': sessionToken,
             },
             errors: {
                 422: `Validation Error`,
@@ -69,16 +67,21 @@ export class FacebookService {
     }
     /**
      * Fetch Data
+     * @param sessionToken
      * @param requestBody
      * @returns ColumnData Successful Response
      * @throws ApiError
      */
     public static facebookFetchData(
-        requestBody: Body_facebook_fetch_data,
+        sessionToken: string,
+        requestBody: QueryData,
     ): CancelablePromise<Array<ColumnData>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/facebook/fetch-data',
+            query: {
+                'session_token': sessionToken,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -88,16 +91,21 @@ export class FacebookService {
     }
     /**
      * Fetch All Data
+     * @param sessionToken
      * @param requestBody
      * @returns ColumnData Successful Response
      * @throws ApiError
      */
     public static facebookFetchAllData(
-        requestBody: Body_facebook_fetch_all_data,
+        sessionToken: string,
+        requestBody: QueryData,
     ): CancelablePromise<Array<ColumnData>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/facebook/fetch-all-data',
+            query: {
+                'session_token': sessionToken,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -107,18 +115,18 @@ export class FacebookService {
     }
     /**
      * Pages
-     * @param accessToken
+     * @param sessionToken
      * @returns any Successful Response
      * @throws ApiError
      */
     public static facebookPages(
-        accessToken: string,
+        sessionToken: string,
     ): CancelablePromise<Array<Record<string, any>>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/facebook/pages',
             query: {
-                'access_token': accessToken,
+                'session_token': sessionToken,
             },
             errors: {
                 422: `Validation Error`,
@@ -138,20 +146,20 @@ export class FacebookService {
     }
     /**
      * Pages Fetch All Data
-     * @param accessToken
+     * @param sessionToken
      * @param requestBody
      * @returns ColumnData Successful Response
      * @throws ApiError
      */
     public static facebookPagesFetchAllData(
-        accessToken: string,
+        sessionToken: string,
         requestBody: QueryData,
     ): CancelablePromise<Array<ColumnData>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/facebook/pages/fetch-all-data',
             query: {
-                'access_token': accessToken,
+                'session_token': sessionToken,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -162,20 +170,20 @@ export class FacebookService {
     }
     /**
      * Pages Fetch Data
-     * @param accessToken
+     * @param sessionToken
      * @param requestBody
      * @returns ColumnData Successful Response
      * @throws ApiError
      */
     public static facebookPagesFetchData(
-        accessToken: string,
+        sessionToken: string,
         requestBody: QueryData,
     ): CancelablePromise<Array<ColumnData>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/facebook/pages/fetch-data',
             query: {
-                'access_token': accessToken,
+                'session_token': sessionToken,
             },
             body: requestBody,
             mediaType: 'application/json',

@@ -26,6 +26,7 @@ export const Connector = () => {
   const [connected, setConnected] = useState(false);
   const [showModal, setShowModal] = useState(true);
   const [user, setUser] = useState<User>();
+  const [sessionToken, setSessionToken] = useState<string>();
 
   const getIconUrl = (imgPath: string) => {
     return require(`../Static/images/${imgPath}.png`);
@@ -67,11 +68,13 @@ export const Connector = () => {
   }
 
   async function updateUser(connectionId: string) {
-    const sessionToken = await getSessionToken();
+    const token = await getSessionToken();
+
+    setSessionToken(token);
 
     const requestBody: HTTPAuthorizationCredentials = {
       scheme: "Bearer",
-      credentials: sessionToken,
+      credentials: token,
     };
 
     if (
@@ -130,6 +133,7 @@ export const Connector = () => {
     const fetchUser = async () => {
       await getSessionToken().then((sessionToken) => {
         if (sessionToken) {
+          setSessionToken(sessionToken);
           UsersService.usersReadUserByMondaySession(sessionToken)
             .then((user: User) => {
               setUser(user);
@@ -137,7 +141,7 @@ export const Connector = () => {
             .catch((err) => {
               const url =
                 process.env.REACT_APP_MONDAY_AUTH_URI ||
-                "https://auth.monday.com/oauth2/authorize?client_id=53487600a960bba8f31d355eda2094ef&redirect_uri=http://localhost:80/api/v1/monday/callback";
+                "https://auth.monday.com/oauth2/authorize?client_id=f45cc62f0e9a56c58ab714a159487c11&redirect_uri=http://localhost:80/api/v1/monday/callback";
               window.location.href = url;
             });
         }
@@ -203,15 +207,15 @@ export const Connector = () => {
           {connected && user && (
             <>
               {connector === "facebook" ? (
-                <FacebookAdsForm user={user} />
+                <FacebookAdsForm user={user} sessionToken={sessionToken} />
               ) : connector === "facebook_pages" ? (
-                <FacebookPagesForm user={user} />
+                <FacebookPagesForm user={user} sessionToken={sessionToken} />
               ) : connector === "instagram" ? (
-                <InstagramPostsForm user={user} />
+                <InstagramPostsForm user={user} sessionToken={sessionToken} />
               ) : connector === "google_ads" ? (
-                <GoogleAdsForm user={user} />
+                <GoogleAdsForm user={user} sessionToken={sessionToken} />
               ) : connector === "custom_api" ? (
-                <CustomApiForm user={user} />
+                <CustomApiForm sessionToken={sessionToken} />
               ) : null}
             </>
           )}

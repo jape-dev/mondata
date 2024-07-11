@@ -18,7 +18,6 @@ import {
   QueryData,
   ColumnData,
   MondayItem,
-  Body_google_ads_fetch_all_data,
   RunService,
   RunBase,
 } from "../api";
@@ -44,9 +43,13 @@ interface BoardColumn {
 
 export interface GoogleAdsFormProps {
   user: User;
+  sessionToken?: string;
 }
 
-export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
+export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
+  user,
+  sessionToken,
+}) => {
   const [accountOptions, setAccountOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
@@ -67,6 +70,10 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
   const [showModal, setShowModal] = useState(false);
   const [subdomain, setSubdomain] = useState("");
 
+  useEffect(() => {
+    console.log("sessionToken", sessionToken);
+  }, [sessionToken]);
+
   const groupingOptions = useMemo(() => {
     return [
       { value: "campaign.name", label: "Campaign" },
@@ -84,12 +91,12 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - date.value);
-    if (user?.monday_token && selectedBoardOption && selectedAccount && date) {
+    if (sessionToken && selectedBoardOption && selectedAccount && date) {
       if (selectedColumnOption) {
         MondayService.mondayItems(
-          user.monday_token,
           selectedBoardOption?.value,
-          selectedColumnOption?.value
+          selectedColumnOption?.value,
+          sessionToken
         ).then((items: MondayItem[]) => {
           const queryData: QueryData = {
             monday_items: items,
@@ -99,37 +106,30 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
             start_date: startDate.toISOString().split("T")[0],
             end_date: endDate.toISOString().split("T")[0],
           };
-          const body: Body_google_ads_fetch_all_data = {
-            query: queryData,
-            user: user,
-          };
-          console.log(body);
-          GoogleAdsService.googleAdsFetchData(body)
+          GoogleAdsService.googleAdsFetchData(sessionToken, queryData)
             .then((data: ColumnData[]) => {
-              if (user.monday_token) {
-                MondayService.mondayAddData(
-                  user?.monday_token,
-                  selectedBoardOption.value,
-                  data
-                )
-                  .then(() => {
-                    if (user.id) {
-                      const run: RunBase = {
-                        user_id: user.id,
-                        board_id: selectedBoardOption.value,
-                      };
-                      RunService.runRun(run);
-                    }
-                    // Send valueCreatedForUser event when data has been loaded into board
-                    monday.execute("valueCreatedForUser");
-                    setLoading(false);
-                    setSuccess(true);
-                  })
-                  .catch(() => {
-                    setLoading(false);
-                    setSuccess(false);
-                  });
-              }
+              MondayService.mondayAddData(
+                selectedBoardOption.value,
+                sessionToken,
+                data
+              )
+                .then(() => {
+                  if (user.id) {
+                    const run: RunBase = {
+                      user_id: user.id,
+                      board_id: selectedBoardOption.value,
+                    };
+                    RunService.runRun(run);
+                  }
+                  // Send valueCreatedForUser event when data has been loaded into board
+                  monday.execute("valueCreatedForUser");
+                  setLoading(false);
+                  setSuccess(true);
+                })
+                .catch(() => {
+                  setLoading(false);
+                  setSuccess(false);
+                });
             })
             .catch(() => {
               setLoading(false);
@@ -144,33 +144,27 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
         };
-        const body: Body_google_ads_fetch_all_data = {
-          query: queryData,
-          user: user,
-        };
-        GoogleAdsService.googleAdsFetchAllData(body).then(
+        GoogleAdsService.googleAdsFetchAllData(sessionToken, queryData).then(
           (data: ColumnData[]) => {
-            if (user.monday_token) {
-              MondayService.mondayCreateBoardWithData(
-                user?.monday_token,
-                "Google Ads",
-                data
-              )
-                .then((board_id) => {
-                  setSelectedBoardOption({
-                    value: board_id,
-                    label: "Google Ads",
-                  });
-                  // Send valueCreatedForUser event when data has been loaded into board
-                  monday.execute("valueCreatedForUser");
-                  setLoading(false);
-                  setSuccess(true);
-                })
-                .catch(() => {
-                  setLoading(false);
-                  setSuccess(false);
+            MondayService.mondayCreateBoardWithData(
+              "Google Ads",
+              sessionToken,
+              data
+            )
+              .then((board_id) => {
+                setSelectedBoardOption({
+                  value: board_id,
+                  label: "Google Ads",
                 });
-            }
+                // Send valueCreatedForUser event when data has been loaded into board
+                monday.execute("valueCreatedForUser");
+                setLoading(false);
+                setSuccess(true);
+              })
+              .catch(() => {
+                setLoading(false);
+                setSuccess(false);
+              });
           }
         );
       }
@@ -232,17 +226,14 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
   );
 
   useEffect(() => {
-    if (user?.google_token) {
-      GoogleAdsService.googleAdsAdAccounts(user.google_token).then(
-        (accounts) => {
-          const accountOptions: Option[] = accounts.map((account) => ({
-            label: account.label,
-            value: account.value,
-          }));
-          console.log(accountOptions);
-          setAccountOptions(accountOptions);
-        }
-      );
+    if (sessionToken) {
+      GoogleAdsService.googleAdsAdAccounts(sessionToken).then((accounts) => {
+        const accountOptions: Option[] = accounts.map((account) => ({
+          label: account.label,
+          value: account.value,
+        }));
+        setAccountOptions(accountOptions);
+      });
       GoogleAdsService.googleAdsFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
@@ -277,12 +268,9 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({ user }) => {
     if (
       selectedBoardOption &&
       selectedBoardOption?.value !== "new_board" &&
-      user?.monday_token
+      sessionToken
     ) {
-      MondayService.mondayBoardColumns(
-        selectedBoardOption.value,
-        user.monday_token
-      )
+      MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
         .then((columns: BoardColumn[]) => {
           const columnOptions: Option[] = columns.map(
             (column: BoardColumn) => ({

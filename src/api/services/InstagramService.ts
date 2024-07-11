@@ -10,18 +10,18 @@ import { request as __request } from '../core/request';
 export class InstagramService {
     /**
      * Pages
-     * @param accessToken
+     * @param sessionToken
      * @returns any Successful Response
      * @throws ApiError
      */
     public static instagramPages(
-        accessToken: string,
+        sessionToken: string,
     ): CancelablePromise<Array<Record<string, any>>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/instagram/pages',
             query: {
-                'access_token': accessToken,
+                'session_token': sessionToken,
             },
             errors: {
                 422: `Validation Error`,
@@ -41,20 +41,20 @@ export class InstagramService {
     }
     /**
      * Pages Fetch Data
-     * @param accessToken
+     * @param sessionToken
      * @param requestBody
      * @returns ColumnData Successful Response
      * @throws ApiError
      */
     public static instagramPagesFetchData(
-        accessToken: string,
+        sessionToken: string,
         requestBody: QueryData,
     ): CancelablePromise<Array<ColumnData>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/instagram/pages/fetch-data',
             query: {
-                'access_token': accessToken,
+                'session_token': sessionToken,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -65,20 +65,20 @@ export class InstagramService {
     }
     /**
      * Pages Fetch All Data
-     * @param accessToken
+     * @param sessionToken
      * @param requestBody
      * @returns ColumnData Successful Response
      * @throws ApiError
      */
     public static instagramPagesFetchAllData(
-        accessToken: string,
+        sessionToken: string,
         requestBody: QueryData,
     ): CancelablePromise<Array<ColumnData>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/instagram/pages/fetch-all-data',
             query: {
-                'access_token': accessToken,
+                'session_token': sessionToken,
             },
             body: requestBody,
             mediaType: 'application/json',

@@ -29,10 +29,12 @@ interface Option {
 }
 
 export interface CustomApiFormProps {
-  user: User;
+  sessionToken?: string;
 }
 
-export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
+export const CustomApiForm: React.FC<CustomApiFormProps> = ({
+  sessionToken,
+}) => {
   const [method, setMethod] = useState<Option>({ value: "get", label: "GET" });
   const [url, setUrl] = useState<string>();
   const [authMethod, setAuthMethod] = useState<Option>({
@@ -62,10 +64,6 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
     ];
   }, []);
 
-  useEffect(() => {
-    console.log(authMethod);
-  }, [authMethod]);
-
   const handleRunClick = () => {
     if (url) {
       setLoading(true);
@@ -82,10 +80,10 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({ user }) => {
         .then((json) => {
           CustomService.customFetchData(json)
             .then((data) => {
-              if (user.monday_token) {
+              if (sessionToken) {
                 MondayService.mondayCreateBoardWithData(
-                  user?.monday_token,
                   "Custom Request",
+                  sessionToken,
                   data
                 )
                   .then((board_id) => {

@@ -2,27 +2,26 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Body_google_ads_fetch_all_data } from '../models/Body_google_ads_fetch_all_data';
-import type { Body_google_ads_fetch_data } from '../models/Body_google_ads_fetch_data';
 import type { ColumnData } from '../models/ColumnData';
+import type { QueryData } from '../models/QueryData';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class GoogleAdsService {
     /**
      * Ad Accounts
-     * @param refreshToken
+     * @param sessionToken
      * @returns any Successful Response
      * @throws ApiError
      */
     public static googleAdsAdAccounts(
-        refreshToken: string,
+        sessionToken: string,
     ): CancelablePromise<Array<Record<string, any>>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/google_ads/ad_accounts',
             query: {
-                'refresh_token': refreshToken,
+                'session_token': sessionToken,
             },
             errors: {
                 422: `Validation Error`,
@@ -42,16 +41,21 @@ export class GoogleAdsService {
     }
     /**
      * Fetch Data
+     * @param sessionToken
      * @param requestBody
      * @returns ColumnData Successful Response
      * @throws ApiError
      */
     public static googleAdsFetchData(
-        requestBody: Body_google_ads_fetch_data,
+        sessionToken: string,
+        requestBody: QueryData,
     ): CancelablePromise<Array<ColumnData>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/google_ads/fetch-data',
+            query: {
+                'session_token': sessionToken,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
@@ -61,16 +65,21 @@ export class GoogleAdsService {
     }
     /**
      * Fetch All Data
+     * @param sessionToken
      * @param requestBody
      * @returns ColumnData Successful Response
      * @throws ApiError
      */
     public static googleAdsFetchAllData(
-        requestBody: Body_google_ads_fetch_all_data,
+        sessionToken: string,
+        requestBody: QueryData,
     ): CancelablePromise<Array<ColumnData>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/google_ads/fetch-all-data',
+            query: {
+                'session_token': sessionToken,
+            },
             body: requestBody,
             mediaType: 'application/json',
             errors: {

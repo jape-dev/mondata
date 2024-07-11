@@ -37,10 +37,12 @@ interface BoardColumn {
 
 export interface FacebookPagesFormProps {
   user: User;
+  sessionToken?: string;
 }
 
 export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   user,
+  sessionToken,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -62,15 +64,15 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     setLoading(true);
     if (
       user.id &&
-      user?.monday_token &&
+      sessionToken &&
       selectedBoardOption &&
       selectedColumnOption &&
       selectedAccount
     ) {
       MondayService.mondayItems(
-        user.monday_token,
         selectedBoardOption?.value,
-        selectedColumnOption?.value
+        selectedColumnOption?.value,
+        sessionToken
       ).then((items: MondayItem[]) => {
         const queryData: QueryData = {
           monday_items: items,
@@ -78,28 +80,27 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           metrics: selectedFields.map((field) => field.value),
         };
         if (selectedAccount.access_token) {
-          FacebookService.facebookPagesFetchData(
-            selectedAccount.access_token,
-            queryData
-          ).then((data: ColumnData[]) => {
-            if (user.monday_token) {
-              MondayService.mondayAddData(
-                user?.monday_token,
-                selectedBoardOption.value,
-                data
-              ).then(() => {
-                if (user.id) {
-                  const run: RunBase = {
-                    user_id: user.id,
-                    board_id: selectedBoardOption.value,
-                  };
-                  RunService.runRun(run);
-                }
-                setLoading(false);
-                setSuccess(true);
-              });
+          FacebookService.facebookPagesFetchData(sessionToken, queryData).then(
+            (data: ColumnData[]) => {
+              if (user.monday_token) {
+                MondayService.mondayAddData(
+                  selectedBoardOption.value,
+                  sessionToken,
+                  data
+                ).then(() => {
+                  if (user.id) {
+                    const run: RunBase = {
+                      user_id: user.id,
+                      board_id: selectedBoardOption.value,
+                    };
+                    RunService.runRun(run);
+                  }
+                  setLoading(false);
+                  setSuccess(true);
+                });
+              }
             }
-          });
+          );
         } else {
           console.log("access token not available on", selectedAccount);
         }
@@ -114,10 +115,10 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           selectedAccount.access_token,
           queryData
         ).then((data: ColumnData[]) => {
-          if (user.monday_token) {
+          if (sessionToken) {
             MondayService.mondayCreateBoardWithData(
-              user?.monday_token,
               "Facebook Posts",
+              sessionToken,
               data
             ).then((board_id) => {
               setSelectedBoardOption({
@@ -168,8 +169,8 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   };
 
   useEffect(() => {
-    if (user?.facebook_token) {
-      FacebookService.facebookPages(user.facebook_token).then((pages) => {
+    if (sessionToken) {
+      FacebookService.facebookPages(sessionToken).then((pages) => {
         const accountOptions: Option[] = pages.map((page) => ({
           label: page.label,
           value: page.value,
@@ -188,8 +189,8 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   }, [user]);
 
   useEffect(() => {
-    if (user?.monday_token) {
-      MondayService.mondayBoards(user.monday_token).then((boards: Board[]) => {
+    if (sessionToken) {
+      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
         const boardOptions: Option[] = [
           {
             value: "new_board",
@@ -211,12 +212,9 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     if (
       selectedBoardOption &&
       selectedBoardOption?.value !== "new_board" &&
-      user?.monday_token
+      sessionToken
     ) {
-      MondayService.mondayBoardColumns(
-        selectedBoardOption.value,
-        user.monday_token
-      )
+      MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
         .then((columns: BoardColumn[]) => {
           const columnOptions: Option[] = columns.map(
             (column: BoardColumn) => ({

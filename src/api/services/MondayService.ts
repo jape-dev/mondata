@@ -51,18 +51,18 @@ export class MondayService {
     }
     /**
      * Boards
-     * @param accessToken
+     * @param sessionToken
      * @returns any Successful Response
      * @throws ApiError
      */
     public static mondayBoards(
-        accessToken: string,
+        sessionToken: string,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/monday/boards',
             query: {
-                'access_token': accessToken,
+                'session_token': sessionToken,
             },
             errors: {
                 422: `Validation Error`,
@@ -71,24 +71,24 @@ export class MondayService {
     }
     /**
      * Items
-     * @param accessToken
      * @param boardId
      * @param columnId
+     * @param sessionToken
      * @returns any Successful Response
      * @throws ApiError
      */
     public static mondayItems(
-        accessToken: string,
         boardId: string,
         columnId: string,
+        sessionToken: string,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/monday/items',
             query: {
-                'access_token': accessToken,
                 'board_id': boardId,
                 'column_id': columnId,
+                'session_token': sessionToken,
             },
             errors: {
                 422: `Validation Error`,
@@ -98,14 +98,14 @@ export class MondayService {
     /**
      * Board Columns
      * @param boardId
-     * @param accessToken
+     * @param sessionToken
      * @param type
      * @returns any Successful Response
      * @throws ApiError
      */
     public static mondayBoardColumns(
         boardId: string,
-        accessToken: string,
+        sessionToken: string,
         type?: (string | null),
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
@@ -115,7 +115,7 @@ export class MondayService {
                 'board_id': boardId,
             },
             query: {
-                'access_token': accessToken,
+                'session_token': sessionToken,
                 'type': type,
             },
             errors: {
@@ -125,23 +125,23 @@ export class MondayService {
     }
     /**
      * Add Data
-     * @param accessToken
      * @param boardId
+     * @param sessionToken
      * @param requestBody
      * @returns any Successful Response
      * @throws ApiError
      */
     public static mondayAddData(
-        accessToken: string,
         boardId: string,
+        sessionToken: string,
         requestBody: Array<ColumnData>,
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/monday/add-data',
             query: {
-                'access_token': accessToken,
                 'board_id': boardId,
+                'session_token': sessionToken,
             },
             body: requestBody,
             mediaType: 'application/json',
@@ -152,29 +152,40 @@ export class MondayService {
     }
     /**
      * Create Board With Data
-     * @param accessToken
      * @param boardName
+     * @param sessionToken
      * @param requestBody
      * @returns number Successful Response
      * @throws ApiError
      */
     public static mondayCreateBoardWithData(
-        accessToken: string,
         boardName: string,
+        sessionToken: string,
         requestBody: Array<ColumnData>,
     ): CancelablePromise<number> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/monday/create-board',
             query: {
-                'access_token': accessToken,
                 'board_name': boardName,
+                'session_token': sessionToken,
             },
             body: requestBody,
             mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
+        });
+    }
+    /**
+     * Webhook
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static mondayWebhook(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/monday/webhook',
         });
     }
 }

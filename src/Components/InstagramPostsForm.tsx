@@ -37,9 +37,13 @@ interface BoardColumn {
 
 export interface InstagramPostsForm {
   user: User;
+  sessionToken?: string;
 }
 
-export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
+export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
+  user,
+  sessionToken,
+}) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
@@ -60,15 +64,15 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
     setLoading(true);
     if (
       user.id &&
-      user?.monday_token &&
+      sessionToken &&
       selectedBoardOption &&
       selectedColumnOption &&
       selectedAccount
     ) {
       MondayService.mondayItems(
-        user.monday_token,
         selectedBoardOption?.value,
-        selectedColumnOption?.value
+        selectedColumnOption?.value,
+        sessionToken
       ).then((items: MondayItem[]) => {
         const queryData: QueryData = {
           monday_items: items,
@@ -80,44 +84,40 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
             selectedAccount.access_token,
             queryData
           ).then((data: ColumnData[]) => {
-            if (user.monday_token) {
-              MondayService.mondayAddData(
-                user?.monday_token,
-                selectedBoardOption.value,
-                data
-              ).then(() => {
-                if (user.id) {
-                  const run: RunBase = {
-                    user_id: user.id,
-                    board_id: selectedBoardOption.value,
-                  };
-                  RunService.runRun(run);
-                }
-                setLoading(false);
-                setSuccess(true);
-              });
-            }
+            MondayService.mondayAddData(
+              selectedBoardOption.value,
+              sessionToken,
+              data
+            ).then(() => {
+              if (user.id) {
+                const run: RunBase = {
+                  user_id: user.id,
+                  board_id: selectedBoardOption.value,
+                };
+                RunService.runRun(run);
+              }
+              setLoading(false);
+              setSuccess(true);
+            });
           });
         } else {
-          console.log("access token not available on", selectedAccount);
+          console.log("access token not available on");
         }
       });
     } else {
-      console.log("IN THE ELSE");
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
       if (selectedAccount?.access_token) {
-        console.log("ABOUT TO FETCH THE DATA");
         InstagramService.instagramPagesFetchAllData(
           selectedAccount.access_token,
           queryData
         ).then((data: ColumnData[]) => {
-          if (user.monday_token) {
+          if (sessionToken) {
             MondayService.mondayCreateBoardWithData(
-              user?.monday_token,
               "Instagram Posts",
+              sessionToken,
               data
             ).then((board_id) => {
               // Send valueCreatedForUser event when data has been loaded into board
@@ -168,8 +168,8 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
   };
 
   useEffect(() => {
-    if (user?.facebook_token) {
-      InstagramService.instagramPages(user.facebook_token).then((pages) => {
+    if (sessionToken) {
+      InstagramService.instagramPages(sessionToken).then((pages) => {
         const accountOptions: Option[] = pages.map((page) => ({
           label: page.label,
           value: page.value,
@@ -188,8 +188,8 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
   }, [user]);
 
   useEffect(() => {
-    if (user?.monday_token) {
-      MondayService.mondayBoards(user.monday_token).then((boards: Board[]) => {
+    if (sessionToken) {
+      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
         const boardOptions: Option[] = [
           {
             value: "new_board",
@@ -211,12 +211,9 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({ user }) => {
     if (
       selectedBoardOption &&
       selectedBoardOption?.value !== "new_board" &&
-      user?.monday_token
+      sessionToken
     ) {
-      MondayService.mondayBoardColumns(
-        selectedBoardOption.value,
-        user.monday_token
-      )
+      MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
         .then((columns: BoardColumn[]) => {
           const columnOptions: Option[] = columns.map(
             (column: BoardColumn) => ({

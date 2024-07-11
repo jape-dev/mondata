@@ -18,7 +18,6 @@ import {
   QueryData,
   ColumnData,
   MondayItem,
-  Body_facebook_fetch_data,
   RunService,
   RunBase,
 } from "../api";
@@ -44,9 +43,13 @@ interface BoardColumn {
 
 export interface FacebookAdFormProps {
   user: User;
+  sessionToken?: string;
 }
 
-export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
+export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
+  user,
+  sessionToken,
+}) => {
   const [accountOptions, setAccountOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
@@ -79,12 +82,12 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - date.value);
-    if (user?.monday_token && selectedBoardOption && selectedAccount && date) {
+    if (sessionToken && selectedBoardOption && selectedAccount && date) {
       if (selectedColumnOption) {
         MondayService.mondayItems(
-          user.monday_token,
           selectedBoardOption?.value,
-          selectedColumnOption?.value
+          selectedColumnOption?.value,
+          sessionToken
         ).then((items: MondayItem[]) => {
           const queryData: QueryData = {
             monday_items: items,
@@ -94,36 +97,31 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
             start_date: startDate.toISOString().split("T")[0],
             end_date: endDate.toISOString().split("T")[0],
           };
-          const body: Body_facebook_fetch_data = {
-            query: queryData,
-            user: user,
-          };
-          FacebookService.facebookFetchData(body)
+
+          FacebookService.facebookFetchData(sessionToken, queryData)
             .then((data: ColumnData[]) => {
-              if (user.monday_token) {
-                MondayService.mondayAddData(
-                  user?.monday_token,
-                  selectedBoardOption.value,
-                  data
-                )
-                  .then(() => {
-                    if (user.id) {
-                      const run: RunBase = {
-                        user_id: user.id,
-                        board_id: selectedBoardOption.value,
-                      };
-                      RunService.runRun(run);
-                    }
-                    // Send valueCreatedForUser event when data has been loaded into board
-                    monday.execute("valueCreatedForUser");
-                    setLoading(false);
-                    setSuccess(true);
-                  })
-                  .catch(() => {
-                    setLoading(false);
-                    setSuccess(false);
-                  });
-              }
+              MondayService.mondayAddData(
+                selectedBoardOption.value,
+                sessionToken,
+                data
+              )
+                .then(() => {
+                  if (user.id) {
+                    const run: RunBase = {
+                      user_id: user.id,
+                      board_id: selectedBoardOption.value,
+                    };
+                    RunService.runRun(run);
+                  }
+                  // Send valueCreatedForUser event when data has been loaded into board
+                  monday.execute("valueCreatedForUser");
+                  setLoading(false);
+                  setSuccess(true);
+                })
+                .catch(() => {
+                  setLoading(false);
+                  setSuccess(false);
+                });
             })
             .catch(() => {
               setLoading(false);
@@ -138,33 +136,27 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
         };
-        const body: Body_facebook_fetch_data = {
-          query: queryData,
-          user: user,
-        };
-        FacebookService.facebookFetchAllData(body).then(
+        FacebookService.facebookFetchAllData(sessionToken, queryData).then(
           (data: ColumnData[]) => {
-            if (user.monday_token) {
-              MondayService.mondayCreateBoardWithData(
-                user?.monday_token,
-                "Facebook Ads",
-                data
-              )
-                .then((board_id) => {
-                  setSelectedBoardOption({
-                    value: board_id,
-                    label: "Facebook Ads",
-                  });
-                  // Send valueCreatedForUser event when data has been loaded into board
-                  monday.execute("valueCreatedForUser");
-                  setLoading(false);
-                  setSuccess(true);
-                })
-                .catch(() => {
-                  setLoading(false);
-                  setSuccess(false);
+            MondayService.mondayCreateBoardWithData(
+              "Facebook Ads",
+              sessionToken,
+              data
+            )
+              .then((board_id) => {
+                setSelectedBoardOption({
+                  value: board_id,
+                  label: "Facebook Ads",
                 });
-            }
+                // Send valueCreatedForUser event when data has been loaded into board
+                monday.execute("valueCreatedForUser");
+                setLoading(false);
+                setSuccess(true);
+              })
+              .catch(() => {
+                setLoading(false);
+                setSuccess(false);
+              });
           }
         );
       }
@@ -226,16 +218,14 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
   );
 
   useEffect(() => {
-    if (user?.facebook_token) {
-      FacebookService.facebookAdAccounts(user.facebook_token).then(
-        (accounts) => {
-          const accountOptions: Option[] = accounts.map((account) => ({
-            label: account.label,
-            value: account.value,
-          }));
-          setAccountOptions(accountOptions);
-        }
-      );
+    if (sessionToken) {
+      FacebookService.facebookAdAccounts(sessionToken).then((accounts) => {
+        const accountOptions: Option[] = accounts.map((account) => ({
+          label: account.label,
+          value: account.value,
+        }));
+        setAccountOptions(accountOptions);
+      });
       FacebookService.facebookFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
@@ -244,11 +234,11 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
         setFields(fieldOptions);
       });
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    if (user?.monday_token) {
-      MondayService.mondayBoards(user.monday_token).then((boards: Board[]) => {
+    if (sessionToken) {
+      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
         const boardOptions: Option[] = [
           {
             value: "new_board",
@@ -270,12 +260,9 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
     if (
       selectedBoardOption &&
       selectedBoardOption?.value !== "new_board" &&
-      user?.monday_token
+      sessionToken
     ) {
-      MondayService.mondayBoardColumns(
-        selectedBoardOption.value,
-        user.monday_token
-      )
+      MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
         .then((columns: BoardColumn[]) => {
           const columnOptions: Option[] = columns.map(
             (column: BoardColumn) => ({
@@ -341,7 +328,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({ user }) => {
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
-
         <div className="flex items-center gap-1">
           <p className="font-bold text-gray-500 text-sm">* Date range</p>
           <Tooltip

@@ -7,10 +7,6 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
-export type { Body_facebook_fetch_all_data } from './models/Body_facebook_fetch_all_data';
-export type { Body_facebook_fetch_data } from './models/Body_facebook_fetch_data';
-export type { Body_google_ads_fetch_all_data } from './models/Body_google_ads_fetch_all_data';
-export type { Body_google_ads_fetch_data } from './models/Body_google_ads_fetch_data';
 export type { ColumnData } from './models/ColumnData';
 export type { CustomAPIRequest } from './models/CustomAPIRequest';
 export type { HTTPAuthorizationCredentials } from './models/HTTPAuthorizationCredentials';
