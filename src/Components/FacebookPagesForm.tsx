@@ -14,6 +14,7 @@ import {
   RunService,
   RunBase,
 } from "../api";
+import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { handleSuccessClick } from "../Utils/monday";
 
 const monday = mondaySdk();
@@ -55,6 +56,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [subdomain, setSubdomain] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const getImageUrl = (imgPath: string) => {
     return require(`../Static/images/${imgPath}.png`);
@@ -105,7 +107,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           console.log("access token not available on", selectedAccount);
         }
       });
-    } else {
+    } else if (user.id && sessionToken && selectedBoardOption) {
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
@@ -133,6 +135,10 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           }
         });
       }
+    } else {
+      setShowModal(true);
+      setLoading(false);
+      setSuccess(false);
     }
   };
 
@@ -359,6 +365,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           Run
         </Button>
       )}
+      <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
     </div>
   );
 };

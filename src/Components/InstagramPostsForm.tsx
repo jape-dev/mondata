@@ -15,6 +15,7 @@ import {
   RunBase,
 } from "../api";
 import { handleSuccessClick } from "../Utils/monday";
+import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 
 const monday = mondaySdk();
 
@@ -55,6 +56,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [subdomain, setSubdomain] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const getImageUrl = (imgPath: string) => {
     return require(`../Static/images/${imgPath}.png`);
@@ -104,7 +106,12 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           console.log("access token not available on");
         }
       });
-    } else {
+    } else if (
+      user.id &&
+      sessionToken &&
+      selectedBoardOption &&
+      selectedAccount
+    ) {
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
@@ -132,6 +139,10 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           }
         });
       }
+    } else {
+      setShowModal(true);
+      setLoading(false);
+      setSuccess(false);
     }
   };
 
@@ -359,6 +370,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           Run
         </Button>
       )}
+      <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
     </div>
   );
 };

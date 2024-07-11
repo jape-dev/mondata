@@ -22,6 +22,7 @@ import {
   RunBase,
 } from "../api";
 import { handleSuccessClick } from "../Utils/monday";
+import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 
 const monday = mondaySdk();
 
@@ -457,15 +458,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           Run
         </Button>
       )}
-      <Modal
-        title="Error: Required Fields"
-        onClose={() => setShowModal(false)}
-        show={showModal}
-      >
-        <ModalContent>
-          <p>Ensure all required options are selected before running.</p>
-        </ModalContent>
-      </Modal>
+      <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
     </div>
   );
 };

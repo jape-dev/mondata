@@ -20,6 +20,7 @@ import {
 } from "../api";
 import { PairValueComponent } from "./PairValue";
 import { handleSuccessClick } from "../Utils/monday";
+import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 
 const monday = mondaySdk();
 
@@ -49,6 +50,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [success, setSuccess] = useState(false);
   const [boardId, setBoardId] = useState<number>();
   const [subdomain, setSubdomain] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const methodOptions = useMemo(() => {
     return [
@@ -108,6 +110,10 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
           setLoading(false);
           setSuccess(false);
         });
+    } else {
+      setShowModal(true);
+      setLoading(false);
+      setSuccess(false);
     }
   };
 
@@ -258,6 +264,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
           </Button>
         )}
       </div>
+      <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
     </>
   );
 };
