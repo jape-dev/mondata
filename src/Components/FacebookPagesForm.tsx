@@ -82,27 +82,28 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           metrics: selectedFields.map((field) => field.value),
         };
         if (selectedAccount.access_token) {
-          FacebookService.facebookPagesFetchData(sessionToken, queryData).then(
-            (data: ColumnData[]) => {
-              if (user.monday_token) {
-                MondayService.mondayAddData(
-                  selectedBoardOption.value,
-                  sessionToken,
-                  data
-                ).then(() => {
-                  if (user.id) {
-                    const run: RunBase = {
-                      user_id: user.id,
-                      board_id: selectedBoardOption.value,
-                    };
-                    RunService.runRun(run);
-                  }
-                  setLoading(false);
-                  setSuccess(true);
-                });
-              }
+          FacebookService.facebookPagesFetchData(
+            selectedAccount.access_token,
+            queryData
+          ).then((data: ColumnData[]) => {
+            if (user.monday_token) {
+              MondayService.mondayAddData(
+                selectedBoardOption.value,
+                sessionToken,
+                data
+              ).then(() => {
+                if (user.id) {
+                  const run: RunBase = {
+                    user_id: user.id,
+                    board_id: selectedBoardOption.value,
+                  };
+                  RunService.runRun(run);
+                }
+                setLoading(false);
+                setSuccess(true);
+              });
             }
-          );
+          });
         } else {
           console.log("access token not available on", selectedAccount);
         }
