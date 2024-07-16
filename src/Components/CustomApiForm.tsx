@@ -21,6 +21,7 @@ import {
 import { PairValueComponent } from "./PairValue";
 import { handleSuccessClick } from "../Utils/monday";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
+import { BaseModal } from "./Modals/BaseModal";
 
 const monday = mondaySdk();
 
@@ -51,6 +52,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [boardId, setBoardId] = useState<number>();
   const [subdomain, setSubdomain] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const methodOptions = useMemo(() => {
     return [
@@ -102,11 +104,13 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
               }
             })
             .catch(() => {
+              setShowErrorModal(true);
               setLoading(false);
               setSuccess(false);
             });
         })
         .catch(() => {
+          setShowErrorModal(true);
           setLoading(false);
           setSuccess(false);
         });
@@ -265,6 +269,14 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
         )}
       </div>
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
+      <BaseModal
+        title="Error: Invalid Request"
+        text={
+          "Could not fetch any data from this API. Please check your configuration and try again."
+        }
+        showModal={showErrorModal}
+        setShowModal={setShowErrorModal}
+      />
     </>
   );
 };
