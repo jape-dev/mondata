@@ -44,11 +44,13 @@ interface BoardColumn {
 
 export interface GoogleAdsFormProps {
   user: User;
+  workspaceId: number;
   sessionToken?: string;
 }
 
 export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   user,
+  workspaceId,
   sessionToken,
 }) => {
   const [accountOptions, setAccountOptions] = useState<Option[]>([]);
@@ -150,6 +152,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
             MondayService.mondayCreateBoardWithData(
               "Google Ads",
               sessionToken,
+              workspaceId,
               data
             )
               .then((board_id) => {

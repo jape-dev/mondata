@@ -38,11 +38,13 @@ interface BoardColumn {
 
 export interface InstagramPostsForm {
   user: User;
+  workspaceId: number;
   sessionToken?: string;
 }
 
 export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   user,
+  workspaceId,
   sessionToken,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
@@ -125,6 +127,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
             MondayService.mondayCreateBoardWithData(
               "Instagram Posts",
               sessionToken,
+              workspaceId,
               data
             ).then((board_id) => {
               // Send valueCreatedForUser event when data has been loaded into board

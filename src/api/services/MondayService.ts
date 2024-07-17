@@ -154,6 +154,7 @@ export class MondayService {
      * Create Board With Data
      * @param boardName
      * @param sessionToken
+     * @param workspaceId
      * @param requestBody
      * @returns number Successful Response
      * @throws ApiError
@@ -161,6 +162,7 @@ export class MondayService {
     public static mondayCreateBoardWithData(
         boardName: string,
         sessionToken: string,
+        workspaceId: number,
         requestBody: Array<ColumnData>,
     ): CancelablePromise<number> {
         return __request(OpenAPI, {
@@ -169,6 +171,7 @@ export class MondayService {
             query: {
                 'board_name': boardName,
                 'session_token': sessionToken,
+                'workspace_id': workspaceId,
             },
             body: requestBody,
             mediaType: 'application/json',

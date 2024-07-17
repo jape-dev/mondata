@@ -38,11 +38,13 @@ interface BoardColumn {
 
 export interface FacebookPagesFormProps {
   user: User;
+  workspaceId: number;
   sessionToken?: string;
 }
 
 export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   user,
+  workspaceId,
   sessionToken,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
@@ -122,6 +124,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
             MondayService.mondayCreateBoardWithData(
               "Facebook Posts",
               sessionToken,
+              workspaceId,
               data
             ).then((board_id) => {
               setSelectedBoardOption({

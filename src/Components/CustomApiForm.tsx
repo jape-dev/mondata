@@ -32,10 +32,12 @@ interface Option {
 
 export interface CustomApiFormProps {
   sessionToken?: string;
+  workspaceId: number;
 }
 
 export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   sessionToken,
+  workspaceId,
 }) => {
   const [method, setMethod] = useState<Option>({ value: "get", label: "GET" });
   const [url, setUrl] = useState<string>();
@@ -88,6 +90,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
                 MondayService.mondayCreateBoardWithData(
                   "Custom Request",
                   sessionToken,
+                  workspaceId,
                   data
                 )
                   .then((board_id) => {

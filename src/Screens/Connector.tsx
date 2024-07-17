@@ -18,6 +18,7 @@ import { GoogleAdsForm } from "../Components/GoogleAdsForm";
 import { CustomApiForm } from "Components/CustomApiForm";
 import { Guide } from "../Components/Modals/OnboardingGuideModal";
 import { ViewerModal } from "../Components/Modals/ViewerUserModal";
+import { AppFeatureBoardViewContext } from "monday-sdk-js/types/client-context.type";
 
 const monday = mondaySdk();
 
@@ -27,6 +28,7 @@ export const Connector = () => {
   const [showModal, setShowModal] = useState(false);
   const [user, setUser] = useState<User>();
   const [sessionToken, setSessionToken] = useState<string>();
+  const [workspaceId, setWorkspaceId] = useState<number>();
 
   const getIconUrl = (imgPath: string) => {
     return require(`../Static/images/${imgPath}.png`);
@@ -171,6 +173,16 @@ export const Connector = () => {
     setShowModal(true);
   };
 
+  useEffect(() => {
+    monday.get("context").then((res: any) => {
+      console.log(res);
+      if (res.data.workspaceId) {
+        console.log("setting workspace id");
+        setWorkspaceId(res.data.workspaceId);
+      }
+    });
+  }, []);
+
   return (
     <>
       <div className="p-2">
@@ -204,18 +216,37 @@ export const Connector = () => {
           ) : null}
         </div>
         <div>
-          {connected && user && (
+          {connected && user && workspaceId && (
             <>
               {connector === "facebook" ? (
-                <FacebookAdsForm user={user} sessionToken={sessionToken} />
+                <FacebookAdsForm
+                  user={user}
+                  sessionToken={sessionToken}
+                  workspaceId={workspaceId}
+                />
               ) : connector === "facebook_pages" ? (
-                <FacebookPagesForm user={user} sessionToken={sessionToken} />
+                <FacebookPagesForm
+                  user={user}
+                  sessionToken={sessionToken}
+                  workspaceId={workspaceId}
+                />
               ) : connector === "instagram" ? (
-                <InstagramPostsForm user={user} sessionToken={sessionToken} />
+                <InstagramPostsForm
+                  user={user}
+                  sessionToken={sessionToken}
+                  workspaceId={workspaceId}
+                />
               ) : connector === "google_ads" ? (
-                <GoogleAdsForm user={user} sessionToken={sessionToken} />
+                <GoogleAdsForm
+                  user={user}
+                  sessionToken={sessionToken}
+                  workspaceId={workspaceId}
+                />
               ) : connector === "custom_api" ? (
-                <CustomApiForm sessionToken={sessionToken} />
+                <CustomApiForm
+                  sessionToken={sessionToken}
+                  workspaceId={workspaceId}
+                />
               ) : null}
             </>
           )}

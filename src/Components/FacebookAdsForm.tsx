@@ -10,7 +10,7 @@ import {
   ModalContent,
 } from "monday-ui-react-core";
 import { Tooltip } from "monday-ui-react-core";
-import { Info } from "monday-ui-react-core/icons";
+import { Info, Workspace } from "monday-ui-react-core/icons";
 import {
   FacebookService,
   User,
@@ -44,11 +44,13 @@ interface BoardColumn {
 
 export interface FacebookAdFormProps {
   user: User;
+  workspaceId: number;
   sessionToken?: string;
 }
 
 export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   user,
+  workspaceId,
   sessionToken,
 }) => {
   const [accountOptions, setAccountOptions] = useState<Option[]>([]);
@@ -142,6 +144,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
             MondayService.mondayCreateBoardWithData(
               "Facebook Ads",
               sessionToken,
+              workspaceId,
               data
             )
               .then((board_id) => {
