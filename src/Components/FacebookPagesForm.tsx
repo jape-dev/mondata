@@ -2,7 +2,13 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import { Dropdown, Button, Tooltip, Icon } from "monday-ui-react-core";
+import {
+  Dropdown,
+  Button,
+  Tooltip,
+  Icon,
+  TextField,
+} from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
   FacebookService,
@@ -16,6 +22,7 @@ import {
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { handleSuccessClick } from "../Utils/monday";
+import { BaseModal } from "./Modals/BaseModal";
 
 const monday = mondaySdk();
 
@@ -52,13 +59,30 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   const [fields, setFields] = useState<Option[]>([]);
   const [selectedFields, setSelectedFields] = useState<Option[]>([]);
   const [boards, setBoards] = useState<Option[]>([]);
-  const [selectedBoardOption, setSelectedBoardOption] = useState<Option>();
+  const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
+    label: "Import into a new board",
+    value: "new_board",
+  });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [subdomain, setSubdomain] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [boardName, setBoardName] = useState("");
+
+  const checkBoardName = () => {
+    const currentNames = boards.map((board) => board.label);
+    if (currentNames.includes(boardName)) {
+      setShowNameModal(true);
+      setLoading(false);
+      setSuccess(false);
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   const getImageUrl = (imgPath: string) => {
     return require(`../Static/images/${imgPath}.png`);
@@ -66,6 +90,10 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
 
   const handleRunClick = () => {
     setLoading(true);
+    const isValidName = checkBoardName();
+    if (!isValidName) {
+      return;
+    }
     if (
       user.id &&
       sessionToken &&
@@ -122,14 +150,14 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         ).then((data: ColumnData[]) => {
           if (sessionToken) {
             MondayService.mondayCreateBoardWithData(
-              "Facebook Posts",
+              boardName,
               sessionToken,
               workspaceId,
               data
             ).then((board_id) => {
               setSelectedBoardOption({
                 value: board_id,
-                label: "Facebook Posts",
+                label: boardName,
               });
               // Send valueCreatedForUser event when data has been loaded into board
               monday.execute("valueCreatedForUser");
@@ -317,6 +345,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           </Tooltip>
         </div>
         <Dropdown
+          value={selectedBoardOption}
           options={boards}
           placeholder="Select a board"
           className="mb-2"
@@ -324,29 +353,47 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           onOptionSelect={(e: Option) => setSelectedBoardOption(e)}
         />
         {selectedBoardOption?.value &&
-          selectedBoardOption.value !== "new_board" && (
-            <>
-              <div className="flex items-center gap-1">
-                <p className="font-bold text-gray-500 text-sm">
-                  * Post Url Column
-                </p>
-                <Tooltip
-                  title="The column containing the url of post"
-                  content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Facebook Ads application."
-                  position={Tooltip.positions.TOP}
-                  image={getImageUrl("post-urls")}
-                >
-                  <Icon icon={Info} className="text-gray-500" />
-                </Tooltip>
-              </div>
-              <Dropdown
-                options={boardColumns}
-                onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-                placeholder="Select column"
-                className="mb-2"
-              />
-            </>
-          )}
+        selectedBoardOption.value !== "new_board" ? (
+          <>
+            <div className="flex items-center gap-1">
+              <p className="font-bold text-gray-500 text-sm">
+                * Post Url Column
+              </p>
+              <Tooltip
+                title="The column containing the url of post"
+                content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Facebook Ads application."
+                position={Tooltip.positions.TOP}
+                image={getImageUrl("post-urls")}
+              >
+                <Icon icon={Info} className="text-gray-500" />
+              </Tooltip>
+            </div>
+            <Dropdown
+              options={boardColumns}
+              onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
+              placeholder="Select column"
+              className="mb-2"
+            />
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-1">
+              <p className="font-bold text-gray-500 text-sm">* Board Name</p>
+              <Tooltip
+                content="The name of your newly created board"
+                position={Tooltip.positions.TOP}
+              >
+                <Icon icon={Info} className="text-gray-500" />
+              </Tooltip>
+            </div>
+            <TextField
+              onChange={(e: any) => setBoardName(e)}
+              size={TextField.sizes.MEDIUM}
+              placeholder="Enter name"
+              className="mb-2 !text-sm"
+            />
+          </>
+        )}
       </div>
       {success ? (
         <Button
@@ -370,6 +417,12 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         </Button>
       )}
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
+      <BaseModal
+        title={"Error: invalid name"}
+        text={"This board name already exists. Please choose a new name"}
+        showModal={showNameModal}
+        setShowModal={setShowModal}
+      />
     </div>
   );
 };

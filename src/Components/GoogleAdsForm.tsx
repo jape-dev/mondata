@@ -7,8 +7,7 @@ import {
   Button,
   Tooltip,
   Icon,
-  Modal,
-  ModalContent,
+  TextField,
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
@@ -23,6 +22,7 @@ import {
 } from "../api";
 import { handleSuccessClick } from "../Utils/monday";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
+import { BaseModal } from "./Modals/BaseModal";
 
 const monday = mondaySdk();
 
@@ -63,7 +63,10 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
       label: "Import into a new board",
     },
   ]);
-  const [selectedBoardOption, setSelectedBoardOption] = useState<Option>();
+  const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
+    label: "Import into a new board",
+    value: "new_board",
+  });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
@@ -72,6 +75,20 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [success, setSuccess] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [subdomain, setSubdomain] = useState("");
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [boardName, setBoardName] = useState("");
+
+  const checkBoardName = () => {
+    const currentNames = boards.map((board) => board.label);
+    if (currentNames.includes(boardName)) {
+      setShowNameModal(true);
+      setLoading(false);
+      setSuccess(false);
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   useEffect(() => {
     console.log("sessionToken", sessionToken);
@@ -91,6 +108,10 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
 
   const handleRunClick = () => {
     setLoading(true);
+    const isValidName = checkBoardName();
+    if (!isValidName) {
+      return;
+    }
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - date.value);
@@ -150,7 +171,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         GoogleAdsService.googleAdsFetchAllData(sessionToken, queryData).then(
           (data: ColumnData[]) => {
             MondayService.mondayCreateBoardWithData(
-              "Google Ads",
+              boardName,
               sessionToken,
               workspaceId,
               data
@@ -158,7 +179,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
               .then((board_id) => {
                 setSelectedBoardOption({
                   value: board_id,
-                  label: "Google Ads",
+                  label: boardName,
                 });
                 // Send valueCreatedForUser event when data has been loaded into board
                 monday.execute("valueCreatedForUser");
@@ -370,6 +391,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           </Tooltip>
         </div>
         <Dropdown
+          value={selectedBoardOption}
           options={boards}
           sLoading={boards.length === 0}
           placeholder="Select a board"
@@ -411,6 +433,21 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
               sLoading={groupingOptions.length === 0}
               className="mb-2"
               menuPlacement={"top"}
+            />
+            <div className="flex items-center gap-1">
+              <p className="font-bold text-gray-500 text-sm">* Board Name</p>
+              <Tooltip
+                content="The name of your newly created board"
+                position={Tooltip.positions.TOP}
+              >
+                <Icon icon={Info} className="text-gray-500" />
+              </Tooltip>
+            </div>
+            <TextField
+              onChange={(e: any) => setBoardName(e)}
+              size={TextField.sizes.MEDIUM}
+              placeholder="Enter name"
+              className="mb-2 !text-sm"
             />
           </>
         ) : selectedBoardOption &&
@@ -462,6 +499,12 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         </Button>
       )}
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
+      <BaseModal
+        title={"Error: invalid name"}
+        text={"This board name already exists. Please choose a new name"}
+        showModal={showNameModal}
+        setShowModal={setShowModal}
+      />
     </div>
   );
 };

@@ -175,9 +175,7 @@ export const Connector = () => {
 
   useEffect(() => {
     monday.get("context").then((res: any) => {
-      console.log(res);
       if (res.data.workspaceId) {
-        console.log("setting workspace id");
         setWorkspaceId(res.data.workspaceId);
       }
     });

@@ -25,6 +25,11 @@ import { BaseModal } from "./Modals/BaseModal";
 
 const monday = mondaySdk();
 
+interface Board {
+  id: string;
+  name: string;
+}
+
 interface Option {
   value: any;
   label: string;
@@ -55,6 +60,21 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [subdomain, setSubdomain] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [boardName, setBoardName] = useState("");
+  const [boards, setBoards] = useState<Option[]>([]);
+
+  const checkBoardName = () => {
+    const currentNames = boards.map((board) => board.label);
+    if (currentNames.includes(boardName)) {
+      setShowNameModal(true);
+      setLoading(false);
+      setSuccess(false);
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   const methodOptions = useMemo(() => {
     return [
@@ -71,6 +91,10 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   }, []);
 
   const handleRunClick = () => {
+    const isValidName = checkBoardName();
+    if (!isValidName) {
+      return;
+    }
     if (url) {
       setLoading(true);
       const requestBody: CustomAPIRequest = {
@@ -88,7 +112,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
             .then((data) => {
               if (sessionToken) {
                 MondayService.mondayCreateBoardWithData(
-                  "Custom Request",
+                  boardName,
                   sessionToken,
                   workspaceId,
                   data
@@ -150,6 +174,26 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
     };
 
     getSubdomain();
+  }, []);
+
+  useEffect(() => {
+    if (sessionToken) {
+      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
+        const boardOptions: Option[] = [
+          {
+            value: "new_board",
+            label: "Import into a new board",
+          },
+        ];
+        boards.forEach((board: Board) => {
+          boardOptions.push({
+            value: board.id,
+            label: board.name,
+          });
+        });
+        setBoards(boardOptions);
+      });
+    }
   }, []);
 
   return (
@@ -251,6 +295,23 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
             />
           </div>
         )}
+        <div className="border-2 border-grey rounded-md p-5 mb-2">
+          <div className="flex items-center gap-1">
+            <p className="font-bold text-gray-500 text-sm">* Board Name</p>
+            <Tooltip
+              content="The name of your newly created board"
+              position={Tooltip.positions.TOP}
+            >
+              <Icon icon={Info} className="text-gray-500" />
+            </Tooltip>
+          </div>
+          <TextField
+            onChange={(e: any) => setBoardName(e)}
+            size={TextField.sizes.MEDIUM}
+            placeholder="Enter name"
+            className="mb-2 !text-sm"
+          />
+        </div>
         {success && boardId ? (
           <Button
             onClick={() => handleSuccessClick(subdomain, boardId)}
@@ -279,6 +340,12 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
         }
         showModal={showErrorModal}
         setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Error: invalid name"}
+        text={"This board name already exists. Please choose a new name"}
+        showModal={showNameModal}
+        setShowModal={setShowModal}
       />
     </>
   );
