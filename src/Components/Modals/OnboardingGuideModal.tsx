@@ -11,30 +11,33 @@ const steps = [<div />, <div />, <div />, <div />, <div />];
 
 const titles = [
   "Welcome to Data Importer",
-  "1) Set-up your board",
-  "2) Select application ",
-  "3) Choose options",
+  "1) Select application ",
+  "2) Choose options",
+  "3) Set-up your board",
   "4) Run",
 ];
 
 const content = [
   <div className="mt-2">Please view these steps to get started.</div>,
   <div className="mt-2">
-    Add your items to the board, including a column for URLs or ids that you
-    want metrics to be imported for. You can also import into a brand new board.
+    1) Select an application and authenticate your account.
   </div>,
   <div className="mt-2">
-    2) Select an application and authenticate your account.
+    2) Choose your options, including the metrics you want to import.
   </div>,
   <div className="mt-2">
-    3) Choose your options, including the metrics you want to import.
+    You can either import into a new board or import into an existing board. If
+    importing into an existing board, you'll need to make sure that it contains
+    a column that holds the post urls or ad ids for metrics to be imported. For
+    tutorials on each application, you can visit out{" "}
+    <a href="https://dataimporter.co/blog">blog.</a>
   </div>,
   <div className="mt-2">
     4) Press run and you're good to go. Your metrics will start importing into
     your board.{" "}
   </div>,
 ];
-const images = ["", "post-urls", "applications", "options", "run-complete"];
+const images = ["", "applications", "options", "post-urls", "run-complete"];
 
 export interface OnboardingGuideModalProps {
   showModal: boolean;
