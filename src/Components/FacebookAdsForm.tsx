@@ -67,6 +67,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [subdomain, setSubdomain] = useState("");
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState("");
+  const [showErrordModal, setShowErrorModal] = useState(false);
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -138,11 +139,13 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
                   setSuccess(true);
                 })
                 .catch(() => {
+                  setShowErrorModal(true);
                   setLoading(false);
                   setSuccess(false);
                 });
             })
             .catch(() => {
+              setShowErrorModal(true);
               setLoading(false);
               setSuccess(false);
             });
@@ -155,8 +158,8 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
         };
-        FacebookService.facebookFetchAllData(sessionToken, queryData).then(
-          (data: ColumnData[]) => {
+        FacebookService.facebookFetchAllData(sessionToken, queryData)
+          .then((data: ColumnData[]) => {
             MondayService.mondayCreateBoardWithData(
               boardName,
               sessionToken,
@@ -174,11 +177,16 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
                 setSuccess(true);
               })
               .catch(() => {
+                setShowErrorModal(true);
                 setLoading(false);
                 setSuccess(false);
               });
-          }
-        );
+          })
+          .catch(() => {
+            setShowErrorModal(true);
+            setLoading(false);
+            setSuccess(false);
+          });
       }
     } else {
       setShowModal(true);
@@ -489,6 +497,14 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         text={"This board name already exists. Please choose a new name"}
         showModal={showNameModal}
         setShowModal={setShowModal}
+      />
+      <BaseModal
+        title={"Error: could not fetch data. "}
+        text={
+          "There was an error trying to fetch your data. Please check your configuation and try again."
+        }
+        showModal={showErrordModal}
+        setShowModal={setShowErrorModal}
       />
     </div>
   );
