@@ -29,8 +29,10 @@ const content = [
     You can either import into a new board or import into an existing board. If
     importing into an existing board, you'll need to make sure that it contains
     a column that holds the post urls or ad ids for metrics to be imported. For
-    tutorials on each application, you can visit out{" "}
-    <a href="https://dataimporter.co/blog">blog.</a>
+    tutorials on each application, you can visit our{" "}
+    <a className="text-blue underline" href="https://dataimporter.co/blog">
+      tutorials page.
+    </a>
   </div>,
   <div className="mt-2">
     4) Press run and you're good to go. Your metrics will start importing into
