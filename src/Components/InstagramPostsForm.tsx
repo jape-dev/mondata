@@ -71,6 +71,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState("");
+  const [showErrordModal, setShowErrorModal] = useState(false);
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -105,37 +106,52 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         selectedBoardOption?.value,
         selectedColumnOption?.value,
         sessionToken
-      ).then((items: MondayItem[]) => {
-        const queryData: QueryData = {
-          monday_items: items,
-          account_id: selectedAccount?.value,
-          metrics: selectedFields.map((field) => field.value),
-        };
-        if (selectedAccount.access_token) {
-          InstagramService.instagramPagesFetchData(
-            selectedAccount.access_token,
-            queryData
-          ).then((data: ColumnData[]) => {
-            MondayService.mondayAddData(
-              selectedBoardOption.value,
-              sessionToken,
-              data
-            ).then(() => {
-              if (user.id) {
-                const run: RunBase = {
-                  user_id: user.id,
-                  board_id: selectedBoardOption.value,
-                };
-                RunService.runRun(run);
-              }
-              setLoading(false);
-              setSuccess(true);
-            });
-          });
-        } else {
-          console.log("access token not available on");
-        }
-      });
+      )
+        .then((items: MondayItem[]) => {
+          const queryData: QueryData = {
+            monday_items: items,
+            account_id: selectedAccount?.value,
+            metrics: selectedFields.map((field) => field.value),
+          };
+          if (selectedAccount.access_token) {
+            InstagramService.instagramPagesFetchData(
+              selectedAccount.access_token,
+              queryData
+            )
+              .then((data: ColumnData[]) => {
+                MondayService.mondayAddData(
+                  selectedBoardOption.value,
+                  sessionToken,
+                  data
+                )
+                  .then(() => {
+                    if (user.id) {
+                      const run: RunBase = {
+                        user_id: user.id,
+                        board_id: selectedBoardOption.value,
+                      };
+                      RunService.runRun(run);
+                    }
+                    setLoading(false);
+                    setSuccess(true);
+                  })
+                  .catch((err) => {
+                    setLoading(false);
+                    setShowErrorModal(true);
+                  });
+              })
+              .catch((err) => {
+                setLoading(false);
+                setShowErrorModal(true);
+              });
+          } else {
+            console.log("access token not available on");
+          }
+        })
+        .catch((err) => {
+          setLoading(false);
+          setShowErrorModal(true);
+        });
     } else if (
       user.id &&
       sessionToken &&
@@ -426,6 +442,22 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         text={"This board name already exists. Please choose a new name"}
         showModal={showNameModal}
         setShowModal={setShowModal}
+      />
+      <BaseModal
+        title={"Error: could not fetch data. "}
+        text={
+          "There was an error trying to fetch your data. Please check your configuation and try again."
+        }
+        showModal={showErrordModal}
+        setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Error: could not fetch data. "}
+        text={
+          "There was an error trying to fetch your data. Please check your configuation and try again."
+        }
+        showModal={showErrordModal}
+        setShowModal={setShowErrorModal}
       />
     </div>
   );
