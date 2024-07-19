@@ -15,7 +15,6 @@ import {
   CustomService,
   CustomAPIRequest,
   MondayService,
-  User,
   PairValue,
 } from "../api";
 import { PairValueComponent } from "./PairValue";

@@ -35,7 +35,7 @@ export class CustomService {
      */
     public static customApiRequest(
         requestBody: CustomAPIRequest,
-    ): CancelablePromise<Record<string, any>> {
+    ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/custom/api-request',
