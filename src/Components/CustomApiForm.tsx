@@ -345,7 +345,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
         title={"Error: invalid name"}
         text={"This board name already exists. Please choose a new name"}
         showModal={showNameModal}
-        setShowModal={setShowModal}
+        setShowModal={setShowNameModal}
       />
     </>
   );

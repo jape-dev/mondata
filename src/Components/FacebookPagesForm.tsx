@@ -447,7 +447,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         title={"Error: invalid name"}
         text={"This board name already exists. Please choose a new name"}
         showModal={showNameModal}
-        setShowModal={setShowModal}
+        setShowModal={setShowNameModal}
       />
       <BaseModal
         title={"Error: could not fetch data. "}

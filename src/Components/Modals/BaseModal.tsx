@@ -2,14 +2,14 @@ import "../../App.css";
 import "monday-ui-react-core/dist/main.css";
 import { Modal, ModalContent } from "monday-ui-react-core";
 
-export interface FieldsRequiredModalProps {
+export interface BaseModalProps {
   title: string;
   text: string;
   showModal: boolean;
   setShowModal: (showModal: boolean) => void;
 }
 
-export const BaseModal: React.FC<FieldsRequiredModalProps> = ({
+export const BaseModal: React.FC<BaseModalProps> = ({
   title,
   text,
   showModal,
