@@ -17,8 +17,6 @@ import { InstagramPostsForm } from "../Components/InstagramPostsForm";
 import { GoogleAdsForm } from "../Components/GoogleAdsForm";
 import { CustomApiForm } from "Components/CustomApiForm";
 import { Guide } from "../Components/Modals/OnboardingGuideModal";
-import { ViewerModal } from "../Components/Modals/ViewerUserModal";
-import { AppFeatureBoardViewContext } from "monday-sdk-js/types/client-context.type";
 
 const monday = mondaySdk();
 
@@ -29,6 +27,23 @@ export const Connector = () => {
   const [user, setUser] = useState<User>();
   const [sessionToken, setSessionToken] = useState<string>();
   const [workspaceId, setWorkspaceId] = useState<number>();
+  const [isViewer, setIsViewer] = useState(false);
+
+  useEffect(() => {
+    monday
+      .get("context")
+      .then((res: any) => {
+        if (res.data?.user) {
+          const isViewOnly = res.data.user.isViewOnly;
+          if (isViewOnly === true) {
+            setIsViewer(true);
+          }
+        }
+      })
+      .catch((error: any) => {
+        console.error("Error fetching context", error);
+      });
+  }, []);
 
   const getIconUrl = (imgPath: string) => {
     return require(`../Static/images/${imgPath}.png`);
@@ -192,26 +207,38 @@ export const Connector = () => {
           >
             How to use
           </Button>
-          {/* <div>"clientID": "53487600a960bba8f31d355eda2094ef"</div> */}
-          <p className="font-bold text-gray-500 text-xs">* Application</p>
-          <Dropdown
-            placeholder="Select an application"
-            options={options}
-            onOptionSelect={(e: any) => setConnector(e.value)}
-          />
-          {connected === true && connector !== "custom_api" ? (
-            <Button
-              kind={Button.kinds.TERTIARY}
-              className="text-xs text-gray-500 font-bold underline m-0 p-0 h-0"
-              onClick={() => connect()}
-            >
-              Connect to different account?
-            </Button>
-          ) : connector !== "custom_api" ? (
-            <Button onClick={() => connect()} className="mt-2">
-              Connect
-            </Button>
-          ) : null}
+          {isViewer ? (
+            <div>
+              <h1 className="font-bold">Viewer Access</h1>
+              <p>
+                This application can be used by users who have member, admin or
+                guest access. As a viewer, you are unable to use this app.
+                Please contact your admin to request a different role.
+              </p>
+            </div>
+          ) : (
+            <>
+              <p className="font-bold text-gray-500 text-xs">* Application</p>
+              <Dropdown
+                placeholder="Select an application"
+                options={options}
+                onOptionSelect={(e: any) => setConnector(e.value)}
+              />
+              {connected === true && connector !== "custom_api" ? (
+                <Button
+                  kind={Button.kinds.TERTIARY}
+                  className="text-xs text-gray-500 font-bold underline m-0 p-0 h-0"
+                  onClick={() => connect()}
+                >
+                  Connect to different account?
+                </Button>
+              ) : connector !== "custom_api" ? (
+                <Button onClick={() => connect()} className="mt-2">
+                  Connect
+                </Button>
+              ) : null}
+            </>
+          )}
         </div>
         <div>
           {connected && user && workspaceId && (
@@ -250,7 +277,6 @@ export const Connector = () => {
           )}
         </div>
         <Guide showModal={showModal} setShowModal={setShowModal} />
-        <ViewerModal />
       </div>
     </>
   );
