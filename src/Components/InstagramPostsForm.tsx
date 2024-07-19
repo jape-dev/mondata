@@ -113,40 +113,33 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
             account_id: selectedAccount?.value,
             metrics: selectedFields.map((field) => field.value),
           };
-          if (selectedAccount.access_token) {
-            InstagramService.instagramPagesFetchData(
-              selectedAccount.access_token,
-              queryData
-            )
-              .then((data: ColumnData[]) => {
-                MondayService.mondayAddData(
-                  selectedBoardOption.value,
-                  sessionToken,
-                  data
-                )
-                  .then(() => {
-                    if (user.id) {
-                      const run: RunBase = {
-                        user_id: user.id,
-                        board_id: selectedBoardOption.value,
-                      };
-                      RunService.runRun(run);
-                    }
-                    setLoading(false);
-                    setSuccess(true);
-                  })
-                  .catch((err) => {
-                    setLoading(false);
-                    setShowErrorModal(true);
-                  });
-              })
-              .catch((err) => {
-                setLoading(false);
-                setShowErrorModal(true);
-              });
-          } else {
-            console.log("access token not available on");
-          }
+          InstagramService.instagramPagesFetchData(sessionToken, queryData)
+            .then((data: ColumnData[]) => {
+              MondayService.mondayAddData(
+                selectedBoardOption.value,
+                sessionToken,
+                data
+              )
+                .then(() => {
+                  if (user.id) {
+                    const run: RunBase = {
+                      user_id: user.id,
+                      board_id: selectedBoardOption.value,
+                    };
+                    RunService.runRun(run);
+                  }
+                  setLoading(false);
+                  setSuccess(true);
+                })
+                .catch((err) => {
+                  setLoading(false);
+                  setShowErrorModal(true);
+                });
+            })
+            .catch((err) => {
+              setLoading(false);
+              setShowErrorModal(true);
+            });
         })
         .catch((err) => {
           setLoading(false);
@@ -162,11 +155,8 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
-      if (selectedAccount?.access_token) {
-        InstagramService.instagramPagesFetchAllData(
-          selectedAccount.access_token,
-          queryData
-        ).then((data: ColumnData[]) => {
+      InstagramService.instagramPagesFetchAllData(sessionToken, queryData).then(
+        (data: ColumnData[]) => {
           if (sessionToken) {
             MondayService.mondayCreateBoardWithData(
               boardName,
@@ -184,8 +174,8 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
               setSuccess(true);
             });
           }
-        });
-      }
+        }
+      );
     } else {
       setShowModal(true);
       setLoading(false);

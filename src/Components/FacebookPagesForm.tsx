@@ -113,42 +113,35 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
             account_id: selectedAccount?.value,
             metrics: selectedFields.map((field) => field.value),
           };
-          if (selectedAccount.access_token) {
-            FacebookService.facebookPagesFetchData(
-              selectedAccount.access_token,
-              queryData
-            )
-              .then((data: ColumnData[]) => {
-                if (user.monday_token) {
-                  MondayService.mondayAddData(
-                    selectedBoardOption.value,
-                    sessionToken,
-                    data
-                  )
-                    .then(() => {
-                      if (user.id) {
-                        const run: RunBase = {
-                          user_id: user.id,
-                          board_id: selectedBoardOption.value,
-                        };
-                        RunService.runRun(run);
-                      }
-                      setLoading(false);
-                      setSuccess(true);
-                    })
-                    .catch((error) => {
-                      setShowErrorModal(true);
-                      setLoading(false);
-                    });
-                }
-              })
-              .catch((error) => {
-                setShowErrorModal(true);
-                setLoading(false);
-              });
-          } else {
-            console.log("access token not available on", selectedAccount);
-          }
+          FacebookService.facebookPagesFetchData(sessionToken, queryData)
+            .then((data: ColumnData[]) => {
+              if (user.monday_token) {
+                MondayService.mondayAddData(
+                  selectedBoardOption.value,
+                  sessionToken,
+                  data
+                )
+                  .then(() => {
+                    if (user.id) {
+                      const run: RunBase = {
+                        user_id: user.id,
+                        board_id: selectedBoardOption.value,
+                      };
+                      RunService.runRun(run);
+                    }
+                    setLoading(false);
+                    setSuccess(true);
+                  })
+                  .catch((error) => {
+                    setShowErrorModal(true);
+                    setLoading(false);
+                  });
+              }
+            })
+            .catch((error) => {
+              setShowErrorModal(true);
+              setLoading(false);
+            });
         })
         .catch((error) => {
           setShowErrorModal(true);
@@ -159,40 +152,35 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
-      if (selectedAccount?.access_token) {
-        FacebookService.facebookPagesFetchAllData(
-          selectedAccount.access_token,
-          queryData
-        )
-          .then((data: ColumnData[]) => {
-            if (sessionToken) {
-              MondayService.mondayCreateBoardWithData(
-                boardName,
-                sessionToken,
-                workspaceId,
-                data
-              )
-                .then((board_id) => {
-                  setSelectedBoardOption({
-                    value: board_id,
-                    label: boardName,
-                  });
-                  // Send valueCreatedForUser event when data has been loaded into board
-                  monday.execute("valueCreatedForUser");
-                  setLoading(false);
-                  setSuccess(true);
-                })
-                .catch((error) => {
-                  setShowErrorModal(true);
-                  setLoading(false);
+      FacebookService.facebookPagesFetchAllData(sessionToken, queryData)
+        .then((data: ColumnData[]) => {
+          if (sessionToken) {
+            MondayService.mondayCreateBoardWithData(
+              boardName,
+              sessionToken,
+              workspaceId,
+              data
+            )
+              .then((board_id) => {
+                setSelectedBoardOption({
+                  value: board_id,
+                  label: boardName,
                 });
-            }
-          })
-          .catch((error) => {
-            setShowErrorModal(true);
-            setLoading(false);
-          });
-      }
+                // Send valueCreatedForUser event when data has been loaded into board
+                monday.execute("valueCreatedForUser");
+                setLoading(false);
+                setSuccess(true);
+              })
+              .catch((error) => {
+                setShowErrorModal(true);
+                setLoading(false);
+              });
+          }
+        })
+        .catch((error) => {
+          setShowErrorModal(true);
+          setLoading(false);
+        });
     } else {
       setShowModal(true);
       setLoading(false);
