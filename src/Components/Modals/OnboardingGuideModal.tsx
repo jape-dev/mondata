@@ -15,15 +15,16 @@ const titles = [
   "2) Choose options",
   "3) Set-up your board",
   "4) Run",
+  "5) Rate limits",
 ];
 
 const content = [
   <div className="mt-2">Please view these steps to get started.</div>,
   <div className="mt-2">
-    1) Select an application and authenticate your account.
+    Select an application and authenticate your account.
   </div>,
   <div className="mt-2">
-    2) Choose your options, including the metrics you want to import.
+    Choose your options, including the metrics you want to import.
   </div>,
   <div className="mt-2">
     You can either import into a new board or import into an existing board. If
@@ -35,11 +36,16 @@ const content = [
     </a>
   </div>,
   <div className="mt-2">
-    4) Press run and you're good to go. Your metrics will start importing into
-    your board.{" "}
+    Press run and you're good to go. Your metrics will start importing into your
+    board.{" "}
+  </div>,
+  <div className="mt-2">
+    If using one of the Instagram or Facebook connectors, you'll only be able to
+    import 200 items per hour. If using a custom API request, check your API
+    documentation for rate limits.
   </div>,
 ];
-const images = ["", "applications", "options", "post-urls", "run-complete"];
+const images = ["", "applications", "options", "post-urls", "run-complete", ""];
 
 export interface OnboardingGuideModalProps {
   showModal: boolean;
