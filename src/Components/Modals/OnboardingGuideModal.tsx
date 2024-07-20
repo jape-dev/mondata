@@ -1,13 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import "../../App.css";
-import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
 import { Modal, ModalContent, Steps } from "monday-ui-react-core";
 import { getImageUrl } from "Utils/image";
 
-const monday = mondaySdk();
-
-const steps = [<div />, <div />, <div />, <div />, <div />];
+const steps = [<div />, <div />, <div />, <div />, <div />, <div />];
 
 const titles = [
   "Welcome to Data Importer",
