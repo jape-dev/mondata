@@ -4,7 +4,9 @@
 /* eslint-disable */
 export type Run = {
     user_id: number;
-    board_id: string;
+    board_id: number;
+    account_id: number;
+    connector: (string | null);
     id?: (number | null);
     created_at?: (string | null);
 };

@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { User } from '../models/User';
 import type { UserCreate } from '../models/UserCreate';
 import type { UserPublic } from '../models/UserPublic';
 import type { UserRegister } from '../models/UserRegister';
@@ -161,17 +160,40 @@ export class UsersService {
      *
      * TODO: set-up using dependencies.
      * @param sessionToken
-     * @returns User Successful Response
+     * @returns UserPublic Successful Response
      * @throws ApiError
      */
     public static usersReadUserByMondaySession(
         sessionToken: string,
-    ): CancelablePromise<User> {
+    ): CancelablePromise<UserPublic> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/users/monday_user',
             query: {
                 'session_token': sessionToken,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Connected
+     * @param userId
+     * @param connector
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static usersConnected(
+        userId: number,
+        connector: string,
+    ): CancelablePromise<boolean> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/connected',
+            query: {
+                'user_id': userId,
+                'connector': connector,
             },
             errors: {
                 422: `Validation Error`,

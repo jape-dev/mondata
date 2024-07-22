@@ -12,13 +12,14 @@ import {
 import { Info } from "monday-ui-react-core/icons";
 import {
   GoogleAdsService,
-  User,
   MondayService,
   QueryData,
   ColumnData,
   MondayItem,
   RunService,
   RunBase,
+  UserPublic,
+  BillingService,
 } from "../api";
 import { handleSuccessClick } from "../Utils/monday";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
@@ -43,7 +44,7 @@ interface BoardColumn {
 }
 
 export interface GoogleAdsFormProps {
-  user: User;
+  user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
 }
@@ -59,13 +60,13 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [selectedFields, setSelectedFields] = useState<Option[]>([]);
   const [boards, setBoards] = useState<Option[]>([
     {
-      value: "new_board",
+      value: 999,
       label: "Import into a new board",
     },
   ]);
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
     label: "Import into a new board",
-    value: "new_board",
+    value: 999,
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
@@ -78,6 +79,29 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState("");
   const [showErrordModal, setShowErrorModal] = useState(false);
+  const [planModal, setPlanModal] = useState(false);
+
+  const checkValidPlan = async () => {
+    try {
+      const isValid = await BillingService.billingValidPlan(
+        selectedBoardOption.value,
+        user
+      );
+
+      if (!isValid) {
+        setPlanModal(true);
+        setLoading(false);
+        setSuccess(false);
+      }
+
+      return isValid;
+    } catch (error) {
+      console.error("Error checking plan validity:", error);
+      setLoading(false);
+      setSuccess(false);
+      return false;
+    }
+  };
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -107,10 +131,14 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     return require(`../Static/images/${imgPath}.png`);
   };
 
-  const handleRunClick = () => {
+  const handleRunClick = async () => {
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
+      return;
+    }
+    const isValidPLan = await checkValidPlan();
+    if (!isValidPLan) {
       return;
     }
     const endDate = new Date();
@@ -139,13 +167,14 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
                 data
               )
                 .then(() => {
-                  if (user.id) {
-                    const run: RunBase = {
-                      user_id: user.id,
-                      board_id: selectedBoardOption.value,
-                    };
-                    RunService.runRun(run);
-                  }
+                  const run: RunBase = {
+                    user_id: user.monday_user_id,
+                    board_id: selectedBoardOption.value,
+                    account_id: user.monday_account_id,
+                    connector: "google_ads",
+                  };
+                  RunService.runRun(run);
+
                   // Send valueCreatedForUser event when data has been loaded into board
                   monday.execute("valueCreatedForUser");
                   setLoading(false);
@@ -184,6 +213,14 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
                   value: board_id,
                   label: boardName,
                 });
+                const run: RunBase = {
+                  user_id: user.monday_user_id,
+                  board_id: board_id,
+                  account_id: user.monday_account_id,
+                  connector: "google_ads",
+                };
+                RunService.runRun(run);
+                // Send valueCreatedForUs
                 // Send valueCreatedForUser event when data has been loaded into board
                 monday.execute("valueCreatedForUser");
                 setLoading(false);
@@ -256,13 +293,17 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
 
   useEffect(() => {
     if (sessionToken) {
-      GoogleAdsService.googleAdsAdAccounts(sessionToken).then((accounts) => {
-        const accountOptions: Option[] = accounts.map((account) => ({
-          label: account.label,
-          value: account.value,
-        }));
-        setAccountOptions(accountOptions);
-      });
+      try {
+        GoogleAdsService.googleAdsAdAccounts(sessionToken).then((accounts) => {
+          const accountOptions: Option[] = accounts.map((account) => ({
+            label: account.label,
+            value: account.value,
+          }));
+          setAccountOptions(accountOptions);
+        });
+      } catch (error) {
+        console.error(error);
+      }
       GoogleAdsService.googleAdsFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
@@ -278,7 +319,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   //     MondayService.mondayBoards(user.monday_token).then((boards: Board[]) => {
   //       const boardOptions: Option[] = [
   //         {
-  //           value: "new_board",
+  //           value: 999,
   //           label: "Import into a new board",
   //         },
   //       ];
@@ -296,7 +337,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   useEffect(() => {
     if (
       selectedBoardOption &&
-      selectedBoardOption?.value !== "new_board" &&
+      selectedBoardOption?.value !== 999 &&
       sessionToken
     ) {
       MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
@@ -402,7 +443,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           className="mb-2"
           onOptionSelect={(e: Option) => handleBoardSelect(e)}
         />
-        {selectedBoardOption?.value === "new_board" ? (
+        {selectedBoardOption?.value === 999 ? (
           <>
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">* Account</p>
@@ -454,8 +495,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
               className="mb-2 !text-sm"
             />
           </>
-        ) : selectedBoardOption &&
-          selectedBoardOption?.value !== "new_board" ? (
+        ) : selectedBoardOption && selectedBoardOption?.value !== 999 ? (
           <>
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">
@@ -524,6 +564,14 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Free tier limit"}
+        text={
+          "As you are currently on the free tier, you can only use Data Importer on one board to keep importing your data for unlimited boards, please upgrade to the PRO plan from the App Marketplace."
+        }
+        showModal={planModal}
+        setShowModal={setPlanModal}
       />
     </div>
   );

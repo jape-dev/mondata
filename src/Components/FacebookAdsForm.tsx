@@ -4,10 +4,11 @@ import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
 import { Dropdown, Button, Icon, TextField } from "monday-ui-react-core";
 import { Tooltip } from "monday-ui-react-core";
-import { Info, Workspace } from "monday-ui-react-core/icons";
+import { Info } from "monday-ui-react-core/icons";
 import {
+  BillingService,
   FacebookService,
-  User,
+  UserPublic,
   MondayService,
   QueryData,
   ColumnData,
@@ -38,7 +39,7 @@ interface BoardColumn {
 }
 
 export interface FacebookAdFormProps {
-  user: User;
+  user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
 }
@@ -55,7 +56,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [boards, setBoards] = useState<Option[]>([]);
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
     label: "Import into a new board",
-    value: "new_board",
+    value: 999,
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
@@ -68,6 +69,27 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState("");
   const [showErrordModal, setShowErrorModal] = useState(false);
+  const [planModal, setPlanModal] = useState(false);
+
+  const checkValidPlan = async () => {
+    try {
+      const isValid = await BillingService.billingValidPlan(
+        selectedBoardOption.value,
+        user
+      );
+      if (!isValid) {
+        setPlanModal(true);
+        setLoading(false);
+        setSuccess(false);
+      }
+      return isValid;
+    } catch (error) {
+      console.error("Error checking plan validity:", error);
+      setLoading(false);
+      setSuccess(false);
+      return false;
+    }
+  };
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -93,10 +115,16 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     return require(`../Static/images/${imgPath}.png`);
   };
 
-  const handleRunClick = () => {
+  const handleRunClick = async () => {
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
+      return;
+    }
+    const isValidPLan = await checkValidPlan();
+    console.log("run is valid", isValidPLan);
+    if (!isValidPLan) {
+      console.log("returning None");
       return;
     }
     const endDate = new Date();
@@ -126,13 +154,13 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
                 data
               )
                 .then(() => {
-                  if (user.id) {
-                    const run: RunBase = {
-                      user_id: user.id,
-                      board_id: selectedBoardOption.value,
-                    };
-                    RunService.runRun(run);
-                  }
+                  const run: RunBase = {
+                    user_id: user.monday_user_id,
+                    board_id: selectedBoardOption.value,
+                    account_id: user.monday_account_id,
+                    connector: "facebook",
+                  };
+                  RunService.runRun(run);
                   // Send valueCreatedForUser event when data has been loaded into board
                   monday.execute("valueCreatedForUser");
                   setLoading(false);
@@ -171,6 +199,14 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
                   value: board_id,
                   label: boardName,
                 });
+                const run: RunBase = {
+                  user_id: user.monday_user_id,
+                  board_id: board_id,
+                  account_id: user.monday_account_id,
+                  connector: "facebook",
+                };
+                RunService.runRun(run);
+                // Send valueCreatedForUs
                 // Send valueCreatedForUser event when data has been loaded into board
                 monday.execute("valueCreatedForUser");
                 setLoading(false);
@@ -247,13 +283,17 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
 
   useEffect(() => {
     if (sessionToken) {
-      FacebookService.facebookAdAccounts(sessionToken).then((accounts) => {
-        const accountOptions: Option[] = accounts.map((account) => ({
-          label: account.label,
-          value: account.value,
-        }));
-        setAccountOptions(accountOptions);
-      });
+      try {
+        FacebookService.facebookAdAccounts(sessionToken).then((accounts) => {
+          const accountOptions: Option[] = accounts.map((account) => ({
+            label: account.label,
+            value: account.value,
+          }));
+          setAccountOptions(accountOptions);
+        });
+      } catch (error) {
+        console.error(error);
+      }
       FacebookService.facebookFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
@@ -269,7 +309,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
         const boardOptions: Option[] = [
           {
-            value: "new_board",
+            value: 999,
             label: "Import into a new board",
           },
         ];
@@ -287,7 +327,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   useEffect(() => {
     if (
       selectedBoardOption &&
-      selectedBoardOption?.value !== "new_board" &&
+      selectedBoardOption?.value !== 999 &&
       sessionToken
     ) {
       MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
@@ -392,7 +432,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
           isLoading={boards.length === 0}
           onOptionSelect={(e: Option) => handleBoardSelect(e)}
         />
-        {selectedBoardOption?.value === "new_board" ? (
+        {selectedBoardOption?.value === 999 ? (
           <>
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">* Account</p>
@@ -443,8 +483,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
               className="mb-2 !text-sm"
             />
           </>
-        ) : selectedBoardOption &&
-          selectedBoardOption?.value !== "new_board" ? (
+        ) : selectedBoardOption && selectedBoardOption?.value !== 999 ? (
           <>
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">
@@ -505,6 +544,14 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Free tier limit"}
+        text={
+          "As you are currently on the free tier, you can only use Data Importer on one board to keep importing your data for unlimited boards, please upgrade to the PRO plan from the App Marketplace."
+        }
+        showModal={planModal}
+        setShowModal={setPlanModal}
       />
     </div>
   );

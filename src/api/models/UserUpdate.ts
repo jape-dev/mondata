@@ -9,8 +9,8 @@ export type UserUpdate = {
     is_superuser?: boolean;
     full_name?: (string | null);
     plan?: (Plan | null);
-    monday_user_id?: (string | null);
-    monday_workspace_id?: (string | null);
+    monday_user_id: number;
+    monday_account_id: number;
     monday_token?: (string | null);
     facebook_token?: (string | null);
     google_token?: (string | null);

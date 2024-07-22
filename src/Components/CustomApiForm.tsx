@@ -12,10 +12,14 @@ import {
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
+  BillingService,
   CustomService,
   CustomAPIRequest,
   MondayService,
   PairValue,
+  RunService,
+  UserPublic,
+  RunBase,
 } from "../api";
 import { PairValueComponent } from "./PairValue";
 import { handleSuccessClick } from "../Utils/monday";
@@ -37,11 +41,13 @@ interface Option {
 export interface CustomApiFormProps {
   sessionToken?: string;
   workspaceId: number;
+  user: UserPublic;
 }
 
 export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   sessionToken,
   workspaceId,
+  user,
 }) => {
   const [method, setMethod] = useState<Option>({ value: "get", label: "GET" });
   const [url, setUrl] = useState<string>();
@@ -55,13 +61,33 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [headers, setHeaders] = useState<PairValue[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [boardId, setBoardId] = useState<number>();
+  const [boardId, setBoardId] = useState<number>(999);
   const [subdomain, setSubdomain] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState("");
   const [boards, setBoards] = useState<Option[]>([]);
+  const [planModal, setPlanModal] = useState(false);
+
+  const checkValidPlan = async () => {
+    try {
+      const isValid = await BillingService.billingValidPlan(boardId, user);
+
+      if (!isValid) {
+        setPlanModal(true);
+        setLoading(false);
+        setSuccess(false);
+      }
+
+      return isValid;
+    } catch (error) {
+      console.error("Error checking plan validity:", error);
+      setLoading(false);
+      setSuccess(false);
+      return false;
+    }
+  };
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -89,11 +115,16 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
     ];
   }, []);
 
-  const handleRunClick = () => {
+  const handleRunClick = async () => {
     const isValidName = checkBoardName();
     if (!isValidName) {
       return;
     }
+    const isValidPLan = await checkValidPlan();
+    if (!isValidPLan) {
+      return;
+    }
+
     if (url) {
       setLoading(true);
       const requestBody: CustomAPIRequest = {
@@ -122,6 +153,13 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
                     monday.execute("valueCreatedForUser");
                     setLoading(false);
                     setSuccess(true);
+                    const run: RunBase = {
+                      user_id: user.monday_user_id,
+                      board_id: board_id,
+                      account_id: user.monday_account_id,
+                      connector: "custom_api",
+                    };
+                    RunService.runRun(run);
                   })
                   .catch(() => {
                     setLoading(false);
@@ -180,7 +218,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
         const boardOptions: Option[] = [
           {
-            value: "new_board",
+            value: 999,
             label: "Import into a new board",
           },
         ];
@@ -345,6 +383,14 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
         text={"This board name already exists. Please choose a new name"}
         showModal={showNameModal}
         setShowModal={setShowNameModal}
+      />
+      <BaseModal
+        title={"Free tier limit"}
+        text={
+          "As you are currently on the free tier, you can only use Data Importer on one board to keep importing your data for unlimited boards, please upgrade to the PRO plan from the App Marketplace."
+        }
+        showModal={planModal}
+        setShowModal={setPlanModal}
       />
     </>
   );

@@ -12,13 +12,14 @@ import {
 import { Info } from "monday-ui-react-core/icons";
 import {
   InstagramService,
-  User,
+  UserPublic,
   MondayService,
   QueryData,
   ColumnData,
   MondayItem,
   RunService,
   RunBase,
+  BillingService,
 } from "../api";
 import { handleSuccessClick } from "../Utils/monday";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
@@ -44,7 +45,7 @@ interface BoardColumn {
 }
 
 export interface InstagramPostsForm {
-  user: User;
+  user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
 }
@@ -61,7 +62,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [boards, setBoards] = useState<Option[]>([]);
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
     label: "Import into a new board",
-    value: "new_board",
+    value: 999,
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
@@ -72,7 +73,29 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState("");
   const [showErrordModal, setShowErrorModal] = useState(false);
+  const [planModal, setPlanModal] = useState(false);
 
+  const checkValidPlan = async () => {
+    try {
+      const isValid = await BillingService.billingValidPlan(
+        selectedBoardOption.value,
+        user
+      );
+
+      if (!isValid) {
+        setPlanModal(true);
+        setLoading(false);
+        setSuccess(false);
+      }
+
+      return isValid;
+    } catch (error) {
+      console.error("Error checking plan validity:", error);
+      setLoading(false);
+      setSuccess(false);
+      return false;
+    }
+  };
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
     if (currentNames.includes(boardName)) {
@@ -89,14 +112,17 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
     return require(`../Static/images/${imgPath}.png`);
   };
 
-  const handleRunClick = () => {
+  const handleRunClick = async () => {
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
       return;
     }
+    const isValidPLan = await checkValidPlan();
+    if (!isValidPLan) {
+      return;
+    }
     if (
-      user.id &&
       sessionToken &&
       selectedBoardOption &&
       selectedColumnOption &&
@@ -121,13 +147,14 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
                 data
               )
                 .then(() => {
-                  if (user.id) {
-                    const run: RunBase = {
-                      user_id: user.id,
-                      board_id: selectedBoardOption.value,
-                    };
-                    RunService.runRun(run);
-                  }
+                  const run: RunBase = {
+                    user_id: user.monday_user_id,
+                    board_id: selectedBoardOption.value,
+                    account_id: user.monday_account_id,
+                    connector: "instagram",
+                  };
+                  RunService.runRun(run);
+
                   setLoading(false);
                   setSuccess(true);
                 })
@@ -145,12 +172,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           setLoading(false);
           setShowErrorModal(true);
         });
-    } else if (
-      user.id &&
-      sessionToken &&
-      selectedBoardOption &&
-      selectedAccount
-    ) {
+    } else if (sessionToken && selectedBoardOption && selectedAccount) {
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
@@ -169,6 +191,14 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
                 value: board_id,
                 label: boardName,
               });
+              const run: RunBase = {
+                user_id: user.monday_user_id,
+                board_id: board_id,
+                account_id: user.monday_account_id,
+                connector: "instagram",
+              };
+              RunService.runRun(run);
+              // Send valueCreatedForUs
               monday.execute("valueCreatedForUser");
               setLoading(false);
               setSuccess(true);
@@ -217,14 +247,18 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
 
   useEffect(() => {
     if (sessionToken) {
-      InstagramService.instagramPages(sessionToken).then((pages) => {
-        const accountOptions: Option[] = pages.map((page) => ({
-          label: page.label,
-          value: page.value,
-          access_token: page.access_token,
-        }));
-        setPageOptions(accountOptions);
-      });
+      try {
+        InstagramService.instagramPages(sessionToken).then((pages) => {
+          const accountOptions: Option[] = pages.map((page) => ({
+            label: page.label,
+            value: page.value,
+            access_token: page.access_token,
+          }));
+          setPageOptions(accountOptions);
+        });
+      } catch (err) {
+        console.log(err);
+      }
       InstagramService.instagramFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
@@ -240,7 +274,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
         const boardOptions: Option[] = [
           {
-            value: "new_board",
+            value: 999,
             label: "Import into a new board",
           },
         ];
@@ -258,7 +292,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   useEffect(() => {
     if (
       selectedBoardOption &&
-      selectedBoardOption?.value !== "new_board" &&
+      selectedBoardOption?.value !== 999 &&
       sessionToken
     ) {
       MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
@@ -361,8 +395,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           className="mb-2"
           onOptionSelect={(e: Option) => setSelectedBoardOption(e)}
         />
-        {selectedBoardOption?.value &&
-        selectedBoardOption.value !== "new_board" ? (
+        {selectedBoardOption?.value && selectedBoardOption.value !== 999 ? (
           <>
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">
@@ -448,6 +481,14 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Free tier limit"}
+        text={
+          "As you are currently on the free tier, you can only use Data Importer on one board to keep importing your data for unlimited boards, please upgrade to the PRO plan from the App Marketplace."
+        }
+        showModal={planModal}
+        setShowModal={setPlanModal}
       />
     </div>
   );

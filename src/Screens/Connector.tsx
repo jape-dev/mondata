@@ -8,7 +8,7 @@ import {
   FacebookService,
   GoogleService,
   HTTPAuthorizationCredentials,
-  User,
+  UserPublic,
   UsersService,
 } from "../api";
 import { FacebookAdsForm } from "../Components/FacebookAdsForm";
@@ -24,7 +24,7 @@ export const Connector = () => {
   const [connector, setConnector] = useState();
   const [connected, setConnected] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [user, setUser] = useState<User>();
+  const [user, setUser] = useState<UserPublic>();
   const [sessionToken, setSessionToken] = useState<string>();
   const [workspaceId, setWorkspaceId] = useState<number>();
   const [isViewer, setIsViewer] = useState(false);
@@ -99,17 +99,9 @@ export const Connector = () => {
       connector === "facebook_pages" ||
       connector === "instagram"
     ) {
-      FacebookService.facebookLogin(connectionId, requestBody).then(
-        (user: User) => {
-          setUser(user);
-        }
-      );
+      FacebookService.facebookLogin(connectionId, requestBody);
     } else {
-      GoogleService.googleLogin(connectionId, requestBody).then(
-        (user: User) => {
-          setUser(user);
-        }
-      );
+      GoogleService.googleLogin(connectionId, requestBody);
     }
   }
 
@@ -152,7 +144,7 @@ export const Connector = () => {
         if (sessionToken) {
           setSessionToken(sessionToken);
           UsersService.usersReadUserByMondaySession(sessionToken)
-            .then((user: User) => {
+            .then((user: UserPublic) => {
               setUser(user);
             })
             .catch((err) => {
@@ -168,21 +160,14 @@ export const Connector = () => {
   }, []);
 
   useEffect(() => {
-    if (
-      (connector === "facebook" ||
-        connector === "facebook_pages" ||
-        connector === "instagram") &&
-      user?.facebook_token
-    ) {
-      setConnected(true);
-    } else if (connector === "google_ads" && user?.google_token) {
-      setConnected(true);
-    } else if (connector === "custom_api") {
-      setConnected(true);
-    } else {
-      setConnected(false);
+    if (user && connector) {
+      UsersService.usersConnected(user?.monday_user_id, connector).then(
+        (res: boolean) => {
+          setConnected(res);
+        }
+      );
     }
-  }, [connector, user?.facebook_token, user?.google_token]);
+  }, [connector, user]);
 
   const openGuideClick = () => {
     setShowModal(true);
@@ -241,7 +226,7 @@ export const Connector = () => {
           )}
         </div>
         <div>
-          {connected && user && workspaceId && (
+          {connected === true && user && workspaceId && (
             <>
               {connector === "facebook" ? (
                 <FacebookAdsForm
@@ -271,6 +256,7 @@ export const Connector = () => {
                 <CustomApiForm
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  user={user}
                 />
               ) : null}
             </>

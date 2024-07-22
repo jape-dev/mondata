@@ -18,7 +18,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   return (
     <div>
       <Modal title={title} onClose={() => setShowModal(false)} show={showModal}>
-        <ModalContent>
+        <ModalContent className="mt-4">
           <p>{text}</p>
         </ModalContent>
       </Modal>

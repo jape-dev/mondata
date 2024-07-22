@@ -4,6 +4,8 @@
 /* eslint-disable */
 export type RunBase = {
     user_id: number;
-    board_id: string;
+    board_id: number;
+    account_id: number;
+    connector: (string | null);
 };
 

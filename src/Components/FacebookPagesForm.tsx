@@ -11,8 +11,9 @@ import {
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
+  BillingService,
   FacebookService,
-  User,
+  UserPublic,
   MondayService,
   QueryData,
   ColumnData,
@@ -44,7 +45,7 @@ interface BoardColumn {
 }
 
 export interface FacebookPagesFormProps {
-  user: User;
+  user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
 }
@@ -61,7 +62,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   const [boards, setBoards] = useState<Option[]>([]);
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
     label: "Import into a new board",
-    value: "new_board",
+    value: 999,
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
@@ -72,7 +73,29 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState("");
   const [showErrordModal, setShowErrorModal] = useState(false);
+  const [planModal, setPlanModal] = useState(false);
 
+  const checkValidPlan = async () => {
+    try {
+      const isValid = await BillingService.billingValidPlan(
+        selectedBoardOption.value,
+        user
+      );
+
+      if (!isValid) {
+        setPlanModal(true);
+        setLoading(false);
+        setSuccess(false);
+      }
+
+      return isValid;
+    } catch (error) {
+      console.error("Error checking plan validity:", error);
+      setLoading(false);
+      setSuccess(false);
+      return false;
+    }
+  };
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
     if (currentNames.includes(boardName)) {
@@ -89,14 +112,17 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     return require(`../Static/images/${imgPath}.png`);
   };
 
-  const handleRunClick = () => {
+  const handleRunClick = async () => {
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
       return;
     }
+    const isValidPLan = await checkValidPlan();
+    if (!isValidPLan) {
+      return;
+    }
     if (
-      user.id &&
       sessionToken &&
       selectedBoardOption &&
       selectedColumnOption &&
@@ -115,28 +141,26 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           };
           FacebookService.facebookPagesFetchData(sessionToken, queryData)
             .then((data: ColumnData[]) => {
-              if (user.monday_token) {
-                MondayService.mondayAddData(
-                  selectedBoardOption.value,
-                  sessionToken,
-                  data
-                )
-                  .then(() => {
-                    if (user.id) {
-                      const run: RunBase = {
-                        user_id: user.id,
-                        board_id: selectedBoardOption.value,
-                      };
-                      RunService.runRun(run);
-                    }
-                    setLoading(false);
-                    setSuccess(true);
-                  })
-                  .catch((error) => {
-                    setShowErrorModal(true);
-                    setLoading(false);
-                  });
-              }
+              MondayService.mondayAddData(
+                selectedBoardOption.value,
+                sessionToken,
+                data
+              )
+                .then(() => {
+                  const run: RunBase = {
+                    user_id: user.monday_account_id,
+                    board_id: selectedBoardOption.value,
+                    account_id: user.monday_account_id,
+                    connector: "facebook_pages",
+                  };
+                  RunService.runRun(run);
+                  setLoading(false);
+                  setSuccess(true);
+                })
+                .catch((error) => {
+                  setShowErrorModal(true);
+                  setLoading(false);
+                });
             })
             .catch((error) => {
               setShowErrorModal(true);
@@ -147,7 +171,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           setShowErrorModal(true);
           setLoading(false);
         });
-    } else if (user.id && sessionToken && selectedBoardOption) {
+    } else if (sessionToken && selectedBoardOption) {
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
@@ -166,6 +190,14 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
                   value: board_id,
                   label: boardName,
                 });
+                const run: RunBase = {
+                  user_id: user.monday_user_id,
+                  board_id: board_id,
+                  account_id: user.monday_account_id,
+                  connector: "facebook_pages",
+                };
+                RunService.runRun(run);
+                // Send valueCreatedForUs
                 // Send valueCreatedForUser event when data has been loaded into board
                 monday.execute("valueCreatedForUser");
                 setLoading(false);
@@ -222,14 +254,18 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
 
   useEffect(() => {
     if (sessionToken) {
-      FacebookService.facebookPages(sessionToken).then((pages) => {
-        const accountOptions: Option[] = pages.map((page) => ({
-          label: page.label,
-          value: page.value,
-          access_token: page.access_token,
-        }));
-        setPageOptions(accountOptions);
-      });
+      try {
+        FacebookService.facebookPages(sessionToken).then((pages) => {
+          const accountOptions: Option[] = pages.map((page) => ({
+            label: page.label,
+            value: page.value,
+            access_token: page.access_token,
+          }));
+          setPageOptions(accountOptions);
+        });
+      } catch (error) {
+        console.error(error);
+      }
       FacebookService.facebookPagesFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
@@ -245,7 +281,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
       MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
         const boardOptions: Option[] = [
           {
-            value: "new_board",
+            value: 999,
             label: "Import into a new board",
           },
         ];
@@ -263,7 +299,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   useEffect(() => {
     if (
       selectedBoardOption &&
-      selectedBoardOption?.value !== "new_board" &&
+      selectedBoardOption?.value !== 999 &&
       sessionToken
     ) {
       MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
@@ -366,8 +402,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           isLoading={boards.length === 0}
           onOptionSelect={(e: Option) => setSelectedBoardOption(e)}
         />
-        {selectedBoardOption?.value &&
-        selectedBoardOption.value !== "new_board" ? (
+        {selectedBoardOption?.value && selectedBoardOption.value !== 999 ? (
           <>
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">
@@ -444,6 +479,14 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Free tier limit"}
+        text={
+          "As you are currently on the free tier, you can only use Data Importer on one board to keep importing your data for unlimited boards, please upgrade to the PRO plan from the App Marketplace."
+        }
+        showModal={planModal}
+        setShowModal={setPlanModal}
       />
     </div>
   );

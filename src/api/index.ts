@@ -26,6 +26,7 @@ export type { UserUpdate } from './models/UserUpdate';
 export type { UserUpdateMe } from './models/UserUpdateMe';
 export type { ValidationError } from './models/ValidationError';
 
+export { BillingService } from './services/BillingService';
 export { CustomService } from './services/CustomService';
 export { FacebookService } from './services/FacebookService';
 export { GoogleService } from './services/GoogleService';
