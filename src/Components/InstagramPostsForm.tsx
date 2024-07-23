@@ -71,7 +71,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [subdomain, setSubdomain] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
-  const [boardName, setBoardName] = useState("");
+  const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [planModal, setPlanModal] = useState(false);
 

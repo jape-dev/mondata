@@ -66,7 +66,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
-  const [boardName, setBoardName] = useState("");
+  const [boardName, setBoardName] = useState();
   const [boards, setBoards] = useState<Option[]>([]);
   const [planModal, setPlanModal] = useState(false);
 
