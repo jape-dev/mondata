@@ -91,7 +91,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
-    if (currentNames.includes(boardName)) {
+    if (boardName && currentNames.includes(boardName)) {
       setShowNameModal(true);
       setLoading(false);
       setSuccess(false);
