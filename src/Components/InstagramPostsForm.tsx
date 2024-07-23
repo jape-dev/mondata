@@ -126,7 +126,8 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       sessionToken &&
       selectedBoardOption &&
       selectedColumnOption &&
-      selectedAccount
+      selectedAccount &&
+      boardName
     ) {
       MondayService.mondayItems(
         selectedBoardOption?.value,
@@ -172,7 +173,12 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           setLoading(false);
           setShowErrorModal(true);
         });
-    } else if (sessionToken && selectedBoardOption && selectedAccount) {
+    } else if (
+      sessionToken &&
+      selectedBoardOption &&
+      selectedAccount &&
+      boardName
+    ) {
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
@@ -465,14 +471,6 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         text={"This board name already exists. Please choose a new name"}
         showModal={showNameModal}
         setShowModal={setShowNameModal}
-      />
-      <BaseModal
-        title={"Error: could not fetch data. "}
-        text={
-          "There was an error trying to fetch your data. Please check your configuation and try again."
-        }
-        showModal={showErrordModal}
-        setShowModal={setShowErrorModal}
       />
       <BaseModal
         title={"Error: could not fetch data. "}

@@ -126,7 +126,8 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
       sessionToken &&
       selectedBoardOption &&
       selectedColumnOption &&
-      selectedAccount
+      selectedAccount &&
+      boardName
     ) {
       MondayService.mondayItems(
         selectedBoardOption?.value,
@@ -171,7 +172,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           setShowErrorModal(true);
           setLoading(false);
         });
-    } else if (sessionToken && selectedBoardOption) {
+    } else if (sessionToken && selectedBoardOption && boardName) {
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),

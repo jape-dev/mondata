@@ -144,7 +144,13 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - date.value);
-    if (sessionToken && selectedBoardOption && selectedAccount && date) {
+    if (
+      sessionToken &&
+      selectedBoardOption &&
+      selectedAccount &&
+      date &&
+      boardName
+    ) {
       if (selectedColumnOption) {
         MondayService.mondayItems(
           selectedBoardOption?.value,

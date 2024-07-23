@@ -125,7 +125,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       return;
     }
 
-    if (url) {
+    if (url && boardName) {
       setLoading(true);
       const requestBody: CustomAPIRequest = {
         method: method.value,
