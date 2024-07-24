@@ -31,16 +31,18 @@ export const Connector = () => {
   const [connectTrigger, setConnectTrigger] = useState(0);
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      setConnectTrigger(connectTrigger + 1);
-    };
+    const intervalId = setInterval(() => {
+      if (!connected) {
+        // Your function to be called periodically
+        setConnectTrigger((connectTrigger) => connectTrigger + 1);
+      } else {
+        clearInterval(intervalId);
+      }
+    }, 1000);
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(intervalId);
+  }, [connected]);
 
   useEffect(() => {
     monday
@@ -136,7 +138,6 @@ export const Connector = () => {
         })
         .then((result) => {
           updateUser(result.connectionId);
-          setConnectTrigger(connectTrigger + 1);
         })
         .catch((err) => {
           console.log(err);
@@ -146,7 +147,6 @@ export const Connector = () => {
         .auth("google", "google-prod")
         .then((result) => {
           updateUser(result.connectionId);
-          setConnectTrigger(connectTrigger + 1);
         })
         .catch((err) => {
           console.log(err);
