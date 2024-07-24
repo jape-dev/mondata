@@ -159,7 +159,11 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
                       account_id: user.monday_account_id,
                       connector: "custom_api",
                     };
-                    RunService.runRun(run);
+                    RunService.runRun(run).catch(() => {
+                      setShowErrorModal(true);
+                      setLoading(false);
+                      setSuccess(false);
+                    });
                   })
                   .catch(() => {
                     setLoading(false);
