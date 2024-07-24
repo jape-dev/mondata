@@ -31,6 +31,18 @@ export const Connector = () => {
   const [connectTrigger, setConnectTrigger] = useState(0);
 
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      setConnectTrigger(connectTrigger + 1);
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
     monday
       .get("context")
       .then((res: any) => {
@@ -100,14 +112,10 @@ export const Connector = () => {
       connector === "facebook_pages" ||
       connector === "instagram"
     ) {
-      FacebookService.facebookLogin(connectionId, requestBody).then(() => {
-        setConnectTrigger(connectTrigger + 1);
-      });
+      FacebookService.facebookLogin(connectionId, requestBody);
       // Need to make these set connected to true
     } else {
-      GoogleService.googleLogin(connectionId, requestBody).then(() => {
-        setConnectTrigger(connectTrigger + 1);
-      });
+      GoogleService.googleLogin(connectionId, requestBody);
     }
   }
 
