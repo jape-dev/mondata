@@ -128,6 +128,7 @@ export const Connector = () => {
         })
         .then((result) => {
           updateUser(result.connectionId);
+          setConnectTrigger(connectTrigger + 1);
         })
         .catch((err) => {
           console.log(err);
@@ -137,6 +138,7 @@ export const Connector = () => {
         .auth("google", "google-prod")
         .then((result) => {
           updateUser(result.connectionId);
+          setConnectTrigger(connectTrigger + 1);
         })
         .catch((err) => {
           console.log(err);
