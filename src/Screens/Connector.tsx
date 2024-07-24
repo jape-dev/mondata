@@ -28,6 +28,7 @@ export const Connector = () => {
   const [sessionToken, setSessionToken] = useState<string>();
   const [workspaceId, setWorkspaceId] = useState<number>();
   const [isViewer, setIsViewer] = useState(false);
+  const [connectTrigger, setConnectTrigger] = useState(0);
 
   useEffect(() => {
     monday
@@ -99,9 +100,14 @@ export const Connector = () => {
       connector === "facebook_pages" ||
       connector === "instagram"
     ) {
-      FacebookService.facebookLogin(connectionId, requestBody);
+      FacebookService.facebookLogin(connectionId, requestBody).then(() => {
+        setConnectTrigger(connectTrigger + 1);
+      });
+      // Need to make these set connected to true
     } else {
-      GoogleService.googleLogin(connectionId, requestBody);
+      GoogleService.googleLogin(connectionId, requestBody).then(() => {
+        setConnectTrigger(connectTrigger + 1);
+      });
     }
   }
 
@@ -167,7 +173,7 @@ export const Connector = () => {
         }
       );
     }
-  }, [connector, user]);
+  }, [connector, user, connectTrigger]);
 
   const openGuideClick = () => {
     setShowModal(true);
