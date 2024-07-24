@@ -11,7 +11,8 @@ export type User = {
     plan?: (Plan | null);
     monday_user_id: number;
     monday_account_id: number;
-    monday_token?: (string | null);
+    monday_token?: (Blob | null);
+    nonce?: (Blob | null);
     facebook_token?: (string | null);
     google_token?: (string | null);
     id?: (number | null);
