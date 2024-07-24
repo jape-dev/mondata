@@ -122,7 +122,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       return;
     }
     const isValidPLan = await checkValidPlan();
-    console.log("run is valid", isValidPLan);
     if (!isValidPLan) {
       console.log("returning None");
       return;
