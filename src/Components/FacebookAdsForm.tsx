@@ -291,7 +291,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       try {
         FacebookService.facebookAdAccounts(sessionToken).then((accounts) => {
           const accountOptions: Option[] = accounts.map((account) => ({
-            label: account.label,
+            label: `${account.label} (${account.value})`,
             value: account.value,
           }));
           setAccountOptions(accountOptions);
