@@ -46,8 +46,7 @@ const content = [
     </p>
     <p>
       If using one of the Instagram or Facebook connectors, you'll only be able
-      to import 200 items per hour. If using a custom API request, check your
-      API documentation for rate limits.
+      to import 200 items per hour.
     </p>
   </div>,
 ];
