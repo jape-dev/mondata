@@ -37,9 +37,18 @@ const content = [
     board.{" "}
   </div>,
   <div className="mt-2">
-    If using one of the Instagram or Facebook connectors, you'll only be able to
-    import 200 items per hour. If using a custom API request, check your API
-    documentation for rate limits.
+    <p className="mb-5">
+      When using a Custom API request, you can import an unlimited amount of
+      items. However for large imports, the time taken to import data will vary
+      as Data Importer manages the monday.com rate limits. On average, it is
+      usually 1 second per item for imports above 500 items. Please also check
+      for any rate limits that may apply to the API you are importing from.
+    </p>
+    <p>
+      If using one of the Instagram or Facebook connectors, you'll only be able
+      to import 200 items per hour. If using a custom API request, check your
+      API documentation for rate limits.
+    </p>
   </div>,
 ];
 const images = ["", "applications", "options", "post-urls", "run-complete", ""];
