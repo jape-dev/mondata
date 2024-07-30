@@ -126,8 +126,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       sessionToken &&
       selectedBoardOption &&
       selectedColumnOption &&
-      selectedAccount &&
-      boardName
+      selectedAccount
     ) {
       MondayService.mondayItems(
         selectedBoardOption?.value,
