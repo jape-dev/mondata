@@ -135,7 +135,6 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
         params: paramaters,
         headers: headers,
       };
-
       CustomService.customApiRequest(requestBody)
         .then((json) => {
           CustomService.customFetchData(json)
