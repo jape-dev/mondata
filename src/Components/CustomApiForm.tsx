@@ -241,12 +241,10 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       <div className="mt-2">
         <div className="border-2 border-grey rounded-md p-5 mb-2">
           <div className="flex items-center gap-1">
-            <p className="font-bold text-gray-500 text-sm">
-              * Method & Url. Choose POST request if your API requires a body to
-              be submitted.
-            </p>
+            <p className="font-bold text-gray-500 text-sm">* Method & Url.</p>
             <Tooltip
-              content="Method for your API call and API url"
+              content="Method for your API call and API url. Choose POST request if your API requires a body to
+              be submitted."
               position={Tooltip.positions.TOP}
             >
               <Icon icon={Info} className="text-gray-500" />
