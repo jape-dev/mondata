@@ -70,6 +70,49 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [boards, setBoards] = useState<Option[]>([]);
   const [planModal, setPlanModal] = useState(false);
 
+  useEffect(() => {
+    // Retrieve data from localStorage
+    const storedData = localStorage.getItem("customApiFormData");
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      setMethod(parsedData.method || { value: "get", label: "GET" });
+      setUrl(parsedData.url || "");
+      setAuthMethod(parsedData.authMethod || { value: "none", label: "None" });
+      setAuthValue(parsedData.authValue || "");
+      setBody(parsedData.body || "");
+      setParameters(parsedData.paramaters || []);
+      setHeaders(parsedData.headers || []);
+      setBoardId(parsedData.boardId || 999);
+      setBoardName(parsedData.boardName || "");
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save data to localStorage
+    const dataToStore = {
+      method,
+      url,
+      authMethod,
+      authValue,
+      body,
+      paramaters,
+      headers,
+      boardId,
+      boardName,
+    };
+    localStorage.setItem("customApiFormData", JSON.stringify(dataToStore));
+  }, [
+    method,
+    url,
+    authMethod,
+    authValue,
+    body,
+    paramaters,
+    headers,
+    boardId,
+    boardName,
+  ]);
+
   const checkValidPlan = async () => {
     try {
       const isValid = await BillingService.billingValidPlan(boardId, user);
@@ -261,6 +304,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
             </div>
             <div className="col-span-7 -full">
               <TextField
+                value={url}
                 placeholder="Url"
                 size={TextField.sizes.MEDIUM}
                 onChange={(e: string) => setUrl(e)}
@@ -289,6 +333,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
           />
           {authMethod.value === "token" && (
             <TextField
+              value={authValue}
               placeholder="Token"
               className="mb-2"
               size={TextField.sizes.MEDIUM}
@@ -347,6 +392,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
             </Tooltip>
           </div>
           <TextField
+            value={boardName}
             onChange={(e: any) => setBoardName(e)}
             size={TextField.sizes.MEDIUM}
             placeholder="Enter name"

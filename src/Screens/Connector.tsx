@@ -21,7 +21,7 @@ import { Guide } from "../Components/Modals/OnboardingGuideModal";
 const monday = mondaySdk();
 
 export const Connector = () => {
-  const [connector, setConnector] = useState();
+  const [connector, setConnector] = useState<string>();
   const [connected, setConnected] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [user, setUser] = useState<UserPublic>();
@@ -29,6 +29,25 @@ export const Connector = () => {
   const [workspaceId, setWorkspaceId] = useState<number>();
   const [isViewer, setIsViewer] = useState(false);
   const [connectTrigger, setConnectTrigger] = useState(0);
+
+  useEffect(() => {
+    const selectedOption = options.find((option) => option.value === connector);
+    console.log("selectedOption", selectedOption);
+  }, [connector]);
+
+  useEffect(() => {
+    const storedConnector = localStorage.getItem("selectedConnector");
+    if (storedConnector) {
+      setConnector(storedConnector);
+    }
+  }, []);
+
+  // Save connector to localStorage whenever it changes
+  useEffect(() => {
+    if (connector) {
+      localStorage.setItem("selectedConnector", connector);
+    }
+  }, [connector]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -221,6 +240,9 @@ export const Connector = () => {
             <>
               <p className="font-bold text-gray-500 text-xs">* Application</p>
               <Dropdown
+                // value={() =>
+                //   options.find((option) => option.value == connector)
+                // }
                 placeholder="Select an application"
                 options={options}
                 onOptionSelect={(e: any) => setConnector(e.value)}
