@@ -191,15 +191,4 @@ export class MondayService {
             url: '/api/v1/monday/webhook',
         });
     }
-    /**
-     * Test Items
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static mondayTestItems(): CancelablePromise<Array<any>> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/monday/test_items',
-        });
-    }
 }

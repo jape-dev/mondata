@@ -16,26 +16,22 @@ import {
   UserPublic,
   MondayService,
   QueryData,
-  ColumnData,
   MondayItem,
   RunService,
-  RunBase,
+  Body_run_run,
+  ScheduleInput,
+  Run,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { handleSuccessClick } from "../Utils/monday";
 import { BaseModal } from "./Modals/BaseModal";
+import { Option } from "../Utils/models";
 
 const monday = mondaySdk();
 
 interface Board {
   id: string;
   name: string;
-}
-
-interface Option {
-  value: any;
-  label: string;
-  access_token?: string;
 }
 
 interface BoardColumn {
@@ -48,12 +44,24 @@ export interface FacebookPagesFormProps {
   user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
+  isRunning: boolean;
+  setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  boardId: number;
+  setBoardId: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   user,
   workspaceId,
   sessionToken,
+  isRunning,
+  setIsRunning,
+  setLoading,
+  setSuccess,
+  boardId,
+  setBoardId,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -66,10 +74,8 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [subdomain, setSubdomain] = useState("");
-  const [showModal, setShowModal] = useState(false);
+  const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
@@ -112,22 +118,38 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     return require(`../Static/images/${imgPath}.png`);
   };
 
+  useEffect(() => {
+    if (isRunning === true) {
+      handleRunClick();
+    }
+  }, [isRunning]);
+
   const handleRunClick = async () => {
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
+      setIsRunning(false);
+      setLoading(false);
       return;
     }
     const isValidPLan = await checkValidPlan();
     if (!isValidPLan) {
+      setIsRunning(false);
+      setLoading(false);
       return;
     }
+    const scheduleInput: ScheduleInput = {
+      user_id: user.monday_user_id,
+      board_id: boardId,
+      account_id: user.monday_account_id,
+      workspace_id: workspaceId,
+      connector: "facebook_pages",
+    };
     if (
       sessionToken &&
       selectedBoardOption &&
       selectedColumnOption &&
-      selectedAccount &&
-      boardName
+      selectedAccount
     ) {
       MondayService.mondayItems(
         selectedBoardOption?.value,
@@ -140,32 +162,22 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
             account_id: selectedAccount?.value,
             metrics: selectedFields.map((field) => field.value),
           };
-          FacebookService.facebookPagesFetchData(sessionToken, queryData)
-            .then((data: ColumnData[]) => {
-              MondayService.mondayAddData(
-                selectedBoardOption.value,
-                sessionToken,
-                data
-              )
-                .then(() => {
-                  const run: RunBase = {
-                    user_id: user.monday_account_id,
-                    board_id: selectedBoardOption.value,
-                    account_id: user.monday_account_id,
-                    connector: "facebook_pages",
-                  };
-                  RunService.runRun(run);
-                  setLoading(false);
-                  setSuccess(true);
-                })
-                .catch((error) => {
-                  setShowErrorModal(true);
-                  setLoading(false);
-                });
-            })
-            .catch((error) => {
-              setShowErrorModal(true);
+          const requestBody: Body_run_run = {
+            query: queryData,
+            schedule_input: scheduleInput,
+          };
+          RunService.runRun(sessionToken, requestBody)
+            .then((run: Run) => {
+              setBoardId(run.board_id);
+              monday.execute("valueCreatedForUser");
               setLoading(false);
+              setSuccess(true);
+              setIsRunning(false);
+            })
+            .catch((err) => {
+              setLoading(false);
+              setShowErrorModal(true);
+              setIsRunning(false);
             });
         })
         .catch((error) => {
@@ -177,45 +189,25 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
-      FacebookService.facebookPagesFetchAllData(sessionToken, queryData)
-        .then((data: ColumnData[]) => {
-          if (sessionToken) {
-            MondayService.mondayCreateBoardWithData(
-              boardName,
-              sessionToken,
-              workspaceId,
-              data
-            )
-              .then((board_id) => {
-                setSelectedBoardOption({
-                  value: board_id,
-                  label: boardName,
-                });
-                const run: RunBase = {
-                  user_id: user.monday_user_id,
-                  board_id: board_id,
-                  account_id: user.monday_account_id,
-                  connector: "facebook_pages",
-                };
-                RunService.runRun(run);
-                // Send valueCreatedForUs
-                // Send valueCreatedForUser event when data has been loaded into board
-                monday.execute("valueCreatedForUser");
-                setLoading(false);
-                setSuccess(true);
-              })
-              .catch((error) => {
-                setShowErrorModal(true);
-                setLoading(false);
-              });
-          }
-        })
-        .catch((error) => {
-          setShowErrorModal(true);
+      const requestBody: Body_run_run = {
+        query: queryData,
+        schedule_input: scheduleInput,
+      };
+      RunService.runRun(sessionToken, requestBody, boardName)
+        .then((run: Run) => {
+          setBoardId(run.board_id);
+          monday.execute("valueCreatedForUser");
           setLoading(false);
+          setSuccess(true);
+          setIsRunning(false);
+        })
+        .catch((err) => {
+          setLoading(false);
+          setShowErrorModal(true);
+          setIsRunning(false);
         });
     } else {
-      setShowModal(true);
+      setShowFieldsModal(true);
       setLoading(false);
       setSuccess(false);
     }
@@ -347,6 +339,13 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     getSubdomain();
   }, []);
 
+  const handleBoardSelect = (selectedBoard: Option) => {
+    setSelectedBoardOption(selectedBoard);
+    setSelectedColumnOption(undefined);
+    setBoardId(selectedBoard.value);
+    setBoardName(undefined);
+  };
+
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
@@ -401,7 +400,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           placeholder="Select a board"
           className="mb-2"
           isLoading={boards.length === 0}
-          onOptionSelect={(e: Option) => setSelectedBoardOption(e)}
+          onOptionSelect={(e: Option) => handleBoardSelect(e)}
         />
         {selectedBoardOption?.value && selectedBoardOption.value !== 999 ? (
           <>
@@ -445,28 +444,10 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           </>
         )}
       </div>
-      {success ? (
-        <Button
-          onClick={() =>
-            handleSuccessClick(subdomain, selectedBoardOption?.value)
-          }
-          loading={loading}
-          className="mt-2 bg-green-500"
-        >
-          Run Complete - Go to Board
-        </Button>
-      ) : (
-        <Button
-          onClick={handleRunClick}
-          loading={loading}
-          success={success}
-          successText="Run Complete - Go to Board"
-          className="mt-2"
-        >
-          Run
-        </Button>
-      )}
-      <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
+      <FieldsRequiredModal
+        showModal={showFieldsModal}
+        setShowModal={setShowFieldsModal}
+      />
       <BaseModal
         title={"Error: invalid name"}
         text={"This board name already exists. Please choose a new name"}

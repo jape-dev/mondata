@@ -13,18 +13,19 @@ import {
 import { Info } from "monday-ui-react-core/icons";
 import {
   BillingService,
-  CustomService,
   CustomAPIRequest,
   MondayService,
   PairValue,
   RunService,
   UserPublic,
-  RunBase,
+  ScheduleInput,
+  Body_run_run,
+  Run,
 } from "../api";
 import { PairValueComponent } from "./PairValue";
-import { handleSuccessClick } from "../Utils/monday";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
+import { Option } from "../Utils/models";
 
 const monday = mondaySdk();
 
@@ -33,21 +34,28 @@ interface Board {
   name: string;
 }
 
-interface Option {
-  value: any;
-  label: string;
-}
-
 export interface CustomApiFormProps {
   sessionToken?: string;
   workspaceId: number;
   user: UserPublic;
+  isRunning: boolean;
+  setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  boardId: number;
+  setBoardId: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   sessionToken,
   workspaceId,
   user,
+  isRunning,
+  setIsRunning,
+  setLoading,
+  setSuccess,
+  boardId,
+  setBoardId,
 }) => {
   const [method, setMethod] = useState<Option>({ value: "get", label: "GET" });
   const [url, setUrl] = useState<string>();
@@ -59,9 +67,6 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [body, setBody] = useState<string>();
   const [paramaters, setParameters] = useState<PairValue[]>([]);
   const [headers, setHeaders] = useState<PairValue[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [boardId, setBoardId] = useState<number>(999);
   const [subdomain, setSubdomain] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
@@ -113,6 +118,12 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
     boardName,
   ]);
 
+  useEffect(() => {
+    if (isRunning === true) {
+      handleRunClick();
+    }
+  }, [isRunning]);
+
   const checkValidPlan = async () => {
     try {
       const isValid = await BillingService.billingValidPlan(boardId, user);
@@ -161,16 +172,26 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const handleRunClick = async () => {
     const isValidName = checkBoardName();
     if (!isValidName) {
+      setIsRunning(false);
+      setLoading(false);
       return;
     }
     const isValidPLan = await checkValidPlan();
     if (!isValidPLan) {
+      setIsRunning(false);
+      setLoading(false);
       return;
     }
-
-    if (url && boardName) {
+    const scheduleInput: ScheduleInput = {
+      user_id: user.monday_user_id,
+      board_id: boardId,
+      account_id: user.monday_account_id,
+      workspace_id: workspaceId,
+      connector: "custom_api",
+    };
+    if (url && boardName && sessionToken) {
       setLoading(true);
-      const requestBody: CustomAPIRequest = {
+      const queryData: CustomAPIRequest = {
         method: method.value,
         url: url,
         auth: authValue,
@@ -178,51 +199,22 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
         params: paramaters,
         headers: headers,
       };
-      CustomService.customApiRequest(requestBody)
-        .then((json) => {
-          CustomService.customFetchData(json)
-            .then((data) => {
-              if (sessionToken) {
-                MondayService.mondayCreateBoardWithData(
-                  boardName,
-                  sessionToken,
-                  workspaceId,
-                  data
-                )
-                  .then((board_id) => {
-                    setBoardId(board_id);
-                    // Send valueCreatedForUser event when data has been loaded into board
-                    monday.execute("valueCreatedForUser");
-                    setLoading(false);
-                    setSuccess(true);
-                    const run: RunBase = {
-                      user_id: user.monday_user_id,
-                      board_id: board_id,
-                      account_id: user.monday_account_id,
-                      connector: "custom_api",
-                    };
-                    RunService.runRun(run).catch(() => {
-                      setShowErrorModal(true);
-                      setLoading(false);
-                      setSuccess(false);
-                    });
-                  })
-                  .catch(() => {
-                    setLoading(false);
-                    setSuccess(false);
-                  });
-              }
-            })
-            .catch(() => {
-              setShowErrorModal(true);
-              setLoading(false);
-              setSuccess(false);
-            });
-        })
-        .catch(() => {
-          setShowErrorModal(true);
+      const requestBody: Body_run_run = {
+        query: queryData,
+        schedule_input: scheduleInput,
+      };
+      RunService.runRun(sessionToken, requestBody, boardName)
+        .then((run: Run) => {
+          setBoardId(run.board_id);
+          monday.execute("valueCreatedForUser");
           setLoading(false);
-          setSuccess(false);
+          setSuccess(true);
+          setIsRunning(false);
+        })
+        .catch((err) => {
+          setLoading(false);
+          setShowErrorModal(true);
+          setIsRunning(false);
         });
     } else {
       setShowModal(true);
@@ -399,25 +391,6 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
             className="mb-2 !text-sm"
           />
         </div>
-        {success && boardId ? (
-          <Button
-            onClick={() => handleSuccessClick(subdomain, boardId)}
-            loading={loading}
-            className="mt-2 bg-green-500"
-          >
-            Run Complete - Go to Board
-          </Button>
-        ) : (
-          <Button
-            onClick={handleRunClick}
-            loading={loading}
-            success={success}
-            successText="Run Complete - Go to Board"
-            className="mt-2"
-          >
-            Run
-          </Button>
-        )}
       </div>
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
       <BaseModal

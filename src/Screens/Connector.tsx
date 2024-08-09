@@ -17,6 +17,9 @@ import { InstagramPostsForm } from "../Components/InstagramPostsForm";
 import { GoogleAdsForm } from "../Components/GoogleAdsForm";
 import { CustomApiForm } from "Components/CustomApiForm";
 import { Guide } from "../Components/Modals/OnboardingGuideModal";
+import { SchedulerBlock } from "../Components/SchedulerBlock";
+import { RunBlock } from "Components/RunBlock";
+import { Option } from "../Utils/models";
 
 const monday = mondaySdk();
 
@@ -29,10 +32,36 @@ export const Connector = () => {
   const [workspaceId, setWorkspaceId] = useState<number>();
   const [isViewer, setIsViewer] = useState(false);
   const [connectTrigger, setConnectTrigger] = useState(0);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [boardId, setBoardId] = useState<number>(999);
+  const [isScheduled, setIsScheduled] = useState<boolean>(false);
+  const [period, setPeriod] = useState<Option>({
+    value: "hours",
+    label: "Hourly",
+  });
+  const [step, setStep] = useState<Option>({
+    value: 1,
+    label: "1",
+  });
+  const [days, setDays] = useState<string[]>([
+    "Mo",
+    "Tu",
+    "We",
+    "Th",
+    "Fr",
+    "Sa",
+    "Su",
+  ]);
+  const [startTime, setStartTime] = useState<string>("09:00");
+  const [timezone, setTimezone] = useState<Option>({
+    value: 0,
+    label: "(UTC+00:00) Western Europe Time, London, Lisbon, Casablanca",
+  });
 
   useEffect(() => {
     const selectedOption = options.find((option) => option.value === connector);
-    console.log("selectedOption", selectedOption);
   }, [connector]);
 
   useEffect(() => {
@@ -105,11 +134,6 @@ export const Connector = () => {
         label: "Instagram Posts",
         leftAvatar: getIconUrl("instagram-icon"),
       },
-      // {
-      //   value: "google_ads",
-      //   label: "Google Ads",
-      //   leftAvatar: getIconUrl("google-ads-icon"),
-      // },
     ],
     []
   );
@@ -238,7 +262,7 @@ export const Connector = () => {
             </div>
           ) : (
             <>
-              <p className="font-bold text-gray-500 text-xs">* Application</p>
+              <p className="font-bold text-gray-500 text-sm">* Application</p>
               <Dropdown
                 // value={() =>
                 //   options.find((option) => option.value == connector)
@@ -271,18 +295,36 @@ export const Connector = () => {
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isRunning={isRunning}
+                  setIsRunning={setIsRunning}
+                  setLoading={setLoading}
+                  setSuccess={setSuccess}
+                  boardId={boardId}
+                  setBoardId={setBoardId}
                 />
               ) : connector === "facebook_pages" ? (
                 <FacebookPagesForm
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isRunning={isRunning}
+                  setIsRunning={setIsRunning}
+                  setLoading={setLoading}
+                  setSuccess={setSuccess}
+                  boardId={boardId}
+                  setBoardId={setBoardId}
                 />
               ) : connector === "instagram" ? (
                 <InstagramPostsForm
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isRunning={isRunning}
+                  setIsRunning={setIsRunning}
+                  setLoading={setLoading}
+                  setSuccess={setSuccess}
+                  boardId={boardId}
+                  setBoardId={setBoardId}
                 />
               ) : connector === "google_ads" ? (
                 <GoogleAdsForm
@@ -295,8 +337,48 @@ export const Connector = () => {
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
                   user={user}
+                  isRunning={isRunning}
+                  setIsRunning={setIsRunning}
+                  setLoading={setLoading}
+                  setSuccess={setSuccess}
+                  boardId={boardId}
+                  setBoardId={setBoardId}
                 />
               ) : null}
+              {/* <SchedulerBlock
+                user={user}
+                workspaceId={workspaceId}
+                sessionToken={sessionToken}
+                isScheduled={isScheduled}
+                setIsScheduled={setIsScheduled}
+                interval={period}
+                setInterval={setPeriod}
+                every={step}
+                setEvery={setStep}
+                days={days}
+                setDays={setDays}
+                startTime={startTime}
+                setStartTime={setStartTime}
+                timezone={timezone}
+                setTimezone={setTimezone}
+              /> */}
+              <RunBlock
+                user={user}
+                workspaceId={workspaceId}
+                sessionToken={sessionToken}
+                setIsRunning={setIsRunning}
+                isScheduled={isScheduled}
+                loading={loading}
+                setLoading={setLoading}
+                success={success}
+                setSuccess={setSuccess}
+                boardId={boardId}
+                period={period}
+                step={step}
+                days={days}
+                startTime={startTime}
+                timezone={timezone}
+              />
             </>
           )}
         </div>

@@ -66,6 +66,37 @@ export class FacebookService {
         });
     }
     /**
+     * Pages
+     * @param sessionToken
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static facebookPages(
+        sessionToken: string,
+    ): CancelablePromise<Array<Record<string, any>>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/facebook/pages',
+            query: {
+                'session_token': sessionToken,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Pages Fields
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static facebookPagesFields(): CancelablePromise<Array<Record<string, any>>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/facebook/pages/fields',
+        });
+    }
+    /**
      * Fetch Data
      * @param sessionToken
      * @param requestBody
@@ -114,34 +145,27 @@ export class FacebookService {
         });
     }
     /**
-     * Pages
+     * Pages Fetch Data
      * @param sessionToken
-     * @returns any Successful Response
+     * @param requestBody
+     * @returns ColumnData Successful Response
      * @throws ApiError
      */
-    public static facebookPages(
+    public static facebookPagesFetchData(
         sessionToken: string,
-    ): CancelablePromise<Array<Record<string, any>>> {
+        requestBody: QueryData,
+    ): CancelablePromise<Array<ColumnData>> {
         return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/facebook/pages',
+            method: 'POST',
+            url: '/api/v1/facebook/pages/fetch-data',
             query: {
                 'session_token': sessionToken,
             },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },
-        });
-    }
-    /**
-     * Pages Fields
-     * @returns any Successful Response
-     * @throws ApiError
-     */
-    public static facebookPagesFields(): CancelablePromise<Array<Record<string, any>>> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/facebook/pages/fields',
         });
     }
     /**
@@ -158,30 +182,6 @@ export class FacebookService {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/facebook/pages/fetch-all-data',
-            query: {
-                'session_token': sessionToken,
-            },
-            body: requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: `Validation Error`,
-            },
-        });
-    }
-    /**
-     * Pages Fetch Data
-     * @param sessionToken
-     * @param requestBody
-     * @returns ColumnData Successful Response
-     * @throws ApiError
-     */
-    public static facebookPagesFetchData(
-        sessionToken: string,
-        requestBody: QueryData,
-    ): CancelablePromise<Array<ColumnData>> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/facebook/pages/fetch-data',
             query: {
                 'session_token': sessionToken,
             },

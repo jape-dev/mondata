@@ -7,6 +7,8 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { Body_run_run } from './models/Body_run_run';
+export type { Body_run_schedule } from './models/Body_run_schedule';
 export type { ColumnData } from './models/ColumnData';
 export type { CustomAPIRequest } from './models/CustomAPIRequest';
 export type { HTTPAuthorizationCredentials } from './models/HTTPAuthorizationCredentials';
@@ -16,7 +18,8 @@ export type { PairValue } from './models/PairValue';
 export { Plan } from './models/Plan';
 export type { QueryData } from './models/QueryData';
 export type { Run } from './models/Run';
-export type { RunBase } from './models/RunBase';
+export type { ScheduleInput } from './models/ScheduleInput';
+export { SchedulePeriod } from './models/SchedulePeriod';
 export type { User } from './models/User';
 export type { UserPublic } from './models/UserPublic';
 export type { ValidationError } from './models/ValidationError';

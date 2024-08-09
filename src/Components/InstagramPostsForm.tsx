@@ -2,40 +2,29 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import {
-  Dropdown,
-  Button,
-  Tooltip,
-  Icon,
-  TextField,
-} from "monday-ui-react-core";
+import { Dropdown, Tooltip, Icon, TextField } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
   InstagramService,
   UserPublic,
   MondayService,
   QueryData,
-  ColumnData,
   MondayItem,
   RunService,
-  RunBase,
   BillingService,
+  Body_run_run,
+  ScheduleInput,
+  Run,
 } from "../api";
-import { handleSuccessClick } from "../Utils/monday";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
+import { Option } from "../Utils/models";
 
 const monday = mondaySdk();
 
 interface Board {
   id: string;
   name: string;
-}
-
-interface Option {
-  value: any;
-  label: string;
-  access_token?: string;
 }
 
 interface BoardColumn {
@@ -48,12 +37,24 @@ export interface InstagramPostsForm {
   user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
+  isRunning: boolean;
+  setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  boardId: number;
+  setBoardId: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   user,
   workspaceId,
   sessionToken,
+  isRunning,
+  setIsRunning,
+  setLoading,
+  setSuccess,
+  boardId,
+  setBoardId,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -66,9 +67,6 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [subdomain, setSubdomain] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState();
@@ -112,16 +110,34 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
     return require(`../Static/images/${imgPath}.png`);
   };
 
+  useEffect(() => {
+    if (isRunning === true) {
+      handleRunClick();
+    }
+  }, [isRunning]);
+
   const handleRunClick = async () => {
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
+      setIsRunning(false);
+      setLoading(false);
       return;
     }
     const isValidPLan = await checkValidPlan();
     if (!isValidPLan) {
+      setIsRunning(false);
+      setLoading(false);
       return;
     }
+    const scheduleInput: ScheduleInput = {
+      user_id: user.monday_user_id,
+      board_id: boardId,
+      account_id: user.monday_account_id,
+      workspace_id: workspaceId,
+      connector: "instagram",
+    };
+
     if (
       sessionToken &&
       selectedBoardOption &&
@@ -139,33 +155,22 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
             account_id: selectedAccount?.value,
             metrics: selectedFields.map((field) => field.value),
           };
-          InstagramService.instagramPagesFetchData(sessionToken, queryData)
-            .then((data: ColumnData[]) => {
-              MondayService.mondayAddData(
-                selectedBoardOption.value,
-                sessionToken,
-                data
-              )
-                .then(() => {
-                  const run: RunBase = {
-                    user_id: user.monday_user_id,
-                    board_id: selectedBoardOption.value,
-                    account_id: user.monday_account_id,
-                    connector: "instagram",
-                  };
-                  RunService.runRun(run);
-
-                  setLoading(false);
-                  setSuccess(true);
-                })
-                .catch((err) => {
-                  setLoading(false);
-                  setShowErrorModal(true);
-                });
+          const requestBody: Body_run_run = {
+            query: queryData,
+            schedule_input: scheduleInput,
+          };
+          RunService.runRun(sessionToken, requestBody, boardName)
+            .then((run: Run) => {
+              setBoardId(run.board_id);
+              monday.execute("valueCreatedForUser");
+              setLoading(false);
+              setSuccess(true);
+              setIsRunning(false);
             })
             .catch((err) => {
               setLoading(false);
               setShowErrorModal(true);
+              setIsRunning(false);
             });
         })
         .catch((err) => {
@@ -182,35 +187,27 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
-      InstagramService.instagramPagesFetchAllData(sessionToken, queryData).then(
-        (data: ColumnData[]) => {
-          if (sessionToken) {
-            MondayService.mondayCreateBoardWithData(
-              boardName,
-              sessionToken,
-              workspaceId,
-              data
-            ).then((board_id) => {
-              // Send valueCreatedForUser event when data has been loaded into board
-              setSelectedBoardOption({
-                value: board_id,
-                label: boardName,
-              });
-              const run: RunBase = {
-                user_id: user.monday_user_id,
-                board_id: board_id,
-                account_id: user.monday_account_id,
-                connector: "instagram",
-              };
-              RunService.runRun(run);
-              // Send valueCreatedForUs
-              monday.execute("valueCreatedForUser");
-              setLoading(false);
-              setSuccess(true);
-            });
-          }
-        }
-      );
+      const requestBody: Body_run_run = {
+        query: queryData,
+        schedule_input: scheduleInput,
+      };
+      RunService.runRun(sessionToken, requestBody, boardName)
+        .then((run: Run) => {
+          setSelectedBoardOption({
+            value: run.board_id,
+            label: boardName,
+          });
+          setBoardId(run.board_id);
+          monday.execute("valueCreatedForUser");
+          setLoading(false);
+          setSuccess(true);
+          setIsRunning(false);
+        })
+        .catch((err) => {
+          setLoading(false);
+          setShowErrorModal(true);
+          setIsRunning(false);
+        });
     } else {
       setShowModal(true);
       setLoading(false);
@@ -316,33 +313,10 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
     }
   }, [selectedBoardOption]);
 
-  useEffect(() => {
-    const getSubdomain = () => {
-      monday
-        .get("location")
-        .then((res) => {
-          if (res.data && res.data.href) {
-            const url = new URL(res.data.href);
-            const hostnameParts = url.hostname.split(".");
-
-            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
-              setSubdomain(hostnameParts[0]);
-            } else if (hostnameParts.length > 2) {
-              setSubdomain(hostnameParts[1]);
-            } else {
-              console.error("Unable to determine subdomain");
-            }
-          } else {
-            console.error("Invalid location data");
-          }
-        })
-        .catch((error) => {
-          console.error("Error getting location:", error);
-        });
-    };
-
-    getSubdomain();
-  }, []);
+  const handleBoardSelect = (selectedBoard: Option) => {
+    setSelectedBoardOption(selectedBoard);
+    setBoardId(selectedBoard.value);
+  };
 
   return (
     <div className="mt-2">
@@ -398,7 +372,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           sLoading={boards.length === 0}
           placeholder="Select a board"
           className="mb-2"
-          onOptionSelect={(e: Option) => setSelectedBoardOption(e)}
+          onOptionSelect={(e: Option) => handleBoardSelect(e)}
         />
         {selectedBoardOption?.value && selectedBoardOption.value !== 999 ? (
           <>
@@ -443,27 +417,6 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           </>
         )}
       </div>
-      {success ? (
-        <Button
-          onClick={() =>
-            handleSuccessClick(subdomain, selectedBoardOption?.value)
-          }
-          loading={loading}
-          className="mt-2 bg-green-500"
-        >
-          Run Complete - Go to Board
-        </Button>
-      ) : (
-        <Button
-          onClick={handleRunClick}
-          loading={loading}
-          success={success}
-          successText="Run Complete - Go to Board"
-          className="mt-2"
-        >
-          Run
-        </Button>
-      )}
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
       <BaseModal
         title={"Error: invalid name"}

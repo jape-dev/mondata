@@ -14,22 +14,19 @@ import {
   ColumnData,
   MondayItem,
   RunService,
-  RunBase,
+  Run,
+  Body_run_run,
+  ScheduleInput,
 } from "../api";
-import { handleSuccessClick } from "../Utils/monday";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
+import { Option } from "../Utils/models";
 
 const monday = mondaySdk();
 
 interface Board {
   id: string;
   name: string;
-}
-
-interface Option {
-  value: any;
-  label: string;
 }
 
 interface BoardColumn {
@@ -42,12 +39,24 @@ export interface FacebookAdFormProps {
   user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
+  isRunning: boolean;
+  setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  boardId: number;
+  setBoardId: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   user,
   workspaceId,
   sessionToken,
+  isRunning,
+  setIsRunning,
+  setLoading,
+  setSuccess,
+  boardId,
+  setBoardId,
 }) => {
   const [accountOptions, setAccountOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -62,14 +71,17 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [subdomain, setSubdomain] = useState("");
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [planModal, setPlanModal] = useState(false);
+
+  useEffect(() => {
+    if (isRunning === true) {
+      handleRunClick();
+    }
+  }, [isRunning]);
 
   const checkValidPlan = async () => {
     try {
@@ -119,13 +131,23 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
+      setIsRunning(false);
+      setLoading(false);
       return;
     }
     const isValidPLan = await checkValidPlan();
     if (!isValidPLan) {
-      console.log("returning None");
+      setIsRunning(false);
+      setLoading(false);
       return;
     }
+    const scheduleInput: ScheduleInput = {
+      user_id: user.monday_user_id,
+      board_id: boardId,
+      account_id: user.monday_account_id,
+      workspace_id: workspaceId,
+      connector: "facebook",
+    };
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - date.value);
@@ -141,48 +163,38 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
           selectedBoardOption?.value,
           selectedColumnOption?.value,
           sessionToken
-        ).then((items: MondayItem[]) => {
-          const queryData: QueryData = {
-            monday_items: items,
-            account_id: selectedAccount?.value,
-            dimensions: selectedGrouping?.value,
-            metrics: selectedFields.map((field) => field.value),
-            start_date: startDate.toISOString().split("T")[0],
-            end_date: endDate.toISOString().split("T")[0],
-          };
-
-          FacebookService.facebookFetchData(sessionToken, queryData)
-            .then((data: ColumnData[]) => {
-              MondayService.mondayAddData(
-                selectedBoardOption.value,
-                sessionToken,
-                data
-              )
-                .then(() => {
-                  const run: RunBase = {
-                    user_id: user.monday_user_id,
-                    board_id: selectedBoardOption.value,
-                    account_id: user.monday_account_id,
-                    connector: "facebook",
-                  };
-                  RunService.runRun(run);
-                  // Send valueCreatedForUser event when data has been loaded into board
-                  monday.execute("valueCreatedForUser");
-                  setLoading(false);
-                  setSuccess(true);
-                })
-                .catch(() => {
-                  setShowErrorModal(true);
-                  setLoading(false);
-                  setSuccess(false);
-                });
-            })
-            .catch(() => {
-              setShowErrorModal(true);
-              setLoading(false);
-              setSuccess(false);
-            });
-        });
+        )
+          .then((items: MondayItem[]) => {
+            const queryData: QueryData = {
+              monday_items: items,
+              account_id: selectedAccount?.value,
+              dimensions: selectedGrouping?.value,
+              metrics: selectedFields.map((field) => field.value),
+              start_date: startDate.toISOString().split("T")[0],
+              end_date: endDate.toISOString().split("T")[0],
+            };
+            const requestBody: Body_run_run = {
+              query: queryData,
+              schedule_input: scheduleInput,
+            };
+            RunService.runRun(sessionToken, requestBody, boardName)
+              .then((run: Run) => {
+                setBoardId(run.board_id);
+                monday.execute("valueCreatedForUser");
+                setLoading(false);
+                setSuccess(true);
+                setIsRunning(false);
+              })
+              .catch((err) => {
+                setLoading(false);
+                setShowErrorModal(true);
+                setIsRunning(false);
+              });
+          })
+          .catch((err) => {
+            setLoading(false);
+            setShowErrorModal(true);
+          });
       } else {
         const queryData: QueryData = {
           account_id: selectedAccount?.value,
@@ -191,42 +203,22 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
         };
-        FacebookService.facebookFetchAllData(sessionToken, queryData)
-          .then((data: ColumnData[]) => {
-            MondayService.mondayCreateBoardWithData(
-              boardName,
-              sessionToken,
-              workspaceId,
-              data
-            )
-              .then((board_id) => {
-                setSelectedBoardOption({
-                  value: board_id,
-                  label: boardName,
-                });
-                const run: RunBase = {
-                  user_id: user.monday_user_id,
-                  board_id: board_id,
-                  account_id: user.monday_account_id,
-                  connector: "facebook",
-                };
-                RunService.runRun(run);
-                // Send valueCreatedForUs
-                // Send valueCreatedForUser event when data has been loaded into board
-                monday.execute("valueCreatedForUser");
-                setLoading(false);
-                setSuccess(true);
-              })
-              .catch(() => {
-                setShowErrorModal(true);
-                setLoading(false);
-                setSuccess(false);
-              });
-          })
-          .catch(() => {
-            setShowErrorModal(true);
+        const requestBody: Body_run_run = {
+          query: queryData,
+          schedule_input: scheduleInput,
+        };
+        RunService.runRun(sessionToken, requestBody, boardName)
+          .then((run: Run) => {
+            setBoardId(run.board_id);
+            monday.execute("valueCreatedForUser");
             setLoading(false);
-            setSuccess(false);
+            setSuccess(true);
+            setIsRunning(false);
+          })
+          .catch((err) => {
+            setLoading(false);
+            setShowErrorModal(true);
+            setIsRunning(false);
           });
       }
     } else {
@@ -272,6 +264,8 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     setSelectedColumnOption(undefined);
     setSelectedGrouping(undefined);
     setSelectedBoardOption(selectedBoard);
+    setBoardId(selectedBoard.value);
+    setBoardName(undefined);
   };
 
   const dateOptions = useMemo(
@@ -350,34 +344,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         });
     }
   }, [selectedBoardOption]);
-
-  useEffect(() => {
-    const getSubdomain = () => {
-      monday
-        .get("location")
-        .then((res) => {
-          if (res.data && res.data.href) {
-            const url = new URL(res.data.href);
-            const hostnameParts = url.hostname.split(".");
-
-            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
-              setSubdomain(hostnameParts[0]);
-            } else if (hostnameParts.length > 2) {
-              setSubdomain(hostnameParts[1]);
-            } else {
-              console.error("Unable to determine subdomain");
-            }
-          } else {
-            console.error("Invalid location data");
-          }
-        })
-        .catch((error) => {
-          console.error("Error getting location:", error);
-        });
-    };
-
-    getSubdomain();
-  }, []);
 
   return (
     <div className="mt-2">
@@ -514,27 +480,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
           </>
         ) : null}
       </div>
-      {success ? (
-        <Button
-          onClick={() =>
-            handleSuccessClick(subdomain, selectedBoardOption?.value)
-          }
-          loading={loading}
-          className="mt-2 bg-green-500"
-        >
-          Run Complete - Go to Board
-        </Button>
-      ) : (
-        <Button
-          onClick={handleRunClick}
-          loading={loading}
-          success={success}
-          successText="Run Complete - Go to Board"
-          className="mt-2"
-        >
-          Run
-        </Button>
-      )}
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
       <BaseModal
         title={"Error: invalid name"}

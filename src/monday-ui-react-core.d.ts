@@ -8,6 +8,7 @@ declare module "monday-ui-react-core" {
   export const Steps: any;
   export const TextField: any;
   export const TextArea: any;
+  export const Toggle: any;
 
   // Add other components as needed
 }

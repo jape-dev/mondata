@@ -17,24 +17,19 @@ import {
   ColumnData,
   MondayItem,
   RunService,
-  RunBase,
   UserPublic,
   BillingService,
 } from "../api";
 import { handleSuccessClick } from "../Utils/monday";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
+import { Option } from "../Utils/models";
 
 const monday = mondaySdk();
 
 interface Board {
   id: string;
   name: string;
-}
-
-interface Option {
-  value: any;
-  label: string;
 }
 
 interface BoardColumn {
@@ -173,14 +168,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
                 data
               )
                 .then(() => {
-                  const run: RunBase = {
-                    user_id: user.monday_user_id,
-                    board_id: selectedBoardOption.value,
-                    account_id: user.monday_account_id,
-                    connector: "google_ads",
-                  };
-                  RunService.runRun(run);
-
                   // Send valueCreatedForUser event when data has been loaded into board
                   monday.execute("valueCreatedForUser");
                   setLoading(false);
@@ -219,13 +206,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
                   value: board_id,
                   label: boardName,
                 });
-                const run: RunBase = {
-                  user_id: user.monday_user_id,
-                  board_id: board_id,
-                  account_id: user.monday_account_id,
-                  connector: "google_ads",
-                };
-                RunService.runRun(run);
                 // Send valueCreatedForUs
                 // Send valueCreatedForUser event when data has been loaded into board
                 monday.execute("valueCreatedForUser");
@@ -283,6 +263,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     setSelectedColumnOption(undefined);
     setSelectedGrouping(undefined);
     setSelectedBoardOption(selectedBoard);
+    setBoardName(undefined);
   };
 
   const dateOptions = useMemo(
