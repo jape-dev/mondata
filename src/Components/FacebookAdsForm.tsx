@@ -457,6 +457,22 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         ) : selectedBoardOption && selectedBoardOption?.value !== 999 ? (
           <>
             <div className="flex items-center gap-1">
+              <p className="font-bold text-gray-500 text-sm">* Account</p>
+              <Tooltip
+                content="The ad account to fetch data from."
+                position={Tooltip.positions.TOP}
+              >
+                <Icon icon={Info} className="text-gray-500" />
+              </Tooltip>
+            </div>
+            <Dropdown
+              placeholder="Select an account"
+              className="mb-2"
+              options={accountOptions}
+              isLoading={accountOptions.length === 0}
+              onOptionSelect={(e: Option) => setSelectedAccount(e)}
+            />
+            <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">
                 * Split by Column
               </p>
