@@ -49,6 +49,8 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
   timezone,
   setTimezone,
 }) => {
+  const [startTimeValue, setStartTimeValue] = useState<string>();
+
   const timezoneOptions = [
     { value: -12, label: "(UTC-12:00) International Date Line West" },
     { value: -11, label: "(UTC-11:00) Midway Island, Samoa" },
@@ -125,6 +127,36 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
     );
   };
 
+  const handleStartTimeChange = (time: string) => {
+    setStartTimeValue(time);
+    // Get the current date
+    const now = new Date();
+    const currentDay = now.getDay();
+
+    // Convert dayButtons to day indices (0 = Sunday, 1 = Monday, etc.)
+    const dayIndices = days.map((day) => dayButtons.indexOf(day));
+
+    // Find the closest day
+    const closestDay = dayIndices.reduce((closest, day) => {
+      const diff = (day - currentDay + 7) % 7;
+      const closestDiff = (closest - currentDay + 7) % 7;
+      return diff < closestDiff ? day : closest;
+    }, dayIndices[0]);
+
+    // Create a new date for the closest day
+    const targetDate = new Date(now);
+    targetDate.setDate(now.getDate() + ((closestDay - currentDay + 7) % 7));
+
+    // Set the time
+    const [hours, minutes] = time.split(":");
+    targetDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+
+    // Build the datetime string
+    const datetimeString = targetDate.toISOString();
+
+    setStartTime(datetimeString);
+  };
+
   return (
     <div className="border-2 border-gray rounded-md p-5 mb-2 mt-2">
       <div className="flex items-center gap-1">
@@ -193,8 +225,8 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
             <span className="text-sm">Starting</span>
             <TextField
               type="time"
-              value={startTime}
-              onChange={(value: string) => setStartTime(value)}
+              value={startTimeValue}
+              onChange={(value: string) => handleStartTimeChange(value)}
               size={TextField.sizes.MEDIUM}
             />
           </div>

@@ -288,13 +288,14 @@ export const Connector = () => {
           )}
         </div>
         <div>
-          {connected === true && user && workspaceId && (
+          {connected === true && user && workspaceId && connector && (
             <>
               {connector === "facebook" ? (
                 <FacebookAdsForm
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}
                   setLoading={setLoading}
@@ -307,6 +308,7 @@ export const Connector = () => {
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}
                   setLoading={setLoading}
@@ -319,6 +321,7 @@ export const Connector = () => {
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}
                   setLoading={setLoading}
@@ -337,15 +340,21 @@ export const Connector = () => {
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
                   user={user}
+                  isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}
                   setLoading={setLoading}
                   setSuccess={setSuccess}
                   boardId={boardId}
                   setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : null}
-              {/* <SchedulerBlock
+              <SchedulerBlock
                 user={user}
                 workspaceId={workspaceId}
                 sessionToken={sessionToken}
@@ -361,7 +370,7 @@ export const Connector = () => {
                 setStartTime={setStartTime}
                 timezone={timezone}
                 setTimezone={setTimezone}
-              /> */}
+              />
               <RunBlock
                 user={user}
                 workspaceId={workspaceId}
@@ -373,6 +382,7 @@ export const Connector = () => {
                 success={success}
                 setSuccess={setSuccess}
                 boardId={boardId}
+                connector={connector}
                 period={period}
                 step={step}
                 days={days}

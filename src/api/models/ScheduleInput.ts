@@ -8,11 +8,13 @@ export type ScheduleInput = {
     board_id: number;
     workspace_id: number;
     account_id: number;
+    board_name?: (string | null);
     connector?: (string | null);
     period?: (SchedulePeriod | null);
     step?: (number | null);
     days?: (Array<string> | null);
     start_datetime?: (string | null);
     tz_offset?: (number | null);
+    data?: null;
 };
 

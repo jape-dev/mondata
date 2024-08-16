@@ -2,13 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import {
-  Dropdown,
-  Button,
-  Tooltip,
-  Icon,
-  TextField,
-} from "monday-ui-react-core";
+import { Dropdown, Tooltip, Icon, TextField } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
   BillingService,
@@ -19,6 +13,7 @@ import {
   MondayItem,
   RunService,
   Body_run_run,
+  Body_run_schedule,
   ScheduleInput,
   Run,
 } from "../api";
@@ -44,6 +39,7 @@ export interface FacebookPagesFormProps {
   user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
+  isScheduled: boolean;
   isRunning: boolean;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -56,6 +52,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   user,
   workspaceId,
   sessionToken,
+  isScheduled,
   isRunning,
   setIsRunning,
   setLoading,
@@ -74,9 +71,9 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [subdomain, setSubdomain] = useState("");
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [planModal, setPlanModal] = useState(false);
@@ -162,9 +159,22 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
             account_id: selectedAccount?.value,
             metrics: selectedFields.map((field) => field.value),
           };
+          if (isScheduled) {
+            const scheduleRequestBody: Body_run_schedule = {
+              query: queryData,
+              schedule_input: scheduleInput,
+            };
+            RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+              (err) => {
+                setLoading(false);
+                setShowScheduleModal(true);
+                setIsRunning(false);
+              }
+            );
+          }
           const requestBody: Body_run_run = {
             query: queryData,
-            schedule_input: scheduleInput,
+            schedule: scheduleInput,
           };
           RunService.runRun(sessionToken, requestBody)
             .then((run: Run) => {
@@ -189,9 +199,22 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
+      if (isScheduled) {
+        const scheduleRequestBody: Body_run_schedule = {
+          query: queryData,
+          schedule_input: scheduleInput,
+        };
+        RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+          (err) => {
+            setLoading(false);
+            setShowScheduleModal(true);
+            setIsRunning(false);
+          }
+        );
+      }
       const requestBody: Body_run_run = {
         query: queryData,
-        schedule_input: scheduleInput,
+        schedule: scheduleInput,
       };
       RunService.runRun(sessionToken, requestBody, boardName)
         .then((run: Run) => {
@@ -310,34 +333,6 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         });
     }
   }, [selectedBoardOption]);
-
-  useEffect(() => {
-    const getSubdomain = () => {
-      monday
-        .get("location")
-        .then((res) => {
-          if (res.data && res.data.href) {
-            const url = new URL(res.data.href);
-            const hostnameParts = url.hostname.split(".");
-
-            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
-              setSubdomain(hostnameParts[0]);
-            } else if (hostnameParts.length > 2) {
-              setSubdomain(hostnameParts[1]);
-            } else {
-              console.error("Unable to determine subdomain");
-            }
-          } else {
-            console.error("Invalid location data");
-          }
-        })
-        .catch((error) => {
-          console.error("Error getting location:", error);
-        });
-    };
-
-    getSubdomain();
-  }, []);
 
   const handleBoardSelect = (selectedBoard: Option) => {
     setSelectedBoardOption(selectedBoard);
@@ -469,6 +464,12 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         }
         showModal={planModal}
         setShowModal={setPlanModal}
+      />
+      <BaseModal
+        title={"Error: schedule error"}
+        text={"Was unable to schedule your import. Please try again."}
+        showModal={showScheduleModal}
+        setShowModal={setShowScheduleModal}
       />
     </div>
   );

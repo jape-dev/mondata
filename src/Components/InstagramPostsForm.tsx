@@ -13,6 +13,7 @@ import {
   RunService,
   BillingService,
   Body_run_run,
+  Body_run_schedule,
   ScheduleInput,
   Run,
 } from "../api";
@@ -38,6 +39,7 @@ export interface InstagramPostsForm {
   workspaceId: number;
   sessionToken?: string;
   isRunning: boolean;
+  isScheduled: boolean;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
@@ -49,6 +51,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   user,
   workspaceId,
   sessionToken,
+  isScheduled,
   isRunning,
   setIsRunning,
   setLoading,
@@ -69,6 +72,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [planModal, setPlanModal] = useState(false);
@@ -155,9 +159,22 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
             account_id: selectedAccount?.value,
             metrics: selectedFields.map((field) => field.value),
           };
+          if (isScheduled) {
+            const scheduleRequestBody: Body_run_schedule = {
+              query: queryData,
+              schedule_input: scheduleInput,
+            };
+            RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+              (err) => {
+                setLoading(false);
+                setShowScheduleModal(true);
+                setIsRunning(false);
+              }
+            );
+          }
           const requestBody: Body_run_run = {
             query: queryData,
-            schedule_input: scheduleInput,
+            schedule: scheduleInput,
           };
           RunService.runRun(sessionToken, requestBody, boardName)
             .then((run: Run) => {
@@ -187,10 +204,24 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
+      if (isScheduled) {
+        const scheduleRequestBody: Body_run_schedule = {
+          query: queryData,
+          schedule_input: scheduleInput,
+        };
+        RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+          (err) => {
+            setLoading(false);
+            setShowScheduleModal(true);
+            setIsRunning(false);
+          }
+        );
+      }
       const requestBody: Body_run_run = {
         query: queryData,
-        schedule_input: scheduleInput,
+        schedule: scheduleInput,
       };
+
       RunService.runRun(sessionToken, requestBody, boardName)
         .then((run: Run) => {
           setSelectedBoardOption({
@@ -439,6 +470,12 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         }
         showModal={planModal}
         setShowModal={setPlanModal}
+      />
+      <BaseModal
+        title={"Error: schedule error"}
+        text={"Was unable to schedule your import. Please try again."}
+        showModal={showScheduleModal}
+        setShowModal={setShowScheduleModal}
       />
     </div>
   );

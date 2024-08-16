@@ -14,8 +14,8 @@ import {
   ColumnData,
   MondayItem,
   RunService,
-  Run,
   Body_run_run,
+  Body_run_schedule,
   ScheduleInput,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
@@ -39,6 +39,7 @@ export interface FacebookAdFormProps {
   user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
+  isScheduled: boolean;
   isRunning: boolean;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -51,6 +52,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   user,
   workspaceId,
   sessionToken,
+  isScheduled,
   isRunning,
   setIsRunning,
   setLoading,
@@ -73,6 +75,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [planModal, setPlanModal] = useState(false);
@@ -151,7 +154,13 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - date.value);
-    if (sessionToken && selectedBoardOption && selectedAccount && date) {
+    if (
+      sessionToken &&
+      selectedBoardOption &&
+      selectedAccount &&
+      date &&
+      boardName
+    ) {
       if (selectedColumnOption) {
         MondayService.mondayItems(
           selectedBoardOption?.value,
@@ -167,9 +176,22 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
               start_date: startDate.toISOString().split("T")[0],
               end_date: endDate.toISOString().split("T")[0],
             };
+            if (isScheduled) {
+              const scheduleRequestBody: Body_run_schedule = {
+                query: queryData,
+                schedule_input: scheduleInput,
+              };
+              RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+                (err) => {
+                  setLoading(false);
+                  setShowScheduleModal(true);
+                  setIsRunning(false);
+                }
+              );
+            }
             const requestBody: Body_run_run = {
               query: queryData,
-              schedule_input: scheduleInput,
+              schedule: scheduleInput,
             };
             RunService.runRun(sessionToken, requestBody, boardName)
               .then((run: Run) => {
@@ -199,8 +221,21 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         };
         const requestBody: Body_run_run = {
           query: queryData,
-          schedule_input: scheduleInput,
+          schedule: scheduleInput,
         };
+        if (isScheduled) {
+          const scheduleRequestBody: Body_run_schedule = {
+            query: queryData,
+            schedule_input: scheduleInput,
+          };
+          RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+            (err) => {
+              setLoading(false);
+              setShowScheduleModal(true);
+              setIsRunning(false);
+            }
+          );
+        }
         RunService.runRun(sessionToken, requestBody, boardName)
           .then((run: Run) => {
             setBoardId(run.board_id);
@@ -512,6 +547,12 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         }
         showModal={planModal}
         setShowModal={setPlanModal}
+      />
+      <BaseModal
+        title={"Error: schedule error"}
+        text={"Was unable to schedule your import. Please try again."}
+        showModal={showScheduleModal}
+        setShowModal={setShowScheduleModal}
       />
     </div>
   );

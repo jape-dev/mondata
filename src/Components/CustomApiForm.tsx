@@ -20,7 +20,8 @@ import {
   UserPublic,
   ScheduleInput,
   Body_run_run,
-  Run,
+  Body_run_schedule,
+  ColumnData,
 } from "../api";
 import { PairValueComponent } from "./PairValue";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
@@ -39,23 +40,35 @@ export interface CustomApiFormProps {
   workspaceId: number;
   user: UserPublic;
   isRunning: boolean;
+  isScheduled: boolean;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   boardId: number;
   setBoardId: React.Dispatch<React.SetStateAction<number>>;
+  period: Option;
+  step: Option;
+  days: string[];
+  startTime: string;
+  timezone: Option;
 }
 
 export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   sessionToken,
   workspaceId,
   user,
+  isScheduled,
   isRunning,
   setIsRunning,
   setLoading,
   setSuccess,
   boardId,
   setBoardId,
+  period,
+  step,
+  days,
+  startTime,
+  timezone,
 }) => {
   const [method, setMethod] = useState<Option>({ value: "get", label: "GET" });
   const [url, setUrl] = useState<string>();
@@ -67,10 +80,10 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [body, setBody] = useState<string>();
   const [paramaters, setParameters] = useState<PairValue[]>([]);
   const [headers, setHeaders] = useState<PairValue[]>([]);
-  const [subdomain, setSubdomain] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [boards, setBoards] = useState<Option[]>([]);
   const [planModal, setPlanModal] = useState(false);
@@ -182,12 +195,19 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       setLoading(false);
       return;
     }
+    console.log(startTime);
     const scheduleInput: ScheduleInput = {
       user_id: user.monday_user_id,
       board_id: boardId,
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
+      board_name: boardName,
       connector: "custom_api",
+      period: period.value,
+      step: step.value,
+      days: days,
+      start_datetime: startTime,
+      tz_offset: timezone.value,
     };
     if (url && boardName && sessionToken) {
       setLoading(true);
@@ -201,15 +221,29 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       };
       const requestBody: Body_run_run = {
         query: queryData,
-        schedule_input: scheduleInput,
+        schedule: scheduleInput,
       };
       RunService.runRun(sessionToken, requestBody, boardName)
-        .then((run: Run) => {
-          setBoardId(run.board_id);
+        .then((data: ColumnData[]) => {
+          setBoardId(123);
           monday.execute("valueCreatedForUser");
           setLoading(false);
           setSuccess(true);
           setIsRunning(false);
+          if (isScheduled) {
+            scheduleInput.data = data;
+            const scheduleRequestBody: Body_run_schedule = {
+              query: queryData,
+              schedule_input: scheduleInput,
+            };
+            RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+              (err) => {
+                setLoading(false);
+                setShowScheduleModal(true);
+                setIsRunning(false);
+              }
+            );
+          }
         })
         .catch((err) => {
           setLoading(false);
@@ -222,34 +256,6 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       setSuccess(false);
     }
   };
-
-  useEffect(() => {
-    const getSubdomain = () => {
-      monday
-        .get("location")
-        .then((res) => {
-          if (res.data && res.data.href) {
-            const url = new URL(res.data.href);
-            const hostnameParts = url.hostname.split(".");
-
-            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
-              setSubdomain(hostnameParts[0]);
-            } else if (hostnameParts.length > 2) {
-              setSubdomain(hostnameParts[1]);
-            } else {
-              console.error("Unable to determine subdomain");
-            }
-          } else {
-            console.error("Invalid location data");
-          }
-        })
-        .catch((error) => {
-          console.error("Error getting location:", error);
-        });
-    };
-
-    getSubdomain();
-  }, []);
 
   useEffect(() => {
     if (sessionToken) {
@@ -414,6 +420,12 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
         }
         showModal={planModal}
         setShowModal={setPlanModal}
+      />
+      <BaseModal
+        title={"Error: schedule error"}
+        text={"Was unable to schedule your import. Please try again."}
+        showModal={showScheduleModal}
+        setShowModal={setShowScheduleModal}
       />
     </>
   );

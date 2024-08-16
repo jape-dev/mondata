@@ -3,8 +3,13 @@ import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
 import { Button } from "monday-ui-react-core";
-import { UserPublic } from "../api";
 import { Option } from "../Utils/models";
+import {
+  UserPublic,
+  RunService,
+  Body_run_schedule,
+  ScheduleInput,
+} from "../api";
 
 const monday = mondaySdk();
 
@@ -13,6 +18,7 @@ export interface RunBlockProps {
   workspaceId: number;
   user: UserPublic;
   boardId: number;
+  connector: string;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   isScheduled: boolean;
   loading: boolean;
@@ -31,6 +37,7 @@ export const RunBlock: React.FC<RunBlockProps> = ({
   workspaceId,
   user,
   boardId,
+  connector,
   setIsRunning,
   isScheduled,
   loading,
@@ -73,19 +80,6 @@ export const RunBlock: React.FC<RunBlockProps> = ({
     getSubdomain();
   }, []);
 
-  const handleSaveClick = () => {
-    // Api call to add to the schedule table and return id
-    // Api call to add celery task
-  };
-
-  const handleSaveAndScheduleClick = () => {
-    // Api call to add to the schedule table and return id
-
-    // Api call to add celery task.
-    setIsRunning(true);
-    setLoading(true);
-  };
-
   const handleRunClick = () => {
     setIsRunning(true);
     setLoading(true);
@@ -101,24 +95,26 @@ export const RunBlock: React.FC<RunBlockProps> = ({
   return (
     <div className="border-2 border-gray rounded-md p-5 mb-2 mt-2">
       {isScheduled ? (
-        <div>
-          <Button
-            onClick={handleRunClick}
-            loading={loading}
-            success={success}
-            className="mt-2"
-          >
-            Schedule & Run
-          </Button>
-          <Button
-            onClick={handleRunClick}
-            loading={loading}
-            success={success}
-            className="mt-2"
-          >
-            Schedule & Run
-          </Button>
-        </div>
+        <>
+          {success ? (
+            <Button
+              onClick={handleSuccessClick}
+              loading={loading}
+              className="mt-2 bg-green-500"
+            >
+              Run Complete - Go to Board
+            </Button>
+          ) : (
+            <Button
+              onClick={handleRunClick}
+              loading={loading}
+              success={success}
+              className="mt-2"
+            >
+              Run & Add to Schedule
+            </Button>
+          )}
+        </>
       ) : (
         <>
           {success ? (

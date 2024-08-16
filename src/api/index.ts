@@ -9,6 +9,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { Body_run_run } from './models/Body_run_run';
 export type { Body_run_schedule } from './models/Body_run_schedule';
+export type { Body_run_test_run_import } from './models/Body_run_test_run_import';
 export type { ColumnData } from './models/ColumnData';
 export type { CustomAPIRequest } from './models/CustomAPIRequest';
 export type { HTTPAuthorizationCredentials } from './models/HTTPAuthorizationCredentials';
@@ -17,7 +18,6 @@ export type { MondayItem } from './models/MondayItem';
 export type { PairValue } from './models/PairValue';
 export { Plan } from './models/Plan';
 export type { QueryData } from './models/QueryData';
-export type { Run } from './models/Run';
 export type { ScheduleInput } from './models/ScheduleInput';
 export { SchedulePeriod } from './models/SchedulePeriod';
 export type { User } from './models/User';
