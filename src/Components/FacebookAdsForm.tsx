@@ -75,33 +75,12 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
-  const [planModal, setPlanModal] = useState(false);
 
   useEffect(() => {
     if (isRunning === true) {
       handleRunClick();
     }
   }, [isRunning]);
-
-  const checkValidPlan = async () => {
-    try {
-      const isValid = await BillingService.billingValidPlan(
-        selectedBoardOption.value,
-        user
-      );
-      if (!isValid) {
-        setPlanModal(true);
-        setLoading(false);
-        setSuccess(false);
-      }
-      return isValid;
-    } catch (error) {
-      console.error("Error checking plan validity:", error);
-      setLoading(false);
-      setSuccess(false);
-      return false;
-    }
-  };
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -131,12 +110,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
-      setIsRunning(false);
-      setLoading(false);
-      return;
-    }
-    const isValidPLan = await checkValidPlan();
-    if (!isValidPLan) {
       setIsRunning(false);
       setLoading(false);
       return;
@@ -504,14 +477,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
-      />
-      <BaseModal
-        title={"Free tier limit"}
-        text={
-          "As you are currently on the free tier, you can only use Data Importer on one board to keep importing your data for unlimited boards, please upgrade to the PRO plan from the App Marketplace."
-        }
-        showModal={planModal}
-        setShowModal={setPlanModal}
       />
     </div>
   );
