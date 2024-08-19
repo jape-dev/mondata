@@ -74,29 +74,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
-  const [planModal, setPlanModal] = useState(false);
-
-  const checkValidPlan = async () => {
-    try {
-      const isValid = await BillingService.billingValidPlan(
-        selectedBoardOption.value,
-        user
-      );
-
-      if (!isValid) {
-        setPlanModal(true);
-        setLoading(false);
-        setSuccess(false);
-      }
-
-      return isValid;
-    } catch (error) {
-      console.error("Error checking plan validity:", error);
-      setLoading(false);
-      setSuccess(false);
-      return false;
-    }
-  };
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -130,10 +107,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
-      return;
-    }
-    const isValidPLan = await checkValidPlan();
-    if (!isValidPLan) {
       return;
     }
     const endDate = new Date();
@@ -551,14 +524,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
-      />
-      <BaseModal
-        title={"Free tier limit"}
-        text={
-          "As you are currently on the free tier, you can only use Data Importer on one board to keep importing your data for unlimited boards, please upgrade to the PRO plan from the App Marketplace."
-        }
-        showModal={planModal}
-        setShowModal={setPlanModal}
       />
     </div>
   );

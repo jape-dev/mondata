@@ -5,7 +5,7 @@
 import type { Body_run_run } from '../models/Body_run_run';
 import type { Body_run_schedule } from '../models/Body_run_schedule';
 import type { Body_run_test_run_import } from '../models/Body_run_test_run_import';
-import type { ColumnData } from '../models/ColumnData';
+import type { RunResponse } from '../models/RunResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -15,14 +15,14 @@ export class RunService {
      * @param sessionToken
      * @param requestBody
      * @param boardName
-     * @returns ColumnData Successful Response
+     * @returns RunResponse Successful Response
      * @throws ApiError
      */
     public static runRun(
         sessionToken: string,
         requestBody: Body_run_run,
         boardName?: (string | null),
-    ): CancelablePromise<Array<ColumnData>> {
+    ): CancelablePromise<RunResponse> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/run/run',

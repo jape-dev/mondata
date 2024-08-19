@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ColumnData } from './ColumnData';
 import type { SchedulePeriod } from './SchedulePeriod';
 export type ScheduleInput = {
     user_id: number;
@@ -15,6 +16,6 @@ export type ScheduleInput = {
     days?: (Array<string> | null);
     start_datetime?: (string | null);
     tz_offset?: (number | null);
-    data?: null;
+    data?: (Array<ColumnData> | null);
 };
 

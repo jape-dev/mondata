@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/static/css/main.d3b21a0e.css",
+    "main.js": "/static/js/main.fa3564f1.js",
+    "static/media/instagram-icon.png": "/static/media/instagram-icon.e905e80e3d57cc2b32c7.png",
+    "static/media/post-urls.png": "/static/media/post-urls.6f10f65eca7f044369b5.png",
+    "static/media/ad-ids.png": "/static/media/ad-ids.2e13c822c23efb5f2bc6.png",
+    "static/media/applications.png": "/static/media/applications.b1d7b0173bd36c2c1585.png",
+    "static/media/google-ads-icon.png": "/static/media/google-ads-icon.6d5a4f22f57b07dfd309.png",
+    "static/media/options.png": "/static/media/options.159a939b0f63c509c0f6.png",
+    "static/media/facebook-icon.png": "/static/media/facebook-icon.1775943a251b9828addc.png",
+    "static/media/run-complete.png": "/static/media/run-complete.f4fb1b5e5ca4fb7b9acb.png",
+    "static/media/youtube-icon.png": "/static/media/youtube-icon.ad24a3f2deeaf750935e.png",
+    "index.html": "/index.html",
+    "main.d3b21a0e.css.map": "/static/css/main.d3b21a0e.css.map",
+    "main.fa3564f1.js.map": "/static/js/main.fa3564f1.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.d3b21a0e.css",
+    "static/js/main.fa3564f1.js"
+  ]
+}

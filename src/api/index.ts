@@ -18,6 +18,8 @@ export type { MondayItem } from './models/MondayItem';
 export type { PairValue } from './models/PairValue';
 export { Plan } from './models/Plan';
 export type { QueryData } from './models/QueryData';
+export type { RunBase } from './models/RunBase';
+export type { RunResponse } from './models/RunResponse';
 export type { ScheduleInput } from './models/ScheduleInput';
 export { SchedulePeriod } from './models/SchedulePeriod';
 export type { User } from './models/User';

@@ -6,17 +6,16 @@ import { Dropdown, Button, Icon, TextField } from "monday-ui-react-core";
 import { Tooltip } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
-  BillingService,
   FacebookService,
   UserPublic,
   MondayService,
   QueryData,
-  ColumnData,
   MondayItem,
   RunService,
   Body_run_run,
   Body_run_schedule,
   ScheduleInput,
+  RunResponse,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
@@ -78,33 +77,12 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
-  const [planModal, setPlanModal] = useState(false);
 
   useEffect(() => {
     if (isRunning === true) {
       handleRunClick();
     }
   }, [isRunning]);
-
-  const checkValidPlan = async () => {
-    try {
-      const isValid = await BillingService.billingValidPlan(
-        selectedBoardOption.value,
-        user
-      );
-      if (!isValid) {
-        setPlanModal(true);
-        setLoading(false);
-        setSuccess(false);
-      }
-      return isValid;
-    } catch (error) {
-      console.error("Error checking plan validity:", error);
-      setLoading(false);
-      setSuccess(false);
-      return false;
-    }
-  };
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -134,12 +112,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
-      setIsRunning(false);
-      setLoading(false);
-      return;
-    }
-    const isValidPLan = await checkValidPlan();
-    if (!isValidPLan) {
       setIsRunning(false);
       setLoading(false);
       return;
@@ -194,8 +166,8 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
               schedule: scheduleInput,
             };
             RunService.runRun(sessionToken, requestBody, boardName)
-              .then((run: Run) => {
-                setBoardId(run.board_id);
+              .then((run: RunResponse) => {
+                setBoardId(run.run.board_id);
                 monday.execute("valueCreatedForUser");
                 setLoading(false);
                 setSuccess(true);
@@ -237,8 +209,8 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
           );
         }
         RunService.runRun(sessionToken, requestBody, boardName)
-          .then((run: Run) => {
-            setBoardId(run.board_id);
+          .then((run: RunResponse) => {
+            setBoardId(run.run.board_id);
             monday.execute("valueCreatedForUser");
             setLoading(false);
             setSuccess(true);
@@ -539,14 +511,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
-      />
-      <BaseModal
-        title={"Free tier limit"}
-        text={
-          "As you are currently on the free tier, you can only use Data Importer on one board to keep importing your data for unlimited boards, please upgrade to the PRO plan from the App Marketplace."
-        }
-        showModal={planModal}
-        setShowModal={setPlanModal}
       />
       <BaseModal
         title={"Error: schedule error"}

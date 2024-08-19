@@ -3,13 +3,9 @@ import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
 import { Button } from "monday-ui-react-core";
+import { UserPublic, BillingService } from "../api";
 import { Option } from "../Utils/models";
-import {
-  UserPublic,
-  RunService,
-  Body_run_schedule,
-  ScheduleInput,
-} from "../api";
+import { UpgradeModal } from "./Modals/UpgradeModal";
 
 const monday = mondaySdk();
 
@@ -51,6 +47,7 @@ export const RunBlock: React.FC<RunBlockProps> = ({
   timezone,
 }) => {
   const [subdomain, setSubdomain] = useState("");
+  const [planModal, setPlanModal] = useState(false);
 
   useEffect(() => {
     const getSubdomain = () => {
@@ -80,7 +77,31 @@ export const RunBlock: React.FC<RunBlockProps> = ({
     getSubdomain();
   }, []);
 
-  const handleRunClick = () => {
+  const checkValidPlan = async () => {
+    try {
+      const isValid = await BillingService.billingValidPlan(boardId, user);
+
+      if (!isValid) {
+        setPlanModal(true);
+        setLoading(false);
+        setSuccess(false);
+      }
+
+      return isValid;
+    } catch (error) {
+      console.error("Error checking plan validity:", error);
+      setLoading(false);
+      setSuccess(false);
+      return false;
+    }
+  };
+
+  const handleRunClick = async () => {
+    const isValidPLan = await checkValidPlan();
+    if (!isValidPLan) {
+      setPlanModal(true);
+      return;
+    }
     setIsRunning(true);
     setLoading(true);
   };
@@ -93,50 +114,60 @@ export const RunBlock: React.FC<RunBlockProps> = ({
   };
 
   return (
-    <div className="border-2 border-gray rounded-md p-5 mb-2 mt-2">
-      {isScheduled ? (
-        <>
-          {success ? (
-            <Button
-              onClick={handleSuccessClick}
-              loading={loading}
-              className="mt-2 bg-green-500"
-            >
-              Run Complete - Go to Board
-            </Button>
-          ) : (
-            <Button
-              onClick={handleRunClick}
-              loading={loading}
-              success={success}
-              className="mt-2"
-            >
-              Run & Add to Schedule
-            </Button>
-          )}
-        </>
-      ) : (
-        <>
-          {success ? (
-            <Button
-              onClick={handleSuccessClick}
-              loading={loading}
-              className="mt-2 bg-green-500"
-            >
-              Run Complete - Go to Board
-            </Button>
-          ) : (
-            <Button
-              onClick={handleRunClick}
-              loading={loading}
-              success={success}
-              className="mt-2"
-            >
-              Run
-            </Button>
-          )}
-        </>
-      )}
-    </div>
+    <>
+      <div className="border-2 border-gray rounded-md p-5 mb-2 mt-2">
+        {isScheduled ? (
+          <>
+            {success ? (
+              <Button
+                onClick={handleSuccessClick}
+                loading={loading}
+                className="mt-2 bg-green-500"
+              >
+                Run Complete - Go to Board
+              </Button>
+            ) : (
+              <Button
+                onClick={handleRunClick}
+                loading={loading}
+                success={success}
+                className="mt-2"
+              >
+                Run & Add to Schedule
+              </Button>
+            )}
+          </>
+        ) : (
+          <>
+            {success ? (
+              <Button
+                onClick={handleSuccessClick}
+                loading={loading}
+                className="mt-2 bg-green-500"
+              >
+                Run Complete - Go to Board
+              </Button>
+            ) : (
+              <Button
+                onClick={handleRunClick}
+                loading={loading}
+                success={success}
+                className="mt-2"
+              >
+                Run
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+      <UpgradeModal
+        title={"Upgrade for unlimited access"}
+        text={
+          "As you are currently on the free tier, you can only use Data Importer on one board. \n To keep importing your data for unlimited boards, please upgrade to the Pro plan from the App Marketplace."
+        }
+        showModal={planModal}
+        setShowModal={setPlanModal}
+      />
+    </>
   );
 };
