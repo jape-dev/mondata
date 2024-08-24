@@ -8,11 +8,9 @@ import {
   Tooltip,
   TextField,
   TextArea,
-  Button,
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
-  BillingService,
   CustomAPIRequest,
   MondayService,
   PairValue,
@@ -67,7 +65,6 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [body, setBody] = useState<string>();
   const [paramaters, setParameters] = useState<PairValue[]>([]);
   const [headers, setHeaders] = useState<PairValue[]>([]);
-  const [subdomain, setSubdomain] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
@@ -197,33 +194,6 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
     }
   };
 
-  useEffect(() => {
-    const getSubdomain = () => {
-      monday
-        .get("location")
-        .then((res) => {
-          if (res.data && res.data.href) {
-            const url = new URL(res.data.href);
-            const hostnameParts = url.hostname.split(".");
-
-            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
-              setSubdomain(hostnameParts[0]);
-            } else if (hostnameParts.length > 2) {
-              setSubdomain(hostnameParts[1]);
-            } else {
-              console.error("Unable to determine subdomain");
-            }
-          } else {
-            console.error("Invalid location data");
-          }
-        })
-        .catch((error) => {
-          console.error("Error getting location:", error);
-        });
-    };
-
-    getSubdomain();
-  }, []);
 
   useEffect(() => {
     if (sessionToken) {

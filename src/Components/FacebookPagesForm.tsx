@@ -74,7 +74,6 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [subdomain, setSubdomain] = useState("");
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState();
@@ -283,34 +282,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     }
   }, [selectedBoardOption]);
 
-  useEffect(() => {
-    const getSubdomain = () => {
-      monday
-        .get("location")
-        .then((res) => {
-          if (res.data && res.data.href) {
-            const url = new URL(res.data.href);
-            const hostnameParts = url.hostname.split(".");
-
-            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
-              setSubdomain(hostnameParts[0]);
-            } else if (hostnameParts.length > 2) {
-              setSubdomain(hostnameParts[1]);
-            } else {
-              console.error("Unable to determine subdomain");
-            }
-          } else {
-            console.error("Invalid location data");
-          }
-        })
-        .catch((error) => {
-          console.error("Error getting location:", error);
-        });
-    };
-
-    getSubdomain();
-  }, []);
-
+  
   const handleBoardSelect = (selectedBoard: Option) => {
     setSelectedBoardOption(selectedBoard);
     setSelectedColumnOption(undefined);
