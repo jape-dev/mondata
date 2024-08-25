@@ -20,6 +20,7 @@ import { Guide } from "../Components/Modals/OnboardingGuideModal";
 import { SchedulerBlock } from "../Components/SchedulerBlock";
 import { RunBlock } from "Components/RunBlock";
 import { Option } from "../Utils/models";
+import { getNextScheduledDate } from "../Utils/datetime";
 
 const monday = mondaySdk();
 
@@ -54,7 +55,7 @@ export const Connector = () => {
     "Sa",
     "Su",
   ]);
-  const [startTime, setStartTime] = useState<string>("09:00");
+  const [startTime, setStartTime] = useState<string>(getNextScheduledDate([], "09:00"));
   const [timezone, setTimezone] = useState<Option>({
     value: 0,
     label: "(UTC+00:00) Western Europe Time, London, Lisbon, Casablanca",
