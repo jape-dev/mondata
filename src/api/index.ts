@@ -20,6 +20,7 @@ export { Plan } from './models/Plan';
 export type { QueryData } from './models/QueryData';
 export type { RunBase } from './models/RunBase';
 export type { RunResponse } from './models/RunResponse';
+export type { Schedule } from './models/Schedule';
 export type { ScheduleInput } from './models/ScheduleInput';
 export { SchedulePeriod } from './models/SchedulePeriod';
 export type { User } from './models/User';

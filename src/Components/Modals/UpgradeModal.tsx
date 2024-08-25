@@ -27,7 +27,7 @@ export const UpgradeModal: React.FC<ModalProps> = ({
       <Modal title={title} onClose={() => setShowModal(false)} show={showModal}>
         <ModalContent className="mt-4">
           <p className="mb-5">{text}</p>
-          <Button leftIcon={Night} onClick={handleClick}>
+          <Button leftIcon={Night} onClick={handleClick} color={Button.colors.POSITIVE}>
             Upgrade
           </Button>
         </ModalContent>

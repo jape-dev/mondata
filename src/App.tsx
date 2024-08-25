@@ -1,13 +1,11 @@
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { Connector } from "./Screens/Connector";
-import { PublicJson } from "Screens/PublicJson";
+import BaseScreen from "./Screens/Base";
 import { OpenAPI } from "api";
 import { SanitizeProvider } from "./Context/SanitizeContext";
 
 export const RouterPath = {
-  CONNECT: "/",
-  PUBLIC_JSON: "/public_json/",
+  BASE: "/",
 };
 
 function App() {
@@ -18,8 +16,7 @@ function App() {
       <SanitizeProvider>
         <Router>
           <Routes>
-            <Route path={RouterPath.CONNECT} element={<Connector />} />
-            <Route path={RouterPath.PUBLIC_JSON} element={<PublicJson />} />
+            <Route path={RouterPath.BASE} element={<BaseScreen />} />
           </Routes>
         </Router>
       </SanitizeProvider>
