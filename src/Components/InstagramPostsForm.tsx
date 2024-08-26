@@ -44,6 +44,11 @@ export interface InstagramPostsForm {
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   boardId: number;
   setBoardId: React.Dispatch<React.SetStateAction<number>>;
+  period: Option;
+  step: Option;
+  days: string[];
+  startTime: string;
+  timezone: Option;
 }
 
 export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
@@ -57,6 +62,11 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   setSuccess,
   boardId,
   setBoardId,
+  period,
+  step,
+  days,
+  startTime,
+  timezone,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -111,7 +121,13 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       board_id: boardId,
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
+      board_name: boardName,
       connector: "instagram",
+      period: period.value,
+      step: step.value,
+      days: days,
+      start_datetime: startTime,
+      tz_offset: timezone.value,
     };
 
     if (
@@ -317,8 +333,10 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   }, [selectedBoardOption]);
 
   const handleBoardSelect = (selectedBoard: Option) => {
+    setBoardName(undefined);
     setSelectedBoardOption(selectedBoard);
     setBoardId(selectedBoard.value);
+    setSelectedColumnOption(undefined);
   };
 
   return (

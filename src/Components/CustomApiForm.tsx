@@ -8,7 +8,6 @@ import {
   Tooltip,
   TextField,
   TextArea,
-  Button,
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
@@ -20,7 +19,6 @@ import {
   ScheduleInput,
   Body_run_run,
   Body_run_schedule,
-  ColumnData,
   RunResponse,
 } from "../api";
 import { PairValueComponent } from "./PairValue";

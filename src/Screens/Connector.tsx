@@ -267,6 +267,11 @@ export const Connector: React.FC<{
                   setSuccess={setSuccess}
                   boardId={boardId}
                   setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : connector === "facebook_pages" ? (
                 <FacebookPagesForm
@@ -280,6 +285,11 @@ export const Connector: React.FC<{
                   setSuccess={setSuccess}
                   boardId={boardId}
                   setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : connector === "instagram" ? (
                 <InstagramPostsForm
@@ -293,6 +303,11 @@ export const Connector: React.FC<{
                   setSuccess={setSuccess}
                   boardId={boardId}
                   setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : connector === "google_ads" ? (
                 <GoogleAdsForm

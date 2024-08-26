@@ -5,7 +5,6 @@ import "monday-ui-react-core/dist/main.css";
 import { Dropdown, Tooltip, Icon, TextField } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
-  BillingService,
   FacebookService,
   UserPublic,
   MondayService,
@@ -18,7 +17,6 @@ import {
   RunResponse,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
-import { handleSuccessClick } from "../Utils/monday";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
 
@@ -46,6 +44,11 @@ export interface FacebookPagesFormProps {
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   boardId: number;
   setBoardId: React.Dispatch<React.SetStateAction<number>>;
+  period: Option;
+  step: Option;
+  days: string[];
+  startTime: string;
+  timezone: Option;
 }
 
 export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
@@ -59,6 +62,11 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   setSuccess,
   boardId,
   setBoardId,
+  period,
+  step,
+  days,
+  startTime,
+  timezone,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -112,7 +120,13 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
       board_id: boardId,
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
+      board_name: boardName,
       connector: "facebook_pages",
+      period: period.value,
+      step: step.value,
+      days: days,
+      start_datetime: startTime,
+      tz_offset: timezone.value,
     };
     if (
       sessionToken &&

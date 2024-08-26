@@ -45,6 +45,11 @@ export interface FacebookAdFormProps {
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   boardId: number;
   setBoardId: React.Dispatch<React.SetStateAction<number>>;
+  period: Option;
+  step: Option;
+  days: string[];
+  startTime: string;
+  timezone: Option;
 }
 
 export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
@@ -58,6 +63,11 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   setSuccess,
   boardId,
   setBoardId,
+  period,
+  step,
+  days,
+  startTime,
+  timezone,
 }) => {
   const [accountOptions, setAccountOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -121,7 +131,13 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       board_id: boardId,
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
+      board_name: boardName,
       connector: "facebook",
+      period: period.value,
+      step: step.value,
+      days: days,
+      start_datetime: startTime,
+      tz_offset: timezone.value,
     };
     const endDate = new Date();
     const startDate = new Date();
