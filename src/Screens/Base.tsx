@@ -7,6 +7,8 @@ import { Connector } from "./Connector";
 import { Guide } from "../Components/Modals/OnboardingGuideModal";
 import { UpgradeModal } from 'Components/Modals/UpgradeModal';
 import longLogo from '../Static/images/long-logo.png';
+import { Button } from "monday-ui-react-core";
+import { Night } from "monday-ui-react-core/icons";
 
 
 const monday = mondaySdk();
@@ -61,6 +63,11 @@ const BaseScreen: React.FC = () => {
     }
   };
 
+  const handleUpgradeClick = () => {
+    const link = "https://dataimporter.monday.com/apps/installed_apps/10150307";
+    window.open(link, "_blank");
+  };
+
 
   return (
     <div>
@@ -68,6 +75,9 @@ const BaseScreen: React.FC = () => {
         <div className="col-span-8 border-b-2 border-gray-250 h-10">
           <div className="flex justify-start h-10 items-center pl-4">
             <img src={longLogo} alt="Logo" className="h-6 !m-0" />
+            <Button onClick={handleUpgradeClick}  size={Button.sizes.SMALL} className="!h-6 ml-3 !text-xs" kind={Button.kinds.SECONDARY}>
+            {user?.plan === Plan.FREE ? "Upgrade" : "Pro"}
+          </Button>
           </div>
         </div>
         <div className="col-span-4 flex justify-end border-b-2 border-gray-250 h-10">

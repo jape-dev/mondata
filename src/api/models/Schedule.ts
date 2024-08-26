@@ -5,10 +5,12 @@
 export type Schedule = {
     user_id: number;
     board_id: number;
+    board_name?: (string | null);
     workspace_id: number;
     account_id: number;
     connector?: (string | null);
     cron?: (string | null);
+    tz_offset?: (number | null);
     data: null;
     last_run_at?: (string | null);
     next_run_at?: (string | null);

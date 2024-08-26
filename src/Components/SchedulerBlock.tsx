@@ -14,7 +14,6 @@ import { UserPublic, Plan } from "../api";
 import { Info } from "monday-ui-react-core/icons";
 import { Option } from "../Utils/models";
 import { getNextScheduledDate } from "../Utils/datetime";
-import { Night } from "monday-ui-react-core/icons";
 import { UpgradeModal } from "./Modals/UpgradeModal";
 
 export interface ScheduleFormProps {
@@ -163,7 +162,7 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
           label="Schedule this request"
           isSelected={isScheduled}
           onChange={handleIsScheduledChange}
-          className="mt-1"
+          className="mt-1 mb-2"
         />
       {isScheduled && (
         <div className="grid grid-cols-8 space-x-8">
