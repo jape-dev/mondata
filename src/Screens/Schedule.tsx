@@ -80,8 +80,8 @@ export const ScheduleTable: React.FC<ScheduleProps> = ({ sessionToken, user }) =
     return nameMap[connector] || 'Unknown Connector';
   };
 
-  const cronToHuman = (cron: string | null, tz_offset: number | null) => {
-    if (cron === null || tz_offset === null) return '-';
+  const cronToHuman = (cron: string | null | undefined, tz_offset: number | null | undefined) => {
+    if (cron === null || cron === undefined || tz_offset === null || tz_offset === undefined) return '-';
     const [minute, hour, dayOfMonth, month, dayOfWeek] = cron.split(' ');
     
     const frequency = getFrequency(minute, hour, dayOfMonth, dayOfWeek);
