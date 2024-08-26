@@ -16,19 +16,19 @@ import { FacebookPagesForm } from "../Components/FacebookPagesForm";
 import { InstagramPostsForm } from "../Components/InstagramPostsForm";
 import { GoogleAdsForm } from "../Components/GoogleAdsForm";
 import { CustomApiForm } from "Components/CustomApiForm";
-import { Guide } from "../Components/Modals/OnboardingGuideModal";
 import { SchedulerBlock } from "../Components/SchedulerBlock";
 import { RunBlock } from "Components/RunBlock";
 import { Option } from "../Utils/models";
+import { getNextScheduledDate } from "../Utils/datetime";
 
 const monday = mondaySdk();
 
-export const Connector = () => {
+export const Connector: React.FC<{ 
+  sessionToken: string | undefined;
+  user: UserPublic | undefined;
+}> = ({ sessionToken, user }) => {
   const [connector, setConnector] = useState<string>();
   const [connected, setConnected] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [user, setUser] = useState<UserPublic>();
-  const [sessionToken, setSessionToken] = useState<string>();
   const [workspaceId, setWorkspaceId] = useState<number>();
   const [isViewer, setIsViewer] = useState(false);
   const [connectTrigger, setConnectTrigger] = useState(0);
@@ -54,7 +54,7 @@ export const Connector = () => {
     "Sa",
     "Su",
   ]);
-  const [startTime, setStartTime] = useState<string>("09:00");
+  const [startTime, setStartTime] = useState<string>(getNextScheduledDate([], "09:00"));
   const [timezone, setTimezone] = useState<Option>({
     value: 0,
     label: "(UTC+00:00) Western Europe Time, London, Lisbon, Casablanca",
@@ -138,18 +138,15 @@ export const Connector = () => {
     []
   );
 
-  async function getSessionToken() {
-    return (await monday.get("sessionToken")).data;
-  }
-
   async function updateUser(connectionId: string) {
-    const token = await getSessionToken();
 
-    setSessionToken(token);
+    if (!sessionToken) {
+      return;
+    }
 
     const requestBody: HTTPAuthorizationCredentials = {
       scheme: "Bearer",
-      credentials: token,
+      credentials: sessionToken,
     };
 
     if (
@@ -198,27 +195,6 @@ export const Connector = () => {
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      await getSessionToken().then((sessionToken) => {
-        if (sessionToken) {
-          setSessionToken(sessionToken);
-          UsersService.usersReadUserByMondaySession(sessionToken)
-            .then((user: UserPublic) => {
-              setUser(user);
-            })
-            .catch((err) => {
-              const url =
-                process.env.REACT_APP_MONDAY_AUTH_URI ||
-                "https://auth.monday.com/oauth2/authorize?client_id=f45cc62f0e9a56c58ab714a159487c11&redirect_uri=http://localhost:80/api/v1/monday/callback";
-              window.location.href = url;
-            });
-        }
-      });
-    };
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
     if (user && connector) {
       UsersService.usersConnected(user?.monday_user_id, connector).then(
         (res: boolean) => {
@@ -227,10 +203,6 @@ export const Connector = () => {
       );
     }
   }, [connector, user, connectTrigger]);
-
-  const openGuideClick = () => {
-    setShowModal(true);
-  };
 
   useEffect(() => {
     monday.get("context").then((res: any) => {
@@ -244,13 +216,6 @@ export const Connector = () => {
     <>
       <div className="p-2">
         <div className="border-2 border-gray rounded-md p-5 mb-2">
-          <Button
-            kind={Button.kinds.TERTIARY}
-            className="absolute right-3 top-2 text-sm text-gray-500 font-bold"
-            onClick={openGuideClick}
-          >
-            How to use
-          </Button>
           {isViewer ? (
             <div>
               <h1 className="font-bold">Viewer Access</h1>
@@ -288,43 +253,61 @@ export const Connector = () => {
           )}
         </div>
         <div>
-          {connected === true && user && workspaceId && (
+          {connected === true && user && workspaceId && connector && (
             <>
               {connector === "facebook" ? (
                 <FacebookAdsForm
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}
                   setLoading={setLoading}
                   setSuccess={setSuccess}
                   boardId={boardId}
                   setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : connector === "facebook_pages" ? (
                 <FacebookPagesForm
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}
                   setLoading={setLoading}
                   setSuccess={setSuccess}
                   boardId={boardId}
                   setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : connector === "instagram" ? (
                 <InstagramPostsForm
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}
                   setLoading={setLoading}
                   setSuccess={setSuccess}
                   boardId={boardId}
                   setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : connector === "google_ads" ? (
                 <GoogleAdsForm
@@ -337,15 +320,21 @@ export const Connector = () => {
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
                   user={user}
+                  isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}
                   setLoading={setLoading}
                   setSuccess={setSuccess}
                   boardId={boardId}
                   setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : null}
-              {/* <SchedulerBlock
+              <SchedulerBlock
                 user={user}
                 workspaceId={workspaceId}
                 sessionToken={sessionToken}
@@ -361,7 +350,7 @@ export const Connector = () => {
                 setStartTime={setStartTime}
                 timezone={timezone}
                 setTimezone={setTimezone}
-              /> */}
+              />
               <RunBlock
                 user={user}
                 workspaceId={workspaceId}
@@ -373,6 +362,7 @@ export const Connector = () => {
                 success={success}
                 setSuccess={setSuccess}
                 boardId={boardId}
+                connector={connector}
                 period={period}
                 step={step}
                 days={days}
@@ -382,7 +372,6 @@ export const Connector = () => {
             </>
           )}
         </div>
-        <Guide showModal={showModal} setShowModal={setShowModal} />
       </div>
     </>
   );

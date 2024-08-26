@@ -13,6 +13,8 @@ import {
 import { UserPublic, Plan } from "../api";
 import { Info } from "monday-ui-react-core/icons";
 import { Option } from "../Utils/models";
+import { getNextScheduledDate } from "../Utils/datetime";
+import { UpgradeModal } from "./Modals/UpgradeModal";
 
 export interface ScheduleFormProps {
   sessionToken?: string;
@@ -32,6 +34,7 @@ export interface ScheduleFormProps {
   setTimezone: React.Dispatch<React.SetStateAction<Option>>;
 }
 
+
 export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
   sessionToken,
   workspaceId,
@@ -49,6 +52,9 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
   timezone,
   setTimezone,
 }) => {
+  const [startTimeValue, setStartTimeValue] = useState<string>("09:00");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
   const timezoneOptions = [
     { value: -12, label: "(UTC-12:00) International Date Line West" },
     { value: -11, label: "(UTC-11:00) Midway Island, Samoa" },
@@ -125,7 +131,22 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
     );
   };
 
+  const handleStartTimeChange = (time: string) => {
+    setStartTimeValue(time);
+    const datetimeString = getNextScheduledDate(days, time);
+    setStartTime(datetimeString);
+  };
+
+  const handleIsScheduledChange = () => {
+    if (user.plan === Plan.FREE) {
+      setShowUpgradeModal(true);
+    } else {
+      setIsScheduled(!isScheduled);
+    }
+  };
+
   return (
+    <>
     <div className="border-2 border-gray rounded-md p-5 mb-2 mt-2">
       <div className="flex items-center gap-1">
         <p className="font-bold text-gray-500 text-sm">* Schedule</p>
@@ -137,23 +158,12 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
           <Icon icon={Info} className="text-gray-500" />
         </Tooltip>
       </div>
-      <div className="mb-4">
-        {user.plan === Plan.FREE ? (
-          <>
-            <Button>Upgrade</Button>
-            <p className="text-sm text-gray-600 mb-4 flex items-center">
-              Scheduled requests run automatically, even if you are not logged
-              into monday.com or do not have Data Importer open.
-            </p>
-          </>
-        ) : (
-          <Toggle
-            label="Schedule this request"
-            isSelected={isScheduled}
-            onChange={() => setIsScheduled(!isScheduled)}
-          />
-        )}
-      </div>
+      <Toggle
+          label="Schedule this request"
+          isSelected={isScheduled}
+          onChange={handleIsScheduledChange}
+          className="mt-1 mb-2"
+        />
       {isScheduled && (
         <div className="grid grid-cols-8 space-x-8">
           <div className="col-span-2">
@@ -193,8 +203,8 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
             <span className="text-sm">Starting</span>
             <TextField
               type="time"
-              value={startTime}
-              onChange={(value: string) => setStartTime(value)}
+              value={startTimeValue}
+              onChange={(value: string) => handleStartTimeChange(value)}
               size={TextField.sizes.MEDIUM}
             />
           </div>
@@ -209,5 +219,7 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
         </div>
       )}
     </div>
+    <UpgradeModal showModal={showUpgradeModal} setShowModal={setShowUpgradeModal} title="Upgrade to schedule imports" text="Scheduled requests run automatically, even if you are not logged into monday.com or do not have Data Importer open." />
+    </>
   );
 };

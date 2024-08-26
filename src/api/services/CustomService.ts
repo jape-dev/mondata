@@ -46,4 +46,15 @@ export class CustomService {
             },
         });
     }
+    /**
+     * Test Data
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static customTestData(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/custom/test_data',
+        });
+    }
 }

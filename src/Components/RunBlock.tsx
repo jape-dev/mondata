@@ -14,6 +14,7 @@ export interface RunBlockProps {
   workspaceId: number;
   user: UserPublic;
   boardId: number;
+  connector: string;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   isScheduled: boolean;
   loading: boolean;
@@ -32,6 +33,7 @@ export const RunBlock: React.FC<RunBlockProps> = ({
   workspaceId,
   user,
   boardId,
+  connector,
   setIsRunning,
   isScheduled,
   loading,
@@ -115,24 +117,26 @@ export const RunBlock: React.FC<RunBlockProps> = ({
     <>
       <div className="border-2 border-gray rounded-md p-5 mb-2 mt-2">
         {isScheduled ? (
-          <div>
-            <Button
-              onClick={handleRunClick}
-              loading={loading}
-              success={success}
-              className="mt-2"
-            >
-              Schedule & Run
-            </Button>
-            <Button
-              onClick={handleRunClick}
-              loading={loading}
-              success={success}
-              className="mt-2"
-            >
-              Schedule & Run
-            </Button>
-          </div>
+          <>
+            {success ? (
+              <Button
+                onClick={handleSuccessClick}
+                loading={loading}
+                className="mt-2 bg-green-500"
+              >
+                Run Complete - Go to Board
+              </Button>
+            ) : (
+              <Button
+                onClick={handleRunClick}
+                loading={loading}
+                success={success}
+                className="mt-2"
+              >
+                Run & Add to Schedule
+              </Button>
+            )}
+          </>
         ) : (
           <>
             {success ? (
@@ -159,7 +163,7 @@ export const RunBlock: React.FC<RunBlockProps> = ({
       <UpgradeModal
         title={"Upgrade for unlimited access"}
         text={
-          "As you are currently on the free tier, you can only use Data Importer on one board. \n To keep importing your data for unlimited boards, please upgrade to the Pro plan from the App Marketplace."
+          "As you are currently on the free tier, you can only use Data Importer on three boards. \n To keep importing your data for unlimited boards, please upgrade to the Pro plan from the App Marketplace."
         }
         showModal={planModal}
         setShowModal={setPlanModal}

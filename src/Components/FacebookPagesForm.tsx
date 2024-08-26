@@ -2,16 +2,9 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import {
-  Dropdown,
-  Button,
-  Tooltip,
-  Icon,
-  TextField,
-} from "monday-ui-react-core";
+import { Dropdown, Tooltip, Icon, TextField } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
-  BillingService,
   FacebookService,
   UserPublic,
   MondayService,
@@ -19,11 +12,11 @@ import {
   MondayItem,
   RunService,
   Body_run_run,
+  Body_run_schedule,
   ScheduleInput,
-  Run,
+  RunResponse,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
-import { handleSuccessClick } from "../Utils/monday";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
 
@@ -44,24 +37,36 @@ export interface FacebookPagesFormProps {
   user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
+  isScheduled: boolean;
   isRunning: boolean;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   boardId: number;
   setBoardId: React.Dispatch<React.SetStateAction<number>>;
+  period: Option;
+  step: Option;
+  days: string[];
+  startTime: string;
+  timezone: Option;
 }
 
 export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   user,
   workspaceId,
   sessionToken,
+  isScheduled,
   isRunning,
   setIsRunning,
   setLoading,
   setSuccess,
   boardId,
   setBoardId,
+  period,
+  step,
+  days,
+  startTime,
+  timezone,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -76,6 +81,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
 
@@ -114,7 +120,13 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
       board_id: boardId,
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
+      board_name: boardName,
       connector: "facebook_pages",
+      period: period.value,
+      step: step.value,
+      days: days,
+      start_datetime: startTime,
+      tz_offset: timezone.value,
     };
     if (
       sessionToken &&
@@ -133,13 +145,26 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
             account_id: selectedAccount?.value,
             metrics: selectedFields.map((field) => field.value),
           };
+          if (isScheduled) {
+            const scheduleRequestBody: Body_run_schedule = {
+              query: queryData,
+              schedule_input: scheduleInput,
+            };
+            RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+              (err) => {
+                setLoading(false);
+                setShowScheduleModal(true);
+                setIsRunning(false);
+              }
+            );
+          }
           const requestBody: Body_run_run = {
             query: queryData,
-            schedule_input: scheduleInput,
+            schedule: scheduleInput,
           };
           RunService.runRun(sessionToken, requestBody)
-            .then((run: Run) => {
-              setBoardId(run.board_id);
+            .then((run: RunResponse) => {
+              setBoardId(run.run.board_id);
               monday.execute("valueCreatedForUser");
               setLoading(false);
               setSuccess(true);
@@ -160,13 +185,26 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
+      if (isScheduled) {
+        const scheduleRequestBody: Body_run_schedule = {
+          query: queryData,
+          schedule_input: scheduleInput,
+        };
+        RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+          (err) => {
+            setLoading(false);
+            setShowScheduleModal(true);
+            setIsRunning(false);
+          }
+        );
+      }
       const requestBody: Body_run_run = {
         query: queryData,
-        schedule_input: scheduleInput,
+        schedule: scheduleInput,
       };
       RunService.runRun(sessionToken, requestBody, boardName)
-        .then((run: Run) => {
-          setBoardId(run.board_id);
+        .then((run: RunResponse) => {
+          setBoardId(run.run.board_id);
           monday.execute("valueCreatedForUser");
           setLoading(false);
           setSuccess(true);
@@ -282,7 +320,6 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     }
   }, [selectedBoardOption]);
 
-  
   const handleBoardSelect = (selectedBoard: Option) => {
     setSelectedBoardOption(selectedBoard);
     setSelectedColumnOption(undefined);
@@ -405,6 +442,12 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Error: schedule error"}
+        text={"Was unable to schedule your import. Please try again."}
+        showModal={showScheduleModal}
+        setShowModal={setShowScheduleModal}
       />
     </div>
   );

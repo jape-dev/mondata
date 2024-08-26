@@ -9,6 +9,13 @@ declare module "monday-ui-react-core" {
   export const TextField: any;
   export const TextArea: any;
   export const Toggle: any;
-
-  // Add other components as needed
+  export const Table: any;
+  export const TableHeader: any;
+  export const TableHeaderCell: any;
+  export const TableBody: any;
+  export const TableRow: any;
+  export const TableCell: any;
+  export const Label: any;
+  export const Tab: any;
+  export const TabList: any;
 }

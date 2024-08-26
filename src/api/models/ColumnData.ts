@@ -6,5 +6,6 @@ import type { MondayItem } from './MondayItem';
 export type ColumnData = {
     column_name: string;
     items: Array<MondayItem>;
+    column_id?: (string | null);
 };
 

@@ -11,10 +11,10 @@ import {
   QueryData,
   MondayItem,
   RunService,
-  BillingService,
   Body_run_run,
+  Body_run_schedule,
   ScheduleInput,
-  Run,
+  RunResponse,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
@@ -38,23 +38,35 @@ export interface InstagramPostsForm {
   workspaceId: number;
   sessionToken?: string;
   isRunning: boolean;
+  isScheduled: boolean;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   boardId: number;
   setBoardId: React.Dispatch<React.SetStateAction<number>>;
+  period: Option;
+  step: Option;
+  days: string[];
+  startTime: string;
+  timezone: Option;
 }
 
 export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   user,
   workspaceId,
   sessionToken,
+  isScheduled,
   isRunning,
   setIsRunning,
   setLoading,
   setSuccess,
   boardId,
   setBoardId,
+  period,
+  step,
+  days,
+  startTime,
+  timezone,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -69,6 +81,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
 
@@ -108,7 +121,13 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       board_id: boardId,
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
+      board_name: boardName,
       connector: "instagram",
+      period: period.value,
+      step: step.value,
+      days: days,
+      start_datetime: startTime,
+      tz_offset: timezone.value,
     };
 
     if (
@@ -128,13 +147,26 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
             account_id: selectedAccount?.value,
             metrics: selectedFields.map((field) => field.value),
           };
+          if (isScheduled) {
+            const scheduleRequestBody: Body_run_schedule = {
+              query: queryData,
+              schedule_input: scheduleInput,
+            };
+            RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+              (err) => {
+                setLoading(false);
+                setShowScheduleModal(true);
+                setIsRunning(false);
+              }
+            );
+          }
           const requestBody: Body_run_run = {
             query: queryData,
-            schedule_input: scheduleInput,
+            schedule: scheduleInput,
           };
           RunService.runRun(sessionToken, requestBody, boardName)
-            .then((run: Run) => {
-              setBoardId(run.board_id);
+            .then((run: RunResponse) => {
+              setBoardId(run.run.board_id);
               monday.execute("valueCreatedForUser");
               setLoading(false);
               setSuccess(true);
@@ -160,17 +192,31 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
       };
+      if (isScheduled) {
+        const scheduleRequestBody: Body_run_schedule = {
+          query: queryData,
+          schedule_input: scheduleInput,
+        };
+        RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+          (err) => {
+            setLoading(false);
+            setShowScheduleModal(true);
+            setIsRunning(false);
+          }
+        );
+      }
       const requestBody: Body_run_run = {
         query: queryData,
-        schedule_input: scheduleInput,
+        schedule: scheduleInput,
       };
+
       RunService.runRun(sessionToken, requestBody, boardName)
-        .then((run: Run) => {
+        .then((run: RunResponse) => {
           setSelectedBoardOption({
-            value: run.board_id,
+            value: run.run.board_id,
             label: boardName,
           });
-          setBoardId(run.board_id);
+          setBoardId(run.run.board_id);
           monday.execute("valueCreatedForUser");
           setLoading(false);
           setSuccess(true);
@@ -287,8 +333,10 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   }, [selectedBoardOption]);
 
   const handleBoardSelect = (selectedBoard: Option) => {
+    setBoardName(undefined);
     setSelectedBoardOption(selectedBoard);
     setBoardId(selectedBoard.value);
+    setSelectedColumnOption(undefined);
   };
 
   return (
@@ -404,6 +452,12 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Error: schedule error"}
+        text={"Was unable to schedule your import. Please try again."}
+        showModal={showScheduleModal}
+        setShowModal={setShowScheduleModal}
       />
     </div>
   );

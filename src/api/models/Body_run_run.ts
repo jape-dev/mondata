@@ -6,7 +6,7 @@ import type { CustomAPIRequest } from './CustomAPIRequest';
 import type { QueryData } from './QueryData';
 import type { ScheduleInput } from './ScheduleInput';
 export type Body_run_run = {
+    schedule: ScheduleInput;
     query: (QueryData | CustomAPIRequest);
-    schedule_input: ScheduleInput;
 };
 
