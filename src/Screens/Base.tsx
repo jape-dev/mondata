@@ -64,7 +64,7 @@ const BaseScreen: React.FC = () => {
   };
 
   const handleUpgradeClick = () => {
-    const link = "https://dataimporter.monday.com/apps/installed_apps/10150307";
+    const link = "https://monday.com/marketplace/listing/10000557/data-importer";
     window.open(link, "_blank");
   };
 
