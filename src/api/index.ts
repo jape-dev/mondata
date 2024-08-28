@@ -9,7 +9,6 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { Body_run_run } from './models/Body_run_run';
 export type { Body_run_schedule } from './models/Body_run_schedule';
-export type { Body_run_test_run_import } from './models/Body_run_test_run_import';
 export type { ColumnData } from './models/ColumnData';
 export type { CustomAPIRequest } from './models/CustomAPIRequest';
 export type { HTTPAuthorizationCredentials } from './models/HTTPAuthorizationCredentials';
@@ -32,6 +31,7 @@ export { CustomService } from './services/CustomService';
 export { FacebookService } from './services/FacebookService';
 export { GoogleService } from './services/GoogleService';
 export { GoogleAdsService } from './services/GoogleAdsService';
+export { GoogleAnalyticsService } from './services/GoogleAnalyticsService';
 export { InstagramService } from './services/InstagramService';
 export { MondayService } from './services/MondayService';
 export { RunService } from './services/RunService';

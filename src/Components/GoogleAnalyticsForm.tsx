@@ -10,7 +10,7 @@ import {
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
-  GoogleAdsService,
+  GoogleAnalyticsService,
   MondayService,
   QueryData,
   MondayItem,
@@ -27,13 +27,14 @@ import { Option } from "../Utils/models";
 
 const monday = mondaySdk();
 
+
 interface BoardColumn {
   id: string;
   title: string;
   type: string;
 }
 
-export interface GoogleAdsFormProps {
+export interface GoogleAnalyticsFormProps {
   user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
@@ -51,7 +52,7 @@ export interface GoogleAdsFormProps {
   timezone: Option;
 }
 
-export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
+export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   user,
   workspaceId,
   sessionToken,
@@ -106,9 +107,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
 
   const groupingOptions = useMemo(() => {
     return [
-      { value: "campaign.name", label: "Campaign" },
-      { value: "ad_group.name", label: "Ad Group" },
-      { value: "ad_group_ad.ad.id", label: "Ad" },
+      { value: "date", label: "Date" },
     ];
   }, []);
 
@@ -140,7 +139,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
       board_name: boardName,
-      connector: "google_ads",
+      connector: "google_analytics",
       period: period.value,
       step: step.value,
       days: days,
@@ -316,7 +315,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   useEffect(() => {
     if (sessionToken) {
       try {
-        GoogleAdsService.googleAdsAdAccounts(sessionToken).then((accounts) => {
+        GoogleAnalyticsService.googleAnalyticsProperties(sessionToken).then((accounts) => {
           const accountOptions: Option[] = accounts.map((account) => ({
             label: account.label,
             value: account.value,
@@ -326,7 +325,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
       } catch (error) {
         console.error(error);
       }
-      GoogleAdsService.googleAdsFields().then((fields) => {
+      GoogleAnalyticsService.googleAnalyticsFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
           value: field.value,
@@ -440,7 +439,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">* Split by</p>
               <Tooltip
-                content="Choose whether metrics should be split by Google Ad Id, Adset Id or Campaign Id"
+                content="Choose how metrics should be split. This will be the first column in your board."
                 position={Tooltip.positions.TOP}
               >
                 <Icon icon={Info} className="text-gray-500" />
@@ -478,7 +477,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
                 * Split by Column
               </p>
               <Tooltip
-                title="The column containing the Google Ad Id, Adset Id or Campaign Id to split metrics by."
+                title="The column containing the Date to split metrics by."
                 content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Google Posts connector."
                 position={Tooltip.positions.TOP}
                 image={getImageUrl("ad-ids")}

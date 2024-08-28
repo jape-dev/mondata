@@ -15,6 +15,7 @@ import { FacebookAdsForm } from "../Components/FacebookAdsForm";
 import { FacebookPagesForm } from "../Components/FacebookPagesForm";
 import { InstagramPostsForm } from "../Components/InstagramPostsForm";
 import { GoogleAdsForm } from "../Components/GoogleAdsForm";
+import { GoogleAnalyticsForm } from "../Components/GoogleAnalyticsForm";
 import { CustomApiForm } from "Components/CustomApiForm";
 import { SchedulerBlock } from "../Components/SchedulerBlock";
 import { RunBlock } from "Components/RunBlock";
@@ -134,6 +135,16 @@ export const Connector: React.FC<{
         label: "Instagram Posts",
         leftAvatar: getIconUrl("instagram-icon"),
       },
+      {
+        value: "google_ads",
+        label: "Google Ads",
+        leftAvatar: getIconUrl("google-ads-icon"),
+      },
+      {
+        value: "google_analytics",
+        label: "Google Analytics",
+        leftAvatar: getIconUrl("google-analytics-icon"),
+      },
     ],
     []
   );
@@ -182,7 +193,7 @@ export const Connector: React.FC<{
         .catch((err) => {
           console.log(err);
         });
-    } else if (connector === "google_ads") {
+    } else if (connector === "google_ads" || connector === "google_analytics") {
       nango
         .auth("google", "google-prod")
         .then((result) => {
@@ -314,12 +325,42 @@ export const Connector: React.FC<{
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
+                  isScheduled={isScheduled}
+                  isRunning={isRunning}
+                  setIsRunning={setIsRunning}
+                  setLoading={setLoading}
+                  setSuccess={setSuccess}
+                  boardId={boardId}
+                  setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : connector === "custom_api" ? (
                 <CustomApiForm
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
                   user={user}
+                  isScheduled={isScheduled}
+                  isRunning={isRunning}
+                  setIsRunning={setIsRunning}
+                  setLoading={setLoading}
+                  setSuccess={setSuccess}
+                  boardId={boardId}
+                  setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
+                />
+              ) : connector === "google_analytics" ? (
+                <GoogleAnalyticsForm
+                  user={user}
+                  sessionToken={sessionToken}
+                  workspaceId={workspaceId}
                   isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}
