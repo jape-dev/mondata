@@ -209,6 +209,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
             };
             RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
               (err) => {
+                console.log(err);
                 setLoading(false);
                 setShowScheduleModal(true);
                 setIsRunning(false);
@@ -217,6 +218,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
           }
         })
         .catch((err) => {
+          console.log(err);
           setLoading(false);
           setShowErrorModal(true);
           setIsRunning(false);

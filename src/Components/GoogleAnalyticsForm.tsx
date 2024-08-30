@@ -2,19 +2,23 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import { Dropdown, Button, Icon, TextField } from "monday-ui-react-core";
-import { Tooltip } from "monday-ui-react-core";
+import {
+  Dropdown,
+  Tooltip,
+  Icon,
+  TextField,
+} from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
-  FacebookService,
-  UserPublic,
+  GoogleAnalyticsService,
   MondayService,
   QueryData,
   MondayItem,
   RunService,
-  Body_run_run,
-  Body_run_schedule,
+  UserPublic,
   ScheduleInput,
+  Body_run_schedule,
+  Body_run_run,
   RunResponse,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
@@ -23,10 +27,6 @@ import { Option } from "../Utils/models";
 
 const monday = mondaySdk();
 
-interface Board {
-  id: string;
-  name: string;
-}
 
 interface BoardColumn {
   id: string;
@@ -34,12 +34,12 @@ interface BoardColumn {
   type: string;
 }
 
-export interface FacebookAdFormProps {
+export interface GoogleAnalyticsFormProps {
   user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
-  isScheduled: boolean;
   isRunning: boolean;
+  isScheduled: boolean;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
@@ -52,7 +52,7 @@ export interface FacebookAdFormProps {
   timezone: Option;
 }
 
-export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
+export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   user,
   workspaceId,
   sessionToken,
@@ -73,7 +73,12 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [selectedAccount, setSelectedAccount] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
   const [selectedFields, setSelectedFields] = useState<Option[]>([]);
-  const [boards, setBoards] = useState<Option[]>([]);
+  const [boards, setBoards] = useState<Option[]>([
+    {
+      value: 999,
+      label: "Import into a new board",
+    },
+  ]);
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
     label: "Import into a new board",
     value: 999,
@@ -84,15 +89,9 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
-
-  useEffect(() => {
-    if (isRunning === true) {
-      handleRunClick();
-    }
-  }, [isRunning]);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -108,15 +107,19 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
 
   const groupingOptions = useMemo(() => {
     return [
-      { value: "campaign", label: "Campaign" },
-      { value: "adset", label: "Adset" },
-      { value: "ad", label: "Ad" },
+      { value: "date", label: "Date" },
     ];
   }, []);
 
   const getImageUrl = (imgPath: string) => {
     return require(`../Static/images/${imgPath}.png`);
   };
+
+  useEffect(() => {
+    if (isRunning === true) {
+      handleRunClick();
+    }
+  }, [isRunning]);
 
   const handleRunClick = async () => {
     setLoading(true);
@@ -126,85 +129,91 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       setLoading(false);
       return;
     }
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - date.value);
+
     const scheduleInput: ScheduleInput = {
       user_id: user.monday_user_id,
       board_id: boardId,
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
       board_name: boardName,
-      connector: "facebook",
+      connector: "google_analytics",
       period: period.value,
       step: step.value,
       days: days,
       start_datetime: startTime,
       tz_offset: timezone.value,
     };
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - date.value);
     if (
       sessionToken &&
       selectedBoardOption &&
+      selectedGrouping &&
       selectedAccount &&
-      date &&
-      boardName
+      date && 
+      selectedColumnOption
     ) {
-      if (selectedColumnOption) {
         MondayService.mondayItems(
           selectedBoardOption?.value,
           selectedColumnOption?.value,
           sessionToken
-        )
-          .then((items: MondayItem[]) => {
-            const queryData: QueryData = {
-              monday_items: items,
-              account_id: selectedAccount?.value,
-              dimensions: selectedGrouping?.value,
-              metrics: selectedFields.map((field) => field.value),
-              start_date: startDate.toISOString().split("T")[0],
-              end_date: endDate.toISOString().split("T")[0],
-            };
-            const requestBody: Body_run_run = {
+        ).then((items: MondayItem[]) => {
+          const queryData: QueryData = {
+            monday_items: items,
+            account_id: selectedAccount?.value,
+            dimensions: selectedGrouping?.value,
+            metrics: selectedFields.map((field) => field.value),
+            start_date: startDate.toISOString().split("T")[0],
+            end_date: endDate.toISOString().split("T")[0],
+          };
+          if (isScheduled) {
+            const scheduleRequestBody: Body_run_schedule = {
               query: queryData,
-              schedule: scheduleInput,
+              schedule_input: scheduleInput,
             };
-            RunService.runRun(sessionToken, requestBody, boardName)
-              .then((run: RunResponse) => {
-                setBoardId(run.run.board_id);
-                monday.execute("valueCreatedForUser");
+            RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+              (err) => {
                 setLoading(false);
-                setSuccess(true);
+                setShowScheduleModal(true);
                 setIsRunning(false);
-                if (isScheduled) {
-                  scheduleInput.data = run.data;
-                  const scheduleRequestBody: Body_run_schedule = {
-                    query: queryData,
-                    schedule_input: scheduleInput,
-                  };
-                  RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
-                    (err) => {
-                      console.log(err);
-                      setLoading(false);
-                      setShowScheduleModal(true);
-                      setIsRunning(false);
-                    }
-                  );
-                }
-              })
-              .catch((err) => {
-                setLoading(false);
-                setShowErrorModal(true);
-                setIsRunning(false);
-              });
-          })
-          .catch((err) => {
-            setLoading(false);
+              }
+            );
+          }
+          const requestBody: Body_run_run = {
+            query: queryData,
+            schedule: scheduleInput,
+          };
+          console.log(requestBody);
+          RunService.runRun(sessionToken, requestBody, boardName)
+            .then((run: RunResponse) => {
+              setBoardId(run.run.board_id);
+              monday.execute("valueCreatedForUser");
+              setLoading(false);
+              setSuccess(true);
+              setIsRunning(false);
+            })
+            .catch((err) => {
+              setLoading(false);
+              setShowErrorModal(true);
+              setIsRunning(false);
+            });
+        }).catch(() => {
             setShowErrorModal(true);
+            setLoading(false);
+            setSuccess(false);
           });
-      } else {
+      } else if (
+        sessionToken &&
+        selectedBoardOption &&
+        selectedAccount &&
+        selectedGrouping &&
+        date &&
+        boardName
+      ) {
         const queryData: QueryData = {
-          account_id: selectedAccount?.value,
-          dimensions: [selectedGrouping?.value],
+          account_id: selectedAccount.value,
+          dimensions: [selectedGrouping.value],
           metrics: selectedFields.map((field) => field.value),
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
@@ -215,6 +224,10 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         };
         RunService.runRun(sessionToken, requestBody, boardName)
           .then((run: RunResponse) => {
+            setSelectedBoardOption({
+              value: run.run.board_id,
+              label: boardName,
+            });
             setBoardId(run.run.board_id);
             monday.execute("valueCreatedForUser");
             setLoading(false);
@@ -241,12 +254,11 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
             setShowErrorModal(true);
             setIsRunning(false);
           });
+      } else {
+        setShowModal(true);
+        setLoading(false);
+        setSuccess(false);
       }
-    } else {
-      setShowModal(true);
-      setLoading(false);
-      setSuccess(false);
-    }
   };
 
   const handleFieldSelect = (selectedField: Option) => {
@@ -285,8 +297,8 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     setSelectedColumnOption(undefined);
     setSelectedGrouping(undefined);
     setSelectedBoardOption(selectedBoard);
-    setBoardId(selectedBoard.value);
     setBoardName(undefined);
+    setBoardId(selectedBoard.value);
   };
 
   const dateOptions = useMemo(
@@ -304,9 +316,9 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   useEffect(() => {
     if (sessionToken) {
       try {
-        FacebookService.facebookAdAccounts(sessionToken).then((accounts) => {
+        GoogleAnalyticsService.googleAnalyticsProperties(sessionToken).then((accounts) => {
           const accountOptions: Option[] = accounts.map((account) => ({
-            label: `${account.label} (${account.value})`,
+            label: account.label,
             value: account.value,
           }));
           setAccountOptions(accountOptions);
@@ -314,7 +326,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       } catch (error) {
         console.error(error);
       }
-      FacebookService.facebookFields().then((fields) => {
+      GoogleAnalyticsService.googleAnalyticsFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
           value: field.value,
@@ -322,27 +334,8 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         setFields(fieldOptions);
       });
     }
-  }, []);
-
-  useEffect(() => {
-    if (sessionToken) {
-      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
-        const boardOptions: Option[] = [
-          {
-            value: 999,
-            label: "Import into a new board",
-          },
-        ];
-        boards.forEach((board: Board) => {
-          boardOptions.push({
-            value: board.id,
-            label: board.name,
-          });
-        });
-        setBoards(boardOptions);
-      });
-    }
   }, [user]);
+
 
   useEffect(() => {
     if (
@@ -366,6 +359,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     }
   }, [selectedBoardOption]);
 
+
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
@@ -384,10 +378,11 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
           multi
           multiline
           options={fields}
-          isLoading={fields.length === 0}
+          sLoading={fields.length === 0}
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
+
         <div className="flex items-center gap-1">
           <p className="font-bold text-gray-500 text-sm">* Date range</p>
           <Tooltip
@@ -419,9 +414,9 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         <Dropdown
           value={selectedBoardOption}
           options={boards}
+          sLoading={boards.length === 0}
           placeholder="Select a board"
           className="mb-2"
-          isLoading={boards.length === 0}
           onOptionSelect={(e: Option) => handleBoardSelect(e)}
         />
         {selectedBoardOption?.value === 999 ? (
@@ -439,13 +434,13 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
               placeholder="Select an account"
               className="mb-2"
               options={accountOptions}
-              isLoading={accountOptions.length === 0}
+              sLoading={accountOptions.length === 0}
               onOptionSelect={(e: Option) => setSelectedAccount(e)}
             />
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">* Split by</p>
               <Tooltip
-                content="Choose whether metrics should be split by Facebook Ad Id, Adset Id or Campaign Id"
+                content="Choose how metrics should be split. This will be the first column in your board."
                 position={Tooltip.positions.TOP}
               >
                 <Icon icon={Info} className="text-gray-500" />
@@ -456,6 +451,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
               value={selectedGrouping}
               onOptionSelect={(e: Option) => setSelectedGrouping(e)}
               placeholder="Select column"
+              sLoading={groupingOptions.length === 0}
               className="mb-2"
               menuPlacement={"top"}
             />
@@ -478,28 +474,12 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         ) : selectedBoardOption && selectedBoardOption?.value !== 999 ? (
           <>
             <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Account</p>
-              <Tooltip
-                content="The ad account to fetch data from."
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              placeholder="Select an account"
-              className="mb-2"
-              options={accountOptions}
-              isLoading={accountOptions.length === 0}
-              onOptionSelect={(e: Option) => setSelectedAccount(e)}
-            />
-            <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">
                 * Split by Column
               </p>
               <Tooltip
-                title="The column containing the Facebook Ad Id, Adset Id or Campaign Id to split metrics by."
-                content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Facebook Posts connector."
+                title="The column containing the Date to split metrics by."
+                content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Google Posts connector."
                 position={Tooltip.positions.TOP}
                 image={getImageUrl("ad-ids")}
               >

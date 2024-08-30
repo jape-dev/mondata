@@ -4,7 +4,6 @@ import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
 import {
   Dropdown,
-  Button,
   Tooltip,
   Icon,
   TextField,
@@ -14,23 +13,19 @@ import {
   GoogleAdsService,
   MondayService,
   QueryData,
-  ColumnData,
   MondayItem,
   RunService,
   UserPublic,
-  BillingService,
+  ScheduleInput,
+  Body_run_schedule,
+  Body_run_run,
+  RunResponse,
 } from "../api";
-import { handleSuccessClick } from "../Utils/monday";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
 
 const monday = mondaySdk();
-
-interface Board {
-  id: string;
-  name: string;
-}
 
 interface BoardColumn {
   id: string;
@@ -42,12 +37,36 @@ export interface GoogleAdsFormProps {
   user: UserPublic;
   workspaceId: number;
   sessionToken?: string;
+  isRunning: boolean;
+  isScheduled: boolean;
+  setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  boardId: number;
+  setBoardId: React.Dispatch<React.SetStateAction<number>>;
+  period: Option;
+  step: Option;
+  days: string[];
+  startTime: string;
+  timezone: Option;
 }
 
 export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   user,
   workspaceId,
   sessionToken,
+  isScheduled,
+  isRunning,
+  setIsRunning,
+  setLoading,
+  setSuccess,
+  boardId,
+  setBoardId,
+  period,
+  step,
+  days,
+  startTime,
+  timezone,
 }) => {
   const [accountOptions, setAccountOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -67,13 +86,11 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [subdomain, setSubdomain] = useState("");
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -87,10 +104,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     }
   };
 
-  useEffect(() => {
-    console.log("sessionToken", sessionToken);
-  }, [sessionToken]);
-
   const groupingOptions = useMemo(() => {
     return [
       { value: "campaign.name", label: "Campaign" },
@@ -103,23 +116,45 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     return require(`../Static/images/${imgPath}.png`);
   };
 
+  useEffect(() => {
+    if (isRunning === true) {
+      handleRunClick();
+    }
+  }, [isRunning]);
+
   const handleRunClick = async () => {
     setLoading(true);
     const isValidName = checkBoardName();
     if (!isValidName) {
+      setIsRunning(false);
+      setLoading(false);
       return;
     }
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - date.value);
+
+    const scheduleInput: ScheduleInput = {
+      user_id: user.monday_user_id,
+      board_id: boardId,
+      account_id: user.monday_account_id,
+      workspace_id: workspaceId,
+      board_name: boardName,
+      connector: "google_ads",
+      period: period.value,
+      step: step.value,
+      days: days,
+      start_datetime: startTime,
+      tz_offset: timezone.value,
+    };
     if (
       sessionToken &&
       selectedBoardOption &&
+      selectedGrouping &&
       selectedAccount &&
-      date &&
-      boardName
+      date && 
+      selectedColumnOption
     ) {
-      if (selectedColumnOption) {
         MondayService.mondayItems(
           selectedBoardOption?.value,
           selectedColumnOption?.value,
@@ -133,71 +168,100 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
             start_date: startDate.toISOString().split("T")[0],
             end_date: endDate.toISOString().split("T")[0],
           };
-          GoogleAdsService.googleAdsFetchData(sessionToken, queryData)
-            .then((data: ColumnData[]) => {
-              MondayService.mondayAddData(
-                selectedBoardOption.value,
-                sessionToken,
-                data
-              )
-                .then(() => {
-                  // Send valueCreatedForUser event when data has been loaded into board
-                  monday.execute("valueCreatedForUser");
-                  setLoading(false);
-                  setSuccess(true);
-                })
-                .catch(() => {
-                  setShowErrorModal(true);
-                  setLoading(false);
-                  setSuccess(false);
-                });
-            })
-            .catch(() => {
-              setShowErrorModal(true);
+          const requestBody: Body_run_run = {
+            query: queryData,
+            schedule: scheduleInput,
+          };
+          console.log(requestBody);
+          RunService.runRun(sessionToken, requestBody, boardName)
+            .then((run: RunResponse) => {
+              setBoardId(run.run.board_id);
+              monday.execute("valueCreatedForUser");
               setLoading(false);
-              setSuccess(false);
+              setSuccess(true);
+              setIsRunning(false);
+              if (isScheduled) {
+                scheduleInput.data = run.data;
+                const scheduleRequestBody: Body_run_schedule = {
+                  query: queryData,
+                  schedule_input: scheduleInput,
+                };
+                RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+                  (err) => {
+                    console.log(err);
+                    setLoading(false);
+                    setShowScheduleModal(true);
+                    setIsRunning(false);
+                  }
+                );
+              }
+            })
+            .catch((err) => {
+              setLoading(false);
+              setShowErrorModal(true);
+              setIsRunning(false);
             });
-        });
-      } else {
+        }).catch(() => {
+            setShowErrorModal(true);
+            setLoading(false);
+            setSuccess(false);
+          });
+      } else if (
+        sessionToken &&
+        selectedBoardOption &&
+        selectedAccount &&
+        selectedGrouping &&
+        date &&
+        boardName
+      ) {
         const queryData: QueryData = {
-          account_id: selectedAccount?.value,
-          dimensions: [selectedGrouping?.value],
+          account_id: selectedAccount.value,
+          dimensions: [selectedGrouping.value],
           metrics: selectedFields.map((field) => field.value),
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
         };
-        GoogleAdsService.googleAdsFetchAllData(sessionToken, queryData).then(
-          (data: ColumnData[]) => {
-            MondayService.mondayCreateBoardWithData(
-              boardName,
-              sessionToken,
-              workspaceId,
-              data
-            )
-              .then((board_id) => {
-                setSelectedBoardOption({
-                  value: board_id,
-                  label: boardName,
-                });
-                // Send valueCreatedForUs
-                // Send valueCreatedForUser event when data has been loaded into board
-                monday.execute("valueCreatedForUser");
-                setLoading(false);
-                setSuccess(true);
-              })
-              .catch(() => {
-                setShowErrorModal(true);
-                setLoading(false);
-                setSuccess(false);
-              });
-          }
-        );
+        const requestBody: Body_run_run = {
+          query: queryData,
+          schedule: scheduleInput,
+        };
+        RunService.runRun(sessionToken, requestBody, boardName)
+          .then((run: RunResponse) => {
+            setSelectedBoardOption({
+              value: run.run.board_id,
+              label: boardName,
+            });
+            setBoardId(run.run.board_id);
+            monday.execute("valueCreatedForUser");
+            setLoading(false);
+            setSuccess(true);
+            setIsRunning(false);
+            if (isScheduled) {
+              scheduleInput.data = run.data;
+              const scheduleRequestBody: Body_run_schedule = {
+                query: queryData,
+                schedule_input: scheduleInput,
+              };
+              RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+                (err) => {
+                  console.log(err);
+                  setLoading(false);
+                  setShowScheduleModal(true);
+                  setIsRunning(false);
+                }
+              );
+            }
+          })
+          .catch((err) => {
+            setLoading(false);
+            setShowErrorModal(true);
+            setIsRunning(false);
+          });
+      } else {
+        setShowModal(true);
+        setLoading(false);
+        setSuccess(false);
       }
-    } else {
-      setShowModal(true);
-      setLoading(false);
-      setSuccess(false);
-    }
   };
 
   const handleFieldSelect = (selectedField: Option) => {
@@ -237,6 +301,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     setSelectedGrouping(undefined);
     setSelectedBoardOption(selectedBoard);
     setBoardName(undefined);
+    setBoardId(selectedBoard.value);
   };
 
   const dateOptions = useMemo(
@@ -274,25 +339,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     }
   }, [user]);
 
-  // useEffect(() => {
-  //   if (user?.monday_token) {
-  //     MondayService.mondayBoards(user.monday_token).then((boards: Board[]) => {
-  //       const boardOptions: Option[] = [
-  //         {
-  //           value: 999,
-  //           label: "Import into a new board",
-  //         },
-  //       ];
-  //       boards.forEach((board: Board) => {
-  //         boardOptions.push({
-  //           value: board.id,
-  //           label: board.name,
-  //         });
-  //       });
-  //       setBoards(boardOptions);
-  //     });
-  //   }
-  // }, [user]);
 
   useEffect(() => {
     if (
@@ -316,33 +362,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     }
   }, [selectedBoardOption]);
 
-  useEffect(() => {
-    const getSubdomain = () => {
-      monday
-        .get("location")
-        .then((res) => {
-          if (res.data && res.data.href) {
-            const url = new URL(res.data.href);
-            const hostnameParts = url.hostname.split(".");
-
-            if (hostnameParts.length > 2 && hostnameParts[0] !== "www") {
-              setSubdomain(hostnameParts[0]);
-            } else if (hostnameParts.length > 2) {
-              setSubdomain(hostnameParts[1]);
-            } else {
-              console.error("Unable to determine subdomain");
-            }
-          } else {
-            console.error("Invalid location data");
-          }
-        })
-        .catch((error) => {
-          console.error("Error getting location:", error);
-        });
-    };
-
-    getSubdomain();
-  }, []);
 
   return (
     <div className="mt-2">
@@ -481,27 +500,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           </>
         ) : null}
       </div>
-      {success ? (
-        <Button
-          onClick={() =>
-            handleSuccessClick(subdomain, selectedBoardOption?.value)
-          }
-          loading={loading}
-          className="mt-2 bg-green-500"
-        >
-          Run Complete - Go to Board
-        </Button>
-      ) : (
-        <Button
-          onClick={handleRunClick}
-          loading={loading}
-          success={success}
-          successText="Run Complete - Go to Board"
-          className="mt-2"
-        >
-          Run
-        </Button>
-      )}
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
       <BaseModal
         title={"Error: invalid name"}
@@ -518,12 +516,10 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         setShowModal={setShowErrorModal}
       />
       <BaseModal
-        title={"Error: could not fetch data. "}
-        text={
-          "There was an error trying to fetch your data. Please check your configuation and try again."
-        }
-        showModal={showErrordModal}
-        setShowModal={setShowErrorModal}
+        title={"Error: schedule error"}
+        text={"Was unable to schedule your import. Please try again."}
+        showModal={showScheduleModal}
+        setShowModal={setShowScheduleModal}
       />
     </div>
   );
