@@ -218,24 +218,10 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
         };
-        if (isScheduled) {
-          const scheduleRequestBody: Body_run_schedule = {
-            query: queryData,
-            schedule_input: scheduleInput,
-          };
-          RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
-            (err) => {
-              setLoading(false);
-              setShowScheduleModal(true);
-              setIsRunning(false);
-            }
-          );
-        }
         const requestBody: Body_run_run = {
           query: queryData,
           schedule: scheduleInput,
         };
-        console.log(requestBody);
         RunService.runRun(sessionToken, requestBody, boardName)
           .then((run: RunResponse) => {
             setSelectedBoardOption({
@@ -247,6 +233,21 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
             setLoading(false);
             setSuccess(true);
             setIsRunning(false);
+            if (isScheduled) {
+              scheduleInput.data = run.data;
+              const scheduleRequestBody: Body_run_schedule = {
+                query: queryData,
+                schedule_input: scheduleInput,
+              };
+              RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+                (err) => {
+                  console.log(err);
+                  setLoading(false);
+                  setShowScheduleModal(true);
+                  setIsRunning(false);
+                }
+              );
+            }
           })
           .catch((err) => {
             setLoading(false);

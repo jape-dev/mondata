@@ -164,19 +164,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
               start_date: startDate.toISOString().split("T")[0],
               end_date: endDate.toISOString().split("T")[0],
             };
-            if (isScheduled) {
-              const scheduleRequestBody: Body_run_schedule = {
-                query: queryData,
-                schedule_input: scheduleInput,
-              };
-              RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
-                (err) => {
-                  setLoading(false);
-                  setShowScheduleModal(true);
-                  setIsRunning(false);
-                }
-              );
-            }
             const requestBody: Body_run_run = {
               query: queryData,
               schedule: scheduleInput,
@@ -188,6 +175,21 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
                 setLoading(false);
                 setSuccess(true);
                 setIsRunning(false);
+                if (isScheduled) {
+                  scheduleInput.data = run.data;
+                  const scheduleRequestBody: Body_run_schedule = {
+                    query: queryData,
+                    schedule_input: scheduleInput,
+                  };
+                  RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+                    (err) => {
+                      console.log(err);
+                      setLoading(false);
+                      setShowScheduleModal(true);
+                      setIsRunning(false);
+                    }
+                  );
+                }
               })
               .catch((err) => {
                 setLoading(false);
@@ -211,19 +213,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
           query: queryData,
           schedule: scheduleInput,
         };
-        if (isScheduled) {
-          const scheduleRequestBody: Body_run_schedule = {
-            query: queryData,
-            schedule_input: scheduleInput,
-          };
-          RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
-            (err) => {
-              setLoading(false);
-              setShowScheduleModal(true);
-              setIsRunning(false);
-            }
-          );
-        }
         RunService.runRun(sessionToken, requestBody, boardName)
           .then((run: RunResponse) => {
             setBoardId(run.run.board_id);
@@ -231,6 +220,21 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
             setLoading(false);
             setSuccess(true);
             setIsRunning(false);
+            if (isScheduled) {
+              scheduleInput.data = run.data;
+              const scheduleRequestBody: Body_run_schedule = {
+                query: queryData,
+                schedule_input: scheduleInput,
+              };
+              RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+                (err) => {
+                  console.log(err);
+                  setLoading(false);
+                  setShowScheduleModal(true);
+                  setIsRunning(false);
+                }
+              );
+            }
           })
           .catch((err) => {
             setLoading(false);
