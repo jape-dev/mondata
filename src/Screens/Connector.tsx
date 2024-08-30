@@ -135,16 +135,16 @@ export const Connector: React.FC<{
         label: "Instagram Posts",
         leftAvatar: getIconUrl("instagram-icon"),
       },
-      // {
-      //   value: "google_ads",
-      //   label: "Google Ads",
-      //   leftAvatar: getIconUrl("google-ads-icon"),
-      // },
-      // {
-      //   value: "google_analytics",
-      //   label: "Google Analytics",
-      //   leftAvatar: getIconUrl("google-analytics-icon"),
-      // },
+      {
+        value: "google_ads",
+        label: "Google Ads",
+        leftAvatar: getIconUrl("google-ads-icon"),
+      },
+      {
+        value: "google_analytics",
+        label: "Google Analytics",
+        leftAvatar: getIconUrl("google-analytics-icon"),
+      },
     ],
     []
   );
