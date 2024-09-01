@@ -66,7 +66,9 @@ export const GuideModal: React.FC<OnboardingGuideModalProps> = ({
       seenOnboarding === "false" ||
       seenOnboarding === null
     ) {
-      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(true);
+      }, 2000);
     }
   }, []);
 
@@ -93,7 +95,7 @@ export const GuideModal: React.FC<OnboardingGuideModalProps> = ({
       <Modal
         title={titles[activeStepIndex]}
         onClose={() => setShowModal(false)}
-        show={true}
+        show={showModal}
       >
         <ModalContent>
           {content[activeStepIndex]}

@@ -4,11 +4,10 @@ import { UserPublic, UsersService, Plan } from "../api";
 import mondaySdk from "monday-sdk-js";
 import { ScheduleTable } from "./Schedule";
 import { Connector } from "./Connector";
-import { Guide } from "../Components/Modals/OnboardingGuideModal";
+import { GuideModal } from "../Components/Modals/OnboardingGuideModal";
 import { UpgradeModal } from 'Components/Modals/UpgradeModal';
 import longLogo from '../Static/images/long-logo.png';
 import { Button } from "monday-ui-react-core";
-import { Night } from "monday-ui-react-core/icons";
 
 
 const monday = mondaySdk();
@@ -17,7 +16,7 @@ const BaseScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [sessionToken, setSessionToken] = useState<string | undefined>();
   const [user, setUser] = useState<UserPublic>();
-  const [guideModal, setGuideModal] = useState(false);
+  const [guideModal, setGuideModal] = useState<boolean>(false);
   const [upgradeModal, setUpgradeModal] = useState(false);
 
   
@@ -95,7 +94,7 @@ const BaseScreen: React.FC = () => {
           <ScheduleTable sessionToken={sessionToken} user={user} />
         )}
       </div>
-      <Guide showModal={guideModal} setShowModal={setGuideModal} />
+      <GuideModal showModal={guideModal} setShowModal={setGuideModal} />
       <UpgradeModal showModal={upgradeModal} setShowModal={setUpgradeModal} title="Upgrade to schedule imports" text="Scheduled imports run automatically, even if you are not logged into monday.com or do not have Data Importer open." />
     </div>
   );

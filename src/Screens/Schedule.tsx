@@ -61,6 +61,7 @@ export const ScheduleTable: React.FC<ScheduleProps> = ({ sessionToken, user }) =
       'facebook_pages': 'facebook-icon',
       'instagram': 'instagram-icon',
       'google_ads': 'google-ads-icon',
+      'google_analytics': 'google-analytics-icon',
       'custom_api': 'custom-api-icon'
     };
 
@@ -74,6 +75,7 @@ export const ScheduleTable: React.FC<ScheduleProps> = ({ sessionToken, user }) =
       'facebook_pages': 'Facebook Pages',
       'instagram': 'Instagram',
       'google_ads': 'Google Ads',
+      'google_analytics': 'Google Analytics',
       'custom_api': 'Custom API'
     };
 
