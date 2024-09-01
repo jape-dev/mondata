@@ -3,8 +3,10 @@ import "../../App.css";
 import "monday-ui-react-core/dist/main.css";
 import { Modal, ModalContent, Steps } from "monday-ui-react-core";
 import { getImageUrl } from "Utils/image";
+import { BaseModal } from "./BaseModal";
 
-const steps = [<div />, <div />, <div />, <div />, <div />, <div />];
+
+const steps = [<div />, <div />, <div />, <div />, <div />];
 
 const titles = [
   "Welcome to Data Importer",
@@ -46,11 +48,27 @@ export interface OnboardingGuideModalProps {
   setShowModal: (showModal: boolean) => void;
 }
 
-export const Guide: React.FC<OnboardingGuideModalProps> = ({
+export const GuideModal: React.FC<OnboardingGuideModalProps> = ({
   showModal,
   setShowModal,
 }) => {
+  console.log("GuideModal rendered with showModal:", showModal);
+  
+  useEffect(() => {
+    console.log("GuideModal useEffect, showModal:", showModal);
+  }, [showModal]);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
+
+  useEffect(() => {
+    const seenOnboarding = localStorage.getItem("seenOnboarding");
+    if (
+      seenOnboarding === undefined ||
+      seenOnboarding === "false" ||
+      seenOnboarding === null
+    ) {
+      setShowModal(true);
+    }
+  }, []);
 
   const stepPrev = useCallback(() => {
     setActiveStepIndex((prevState) => prevState - 1);
@@ -71,11 +89,11 @@ export const Guide: React.FC<OnboardingGuideModalProps> = ({
   };
 
   return (
-    <div>
+    <div className="z-100000"> 
       <Modal
         title={titles[activeStepIndex]}
         onClose={() => setShowModal(false)}
-        show={showModal}
+        show={true}
       >
         <ModalContent>
           {content[activeStepIndex]}
