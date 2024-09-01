@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import "../../App.css";
 import "monday-ui-react-core/dist/main.css";
 import { Modal, ModalContent, Steps } from "monday-ui-react-core";
@@ -33,7 +33,10 @@ const content = [
   </div>,
   <div className="mt-2">
     Press run and you're good to go. Your metrics will start importing into your
-    board.{" "}
+    board. If you have any questions or need support, please reach out at{" "}
+    <a className="text-blue underline" href="mailto:james@dataimporter.co">
+      james@dataimporter.co
+    </a>
   </div>
 ];
 const images = ["", "applications", "options", "post-urls", "run-complete", ""];
@@ -48,17 +51,6 @@ export const Guide: React.FC<OnboardingGuideModalProps> = ({
   setShowModal,
 }) => {
   const [activeStepIndex, setActiveStepIndex] = useState(0);
-
-  // useEffect(() => {
-  //   const seenOnboarding = localStorage.getItem("seenOnboarding");
-  //   if (
-  //     seenOnboarding === undefined ||
-  //     seenOnboarding === "false" ||
-  //     seenOnboarding === null
-  //   ) {
-  //     setShowModal(true);
-  //   }
-  // }, []);
 
   const stepPrev = useCallback(() => {
     setActiveStepIndex((prevState) => prevState - 1);
