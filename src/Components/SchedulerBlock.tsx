@@ -149,7 +149,7 @@ export const SchedulerBlock: React.FC<ScheduleFormProps> = ({
     <>
     <div className="border-2 border-gray rounded-md p-5 mb-2 mt-2">
       <div className="flex items-center gap-1">
-        <p className="font-bold text-gray-500 text-sm">* Schedule</p>
+        <p className="font-bold text-gray-500 text-sm">Schedule</p>
         <Tooltip
           content="Scheduled requests run automatically, even if you are not logged
           into monday.com or do not have Data Importer open."

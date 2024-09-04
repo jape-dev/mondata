@@ -91,6 +91,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [show2StepModal, setShow2StepModal] = useState(false);
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -318,17 +319,35 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
 
   useEffect(() => {
     if (sessionToken) {
-      try {
         GoogleAdsService.googleAdsAdAccounts(sessionToken).then((accounts) => {
           const accountOptions: Option[] = accounts.map((account) => ({
             label: account.label,
             value: account.value,
           }));
           setAccountOptions(accountOptions);
+        }).catch((error: any) => {
+          console.error("Error fetching Google Ads accounts:", error);
+          console.log("Full error object:", JSON.stringify(error, null, 2));
+          
+          if (error.body && error.body.detail) {
+            const errorDetail = error.body.detail;
+            console.log("Error detail:", errorDetail);
+            
+            if (errorDetail.includes("TWO_STEP_VERIFICATION_NOT_ENROLLED")) {
+              setShow2StepModal(true);
+            } else if (errorDetail.includes("PERMISSION_DENIED")) {
+              // Handle permission denied error
+              console.log("Permission denied error");
+              // You might want to show a different modal or message for this
+            } else {
+              // Handle other specific error messages here
+              console.log("Unhandled error type");
+            }
+          } else {
+            // Handle cases where there's no expected error structure
+            console.log("Unexpected error structure:", error);
+          }
         });
-      } catch (error) {
-        console.error(error);
-      }
       GoogleAdsService.googleAdsFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
@@ -514,6 +533,20 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         }
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Google Ads Error: 2 step verification not enrolled"}
+        text={
+          <>
+            Google Ads requires 2 step verification to be enabled on your account in order to use their API. If you don't see any accounts in the drop down menu, please{" "}
+            <a href="https://support.google.com/google-ads/answer/12864186" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+              enable 2 step verification
+            </a>{" "}
+            and try again.
+          </>
+        }
+        showModal={show2StepModal}
+        setShowModal={setShow2StepModal}
       />
       <BaseModal
         title={"Error: schedule error"}
