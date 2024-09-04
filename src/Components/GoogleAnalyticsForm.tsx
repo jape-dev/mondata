@@ -92,6 +92,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showNoValuesModal, setShowNoValuesModal] = useState(false);
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -249,9 +250,18 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
               );
             }
           })
-          .catch((err) => {
+          .catch((error: any) => {
+            if (error.body && error.body.detail) {
+              const errorDetail = error.body.detail;
+              console.log("Error detail:", errorDetail);
+              if (errorDetail.includes("NO_GOOGLE_ANALYTICS_VALUES")) {
+                setShowNoValuesModal(true);
+            } else {
+              // Handle cases where there's no expected error structure
+              console.log("Unexpected error structure:", error);
+              setShowErrorModal(true);
+            }}
             setLoading(false);
-            setShowErrorModal(true);
             setIsRunning(false);
           });
       } else {
@@ -518,6 +528,12 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
         text={"Was unable to schedule your import. Please try again."}
         showModal={showScheduleModal}
         setShowModal={setShowScheduleModal}
+      />
+      <BaseModal
+        title={"Error: No Data Found"}
+        text={"No data found for this Google Analytics account in the date range you selected. Please check your configuration and try again. If you think this is an error, please contact support at james@dataimporter.co"}
+        showModal={showNoValuesModal}
+        setShowModal={setShowNoValuesModal}
       />
     </div>
   );
