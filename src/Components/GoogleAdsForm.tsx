@@ -93,6 +93,10 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [show2StepModal, setShow2StepModal] = useState(false);
 
+  useEffect(() => {
+    console.log("showModal", showModal)
+  }, [showModal])
+  
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
     if (boardName && currentNames.includes(boardName)) {
@@ -326,9 +330,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           }));
           setAccountOptions(accountOptions);
         }).catch((error: any) => {
-          console.error("Error fetching Google Ads accounts:", error);
-          console.log("Full error object:", JSON.stringify(error, null, 2));
-          
           if (error.body && error.body.detail) {
             const errorDetail = error.body.detail;
             console.log("Error detail:", errorDetail);
