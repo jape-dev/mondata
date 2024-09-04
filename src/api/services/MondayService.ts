@@ -70,6 +70,29 @@ export class MondayService {
         });
     }
     /**
+     * Groups
+     * @param sessionToken
+     * @param boardId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static mondayGroups(
+        sessionToken: string,
+        boardId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/monday/groups',
+            query: {
+                'session_token': sessionToken,
+                'board_id': boardId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Items
      * @param boardId
      * @param columnId

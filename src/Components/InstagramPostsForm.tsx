@@ -19,6 +19,7 @@ import {
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
+import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
 
@@ -79,10 +80,14 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
+  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+    label: "Import into a new group",
+    value: 999,
+  });
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [boardName, setBoardName] = useState();
+  const [boardName, setBoardName] = useState<string>();
   const [showErrordModal, setShowErrorModal] = useState(false);
 
   const checkBoardName = () => {
@@ -95,10 +100,6 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
     } else {
       return true;
     }
-  };
-
-  const getImageUrl = (imgPath: string) => {
-    return require(`../Static/images/${imgPath}.png`);
   };
 
   useEffect(() => {
@@ -314,35 +315,6 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
     }
   }, [user]);
 
-  useEffect(() => {
-    if (
-      selectedBoardOption &&
-      selectedBoardOption?.value !== 999 &&
-      sessionToken
-    ) {
-      MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
-        .then((columns: BoardColumn[]) => {
-          const columnOptions: Option[] = columns.map(
-            (column: BoardColumn) => ({
-              value: column.id,
-              label: column.title,
-            })
-          );
-          setBoardColumns(columnOptions);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-  }, [selectedBoardOption]);
-
-  const handleBoardSelect = (selectedBoard: Option) => {
-    setBoardName(undefined);
-    setSelectedBoardOption(selectedBoard);
-    setBoardId(selectedBoard.value);
-    setSelectedColumnOption(undefined);
-  };
-
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
@@ -381,67 +353,27 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
       </div>
-      <div className="border-2 border-gray rounded-md p-5">
-        <div className="flex items-center gap-1">
-          <p className="font-bold text-gray-500 text-sm">* Board</p>
-          <Tooltip
-            content="The board to import metrics into."
-            position={Tooltip.positions.TOP}
-          >
-            <Icon icon={Info} className="text-gray-500" />
-          </Tooltip>
-        </div>
-        <Dropdown
-          value={selectedBoardOption}
-          options={boards}
-          sLoading={boards.length === 0}
-          placeholder="Select a board"
-          className="mb-2"
-          onOptionSelect={(e: Option) => handleBoardSelect(e)}
-        />
-        {selectedBoardOption?.value && selectedBoardOption.value !== 999 ? (
-          <>
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">
-                * Post Url Column
-              </p>
-              <Tooltip
-                title="The column containing the url of post"
-                content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Instagram Ads application."
-                position={Tooltip.positions.TOP}
-                image={getImageUrl("post-urls")}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              options={boardColumns}
-              sLoading={boardColumns.length === 0}
-              onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-              placeholder="Select column"
-              className="mb-2"
-            />
-          </>
-        ) : (
-          <>
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Board Name</p>
-              <Tooltip
-                content="The name of your newly created board"
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <TextField
-              onChange={(e: any) => setBoardName(e)}
-              size={TextField.sizes.MEDIUM}
-              placeholder="Enter name"
-              className="mb-2 !text-sm"
-            />
-          </>
-        )}
-      </div>
+      <BoardBlock
+        sessionToken={sessionToken}
+        workspaceId={workspaceId}
+        user={user}
+        boards={boards}
+        boardId={boardId}
+        setBoardId={setBoardId}
+        connector="instagram"
+        selectedBoardOption={selectedBoardOption}
+        setSelectedBoardOption={setSelectedBoardOption}
+        selectedColumnOption={selectedColumnOption}
+        setSelectedColumnOption={setSelectedColumnOption}
+        boardName={boardName}
+        setBoardName={setBoardName}
+        selectedGroupOption={selectedGroupOption}
+        setSelectedGroupOption={setSelectedGroupOption}
+        columnTitle="Post UrlColumn"
+        columnModalTitle="The column containing the url of post"
+        columnModalDescription="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Instagram Ads application."
+        columnModalImage="post-urls"
+      />
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
       <BaseModal
         title={"Error: invalid name"}
