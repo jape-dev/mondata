@@ -235,6 +235,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       setShowModal(true);
       setLoading(false);
       setSuccess(false);
+      setIsRunning(false);
     }
   };
 

@@ -258,6 +258,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
         setShowModal(true);
         setLoading(false);
         setSuccess(false);
+        setIsRunning(false);
       }
   };
 

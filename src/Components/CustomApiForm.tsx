@@ -227,6 +227,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       setShowModal(true);
       setLoading(false);
       setSuccess(false);
+      setIsRunning(false);
     }
   };
 

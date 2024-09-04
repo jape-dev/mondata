@@ -223,6 +223,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
       setShowFieldsModal(true);
       setLoading(false);
       setSuccess(false);
+      setIsRunning(false);
     }
   };
 

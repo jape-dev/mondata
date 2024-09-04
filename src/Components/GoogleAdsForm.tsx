@@ -86,16 +86,13 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
-  const [showModal, setShowModal] = useState(false);
+  const [showFieldsRequiredModal, setShowFieldsRequiredModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [show2StepModal, setShow2StepModal] = useState(false);
 
-  useEffect(() => {
-    console.log("showModal", showModal)
-  }, [showModal])
   
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -263,9 +260,10 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
             setIsRunning(false);
           });
       } else {
-        setShowModal(true);
+        setShowFieldsRequiredModal(true);
         setLoading(false);
         setSuccess(false);
+        setIsRunning(false);
       }
   };
 
@@ -520,7 +518,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           </>
         ) : null}
       </div>
-      <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
+      <FieldsRequiredModal showModal={showFieldsRequiredModal} setShowModal={setShowFieldsRequiredModal} />
       <BaseModal
         title={"Error: invalid name"}
         text={"This board name already exists. Please choose a new name"}
