@@ -455,7 +455,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
               placeholder="Select an account"
               className="mb-2"
               options={accountOptions}
-              sLoading={accountOptions.length === 0}
+              isLoading={accountOptions.length === 0 ? true : false}
               onOptionSelect={(e: Option) => setSelectedAccount(e)}
             />
             <div className="flex items-center gap-1">
