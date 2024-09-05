@@ -246,6 +246,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       setShowModal(true);
       setLoading(false);
       setSuccess(false);
+      setIsRunning(false);
     }
   };
 

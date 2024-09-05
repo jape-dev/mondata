@@ -236,6 +236,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       setShowModal(true);
       setLoading(false);
       setSuccess(false);
+      setIsRunning(false);
     }
   };
 
@@ -331,7 +332,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           placeholder="Select a page"
           className="mb-2"
           options={pageOptions}
-          sLoading={pageOptions.length === 0}
+          isLoading={pageOptions.length === 0}
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
         <div className="flex items-center gap-1">
@@ -348,7 +349,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           multi
           multiline
           options={fields}
-          sLoading={fields.length === 0}
+          isLoading={fields.length === 0}
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />

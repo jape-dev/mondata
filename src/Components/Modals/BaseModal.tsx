@@ -4,7 +4,7 @@ import { Modal, ModalContent } from "monday-ui-react-core";
 
 export interface BaseModalProps {
   title: string;
-  text: string;
+  text: string | React.ReactNode;
   showModal: boolean;
   setShowModal: (showModal: boolean) => void;
 }
@@ -19,7 +19,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
     <div>
       <Modal title={title} onClose={() => setShowModal(false)} show={showModal}>
         <ModalContent className="mt-4">
-          <p>{text}</p>
+          {text}
         </ModalContent>
       </Modal>
     </div>

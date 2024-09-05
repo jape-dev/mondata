@@ -92,6 +92,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   const [boardName, setBoardName] = useState();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showNoValuesModal, setShowNoValuesModal] = useState(false);
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -249,15 +250,25 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
               );
             }
           })
-          .catch((err) => {
+          .catch((error: any) => {
+            if (error.body && error.body.detail) {
+              const errorDetail = error.body.detail;
+              console.log("Error detail:", errorDetail);
+              if (errorDetail.includes("NO_GOOGLE_ANALYTICS_VALUES")) {
+                setShowNoValuesModal(true);
+            } else {
+              // Handle cases where there's no expected error structure
+              console.log("Unexpected error structure:", error);
+              setShowErrorModal(true);
+            }}
             setLoading(false);
-            setShowErrorModal(true);
             setIsRunning(false);
           });
       } else {
         setShowModal(true);
         setLoading(false);
         setSuccess(false);
+        setIsRunning(false);
       }
   };
 
@@ -378,7 +389,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
           multi
           multiline
           options={fields}
-          sLoading={fields.length === 0}
+          isLoading={fields.length === 0}
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
@@ -414,7 +425,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
         <Dropdown
           value={selectedBoardOption}
           options={boards}
-          sLoading={boards.length === 0}
+          isLoading={boards.length === 0}
           placeholder="Select a board"
           className="mb-2"
           onOptionSelect={(e: Option) => handleBoardSelect(e)}
@@ -434,7 +445,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
               placeholder="Select an account"
               className="mb-2"
               options={accountOptions}
-              sLoading={accountOptions.length === 0}
+              isLoading={accountOptions.length === 0}
               onOptionSelect={(e: Option) => setSelectedAccount(e)}
             />
             <div className="flex items-center gap-1">
@@ -451,7 +462,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
               value={selectedGrouping}
               onOptionSelect={(e: Option) => setSelectedGrouping(e)}
               placeholder="Select column"
-              sLoading={groupingOptions.length === 0}
+              isLoading={groupingOptions.length === 0}
               className="mb-2"
               menuPlacement={"top"}
             />
@@ -517,6 +528,12 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
         text={"Was unable to schedule your import. Please try again."}
         showModal={showScheduleModal}
         setShowModal={setShowScheduleModal}
+      />
+      <BaseModal
+        title={"Error: No Data Found"}
+        text={"No data found for this Google Analytics account in the date range you selected. Please check your configuration and try again. If you think this is an error, please contact support at james@dataimporter.co"}
+        showModal={showNoValuesModal}
+        setShowModal={setShowNoValuesModal}
       />
     </div>
   );

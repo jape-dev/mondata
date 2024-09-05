@@ -5,6 +5,7 @@
 export type Schedule = {
     user_id: number;
     board_id: number;
+    group_id: number;
     board_name?: (string | null);
     workspace_id: number;
     account_id: number;
