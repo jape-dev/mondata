@@ -365,7 +365,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           multi
           multiline
           options={fields}
-          sLoading={fields.length === 0}
+          isLoading={fields.length === 0}
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
