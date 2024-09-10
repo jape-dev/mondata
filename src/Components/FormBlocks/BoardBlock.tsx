@@ -27,6 +27,8 @@ export interface BoardBlockProps {
   setSelectedColumnOption: React.Dispatch<React.SetStateAction<Option | undefined>>;
   boardName?: string;
   setBoardName: React.Dispatch<React.SetStateAction<string | undefined>>;
+  groupName?: string;
+  setGroupName: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedGroupOption?: Option;
   setSelectedGroupOption: React.Dispatch<React.SetStateAction<Option | undefined>>;
   columnTitle?: string;
@@ -49,6 +51,8 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
   setSelectedColumnOption,
   boardName,
   setBoardName,
+  groupName,
+  setGroupName,
   selectedGroupOption,
   setSelectedGroupOption,
   columnTitle,
@@ -67,7 +71,12 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
     setSelectedGroupOption(undefined);
   };
 
-  
+  const handleGroupSelect = (selectedGroup: Option) => {
+    setSelectedGroupOption(selectedGroup);
+    setGroupName(undefined);
+  };
+
+
   useEffect(() => {
     if (
       selectedBoardOption &&
@@ -92,17 +101,19 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
           const groupOptions: Option[] = [
             {
               value: 999,
-              label: "Import into a new grouo",
+              label: "Import into a new group",
             },
             {
               value: 998,
-              label: "Import into all existing groups",
+              label: "Import into all groups",
             },
-            groups.map((group: any) => ({
+          ];
+          groups.forEach((group: any) => {
+            groupOptions.push({
               value: group.id,
               label: group.title,
-            })),
-          ];
+            });
+          });
           setBoardGroups(groupOptions);
         })
         .catch((error: any) => {
@@ -147,12 +158,12 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
             </div>
             <Dropdown
               options={boardGroups}
-              sLoading={boardGroups.length === 0}
+              isLoading={boardGroups.length === 0}
               onOptionSelect={(e: Option) => setSelectedGroupOption(e)}
               placeholder="Select group"
               className="mb-2"
             />
-            {selectedGroupOption?.value && selectedGroupOption.value !== 999 && columnModalTitle && columnModalDescription && columnModalImage && (
+            {selectedGroupOption?.value && selectedGroupOption.value !== 999 && columnModalTitle && columnModalDescription && columnModalImage ? (
                 <>
                     <div className="flex items-center gap-1">
                         <p className="font-bold text-gray-500 text-sm">
@@ -167,15 +178,37 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
                         </Tooltip>
                   </div>
                   <Dropdown
-                    // Add an onOpen to 
                     options={boardColumns}
-                    sLoading={boardColumns.length === 0}
+                    isLoading={boardColumns.length === 0}
                     onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
                     placeholder="Select column"
                     className="mb-2"
                     />
                 </>
-            )}
+            ) : selectedGroupOption?.value && selectedGroupOption.value === 999 ? (
+                <>
+                <div className="flex items-center gap-1">
+                <p className="font-bold text-gray-500 text-sm">
+                    * Group Name
+                </p>
+                <Tooltip
+                    content={"Name of new group to be created."}
+                    position={Tooltip.positions.TOP}
+                >
+                <Icon icon={Info} className="text-gray-500" />
+                </Tooltip>
+                </div>
+                <TextField
+                    onChange={(e: any) => setGroupName(e)}
+                    size={TextField.sizes.MEDIUM}s
+                    placeholder="Enter name"
+                    className="mb-2 !text-sm"
+                />
+                </>
+            ) : (
+                <></>
+            )
+        }
           </>
         ) : (
           <>

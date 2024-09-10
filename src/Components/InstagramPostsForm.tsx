@@ -88,6 +88,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [showNameModal, setShowNameModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState<string>();
+  const [groupName, setGroupName] = useState<string>();
   const [showErrordModal, setShowErrorModal] = useState(false);
 
   const checkBoardName = () => {
@@ -123,6 +124,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
       board_name: boardName,
+      group_name: groupName,
       connector: "instagram",
       period: period.value,
       step: step.value,
@@ -140,7 +142,8 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       MondayService.mondayItems(
         selectedBoardOption?.value,
         selectedColumnOption?.value,
-        sessionToken
+        sessionToken,
+        selectedGroupOption?.value,
       )
         .then((items: MondayItem[]) => {
           const queryData: QueryData = {
@@ -152,7 +155,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
             query: queryData,
             schedule: scheduleInput,
           };
-          RunService.runRun(sessionToken, requestBody, boardName)
+          RunService.runRun(sessionToken, requestBody)
             .then((run: RunResponse) => {
               setBoardId(run.run.board_id);
               monday.execute("valueCreatedForUser");
@@ -189,7 +192,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       sessionToken &&
       selectedBoardOption &&
       selectedAccount &&
-      boardName
+      (boardName || groupName)
     ) {
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
@@ -202,10 +205,11 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
 
       RunService.runRun(sessionToken, requestBody, boardName)
         .then((run: RunResponse) => {
+          if (boardName) {
           setSelectedBoardOption({
             value: run.run.board_id,
             label: boardName,
-          });
+          })};
           setBoardId(run.run.board_id);
           monday.execute("valueCreatedForUser");
           setLoading(false);
@@ -368,9 +372,11 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         setSelectedColumnOption={setSelectedColumnOption}
         boardName={boardName}
         setBoardName={setBoardName}
+        groupName={groupName}
+        setGroupName={setGroupName}
         selectedGroupOption={selectedGroupOption}
         setSelectedGroupOption={setSelectedGroupOption}
-        columnTitle="Post UrlColumn"
+        columnTitle="Post Url Column"
         columnModalTitle="The column containing the url of post"
         columnModalDescription="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Instagram Ads application."
         columnModalImage="post-urls"

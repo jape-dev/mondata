@@ -9,8 +9,9 @@ export type ScheduleInput = {
     board_id: number;
     workspace_id: number;
     account_id: number;
-    group_id?: (number | null);
+    group_id?: (string | null);
     board_name?: (string | null);
+    group_name?: (string | null);
     connector?: (string | null);
     period?: (SchedulePeriod | null);
     step?: (number | null);
