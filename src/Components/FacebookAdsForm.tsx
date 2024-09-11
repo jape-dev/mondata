@@ -146,8 +146,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       sessionToken &&
       selectedBoardOption &&
       selectedAccount &&
-      date &&
-      boardName
+      date
     ) {
       if (selectedColumnOption) {
         MondayService.mondayItems(
@@ -507,14 +506,22 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
                 <Icon icon={Info} className="text-gray-500" />
               </Tooltip>
             </div>
-            <Dropdown
+            <Tooltip
+                title="The column containing the Facebook Ad Id, Adset Id or Campaign Id to split metrics by."
+                content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Facebook Posts connector."
+                position={Tooltip.positions.TOP}
+                image={getImageUrl("ad-ids")}
+              >
+                          <Dropdown
               options={boardColumns}
               value={selectedColumnOption}
               onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
               placeholder="Select column"
               className="mb-2"
-              menuPlacement={"top"}
+              menuPlacement={"bottom"}
             />
+              </Tooltip>
+  
           </>
         ) : null}
       </div>
