@@ -28,12 +28,6 @@ interface Board {
   name: string;
 }
 
-interface BoardColumn {
-  id: string;
-  title: string;
-  type: string;
-}
-
 export interface InstagramPostsForm {
   user: UserPublic;
   workspaceId: number;
@@ -73,12 +67,11 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [selectedAccount, setSelectedAccount] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
   const [selectedFields, setSelectedFields] = useState<Option[]>([]);
-  const [boards, setBoards] = useState<Option[]>([]);
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
     label: "Import into a new board",
     value: 999,
   });
-  const [boardColumns, setBoardColumns] = useState<Option[]>([]);
+  const [boards, setBoards] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
     label: "Import into a new group",
@@ -363,6 +356,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         workspaceId={workspaceId}
         user={user}
         boards={boards}
+        setBoards={setBoards}
         boardId={boardId}
         setBoardId={setBoardId}
         connector="instagram"

@@ -6,6 +6,11 @@ import { UserPublic, MondayService } from "../../api";
 import { Option } from "../../Utils/models";
 import { getImageUrl } from "../../Utils/image";
 
+interface Board {
+  id: string;
+  name: string;
+}
+
 
 interface BoardColumn {
     id: string;
@@ -17,9 +22,10 @@ export interface BoardBlockProps {
   sessionToken?: string;
   workspaceId: number;
   user: UserPublic;
-  boards: Option[];
   boardId: number;
   setBoardId: React.Dispatch<React.SetStateAction<number>>;
+  boards: Option[];
+  setBoards: React.Dispatch<React.SetStateAction<Option[]>>;
   connector: string;
   selectedBoardOption: Option;
   setSelectedBoardOption: React.Dispatch<React.SetStateAction<Option>>;
@@ -41,9 +47,10 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
   sessionToken,
   workspaceId,
   user,
-  boards,
   boardId,
   setBoardId,
+  boards,
+  setBoards,
   connector,
   selectedBoardOption,
   setSelectedBoardOption,
@@ -121,6 +128,27 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
         });
     }
   }, [selectedBoardOption]);
+
+
+  useEffect(() => {
+    if (sessionToken) {
+      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
+        const boardOptions: Option[] = [
+          {
+            value: 999,
+            label: "Import into a new board",
+          },
+        ];
+        boards.forEach((board: Board) => {
+          boardOptions.push({
+            value: board.id,
+            label: board.name,
+          });
+        });
+        setBoards(boardOptions);
+      });
+    }
+  }, [user]);
 
   return (
     <>
