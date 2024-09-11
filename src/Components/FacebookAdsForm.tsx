@@ -509,17 +509,17 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
             <Tooltip
                 title="The column containing the Facebook Ad Id, Adset Id or Campaign Id to split metrics by."
                 content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Facebook Posts connector."
-                position={Tooltip.positions.TOP}
+                position={Tooltip.positions.TOP_START}
                 image={getImageUrl("ad-ids")}
               >
-                          <Dropdown
-              options={boardColumns}
-              value={selectedColumnOption}
-              onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-              placeholder="Select column"
-              className="mb-2"
-              menuPlacement={"bottom"}
-            />
+                <Dropdown
+                  options={boardColumns}
+                  value={selectedColumnOption}
+                  onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
+                  placeholder="Select column"
+                  className="mb-2"
+                  menuPlacement={"bottom"}
+                />
               </Tooltip>
   
           </>
