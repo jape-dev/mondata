@@ -177,20 +177,29 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
                 * Group
               </p>
               <Tooltip
-                title="The column containing the url of post"
-                content="Select the boardgroup you want to import metrics into."
+                title={columnModalTitle}
+                content={columnModalDescription}
+                image={columnModalImage ? getImageUrl(columnModalImage) : undefined}
                 position={Tooltip.positions.TOP}
               >
                 <Icon icon={Info} className="text-gray-500" />
               </Tooltip>
             </div>
+            <Tooltip
+                title={columnModalTitle}
+                content={columnModalDescription}
+                image={columnModalImage ? getImageUrl(columnModalImage) : undefined}
+                position={Tooltip.positions.TOP_START}
+              >
             <Dropdown
               options={boardGroups}
               isLoading={boardGroups.length === 0}
               onOptionSelect={(e: Option) => setSelectedGroupOption(e)}
               placeholder="Select group"
               className="mb-2"
+              menuPlacement={"bottom"}
             />
+              </Tooltip>
             {selectedGroupOption?.value && selectedGroupOption.value !== 999 && columnModalTitle && columnModalDescription && columnModalImage ? (
                 <>
                     <div className="flex items-center gap-1">
@@ -203,15 +212,23 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
                             image={getImageUrl(columnModalImage)}
                         >
                         <Icon icon={Info} className="text-gray-500" />
-                        </Tooltip>
+                        </Tooltip>  
                   </div>
+                  <Tooltip
+                  title={columnModalTitle}
+                  content={columnModalDescription}
+                  image={getImageUrl(columnModalImage)}
+                position={Tooltip.positions.TOP_START}
+              >
                   <Dropdown
                     options={boardColumns}
                     isLoading={boardColumns.length === 0}
                     onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
                     placeholder="Select column"
                     className="mb-2"
+                    menuPlacement={"bottom"}
                     />
+                    </Tooltip>
                 </>
             ) : selectedGroupOption?.value && selectedGroupOption.value === 999 ? (
                 <>
