@@ -18,7 +18,7 @@ export const UpgradeModal: React.FC<ModalProps> = ({
   setShowModal,
 }) => {
   const handleClick = () => {
-    const link = "https://dataimporter.monday.com/apps/installed_apps/10150307";
+    const link = "https://monday.com/marketplace/listing/10000557/data-importer";
     window.open(link, "_blank");
     setShowModal(false);
   };
