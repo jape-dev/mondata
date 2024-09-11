@@ -408,20 +408,28 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
               </p>
               <Tooltip
                 title="The column containing the url of post"
-                content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Instagram Ads application."
+                content="(Example above). Each row containing a url will have imported metrics for it."
                 position={Tooltip.positions.TOP}
                 image={getImageUrl("post-urls")}
               >
                 <Icon icon={Info} className="text-gray-500" />
               </Tooltip>
             </div>
-            <Dropdown
-              options={boardColumns}
-              isLoading={boardColumns.length === 0}
-              onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-              placeholder="Select column"
-              className="mb-2"
+            <Tooltip
+                title="The column containing the url of post"
+                content="(Example above). Each row containing a url will have imported metrics for it."
+                position={Tooltip.positions.TOP_START}
+                image={getImageUrl("post-urls")}
+              >
+              <Dropdown
+                options={boardColumns}
+                isLoading={boardColumns.length === 0}
+                onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
+                placeholder="Select column"
+                className="mb-2"
+                menuPlacement={"bottom"}
             />
+              </Tooltip>
           </>
         ) : (
           <>

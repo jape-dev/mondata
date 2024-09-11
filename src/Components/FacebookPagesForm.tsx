@@ -403,12 +403,20 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
                 <Icon icon={Info} className="text-gray-500" />
               </Tooltip>
             </div>
-            <Dropdown
-              options={boardColumns}
-              onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-              placeholder="Select column"
-              className="mb-2"
-            />
+            <Tooltip
+                title="The column containing the url of post"
+                content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Facebook Ads application."
+                position={Tooltip.positions.TOP_START}
+                image={getImageUrl("post-urls")}
+              >
+                <Dropdown
+                  options={boardColumns}
+                  onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
+                  placeholder="Select column"
+                  className="mb-2"
+                  menuPlacement={"bottom"}
+                />
+              </Tooltip>
           </>
         ) : (
           <>
