@@ -70,7 +70,10 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   });
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [selectedGroupOption, setSelectedGroupOption] = useState<Option>();
+  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+    value: 999,
+    label: "Import into a new group",
+  });
   const [groupName, setGroupName] = useState<string>();
   const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
   const [showModal, setShowModal] = useState(false);

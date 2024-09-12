@@ -11,7 +11,6 @@ interface Board {
   name: string;
 }
 
-
 interface BoardColumn {
     id: string;
     title: string;
@@ -73,7 +72,10 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
   splitByGrouping,
   setSplitByGrouping,
 }) => {
-  const [boardGroups, setBoardGroups] = useState<Option[]>([]);
+  const [boardGroups, setBoardGroups] = useState<Option[]>([{
+    label: "Import into a new group",
+    value: 999,
+  }]);
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
 
   const handleBoardSelect = (selectedBoard: Option) => {
@@ -109,29 +111,32 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
         .catch((error: any) => {
           console.log(error);
         });
-      MondayService.mondayGroups(sessionToken, selectedBoardOption.value)
-        .then((groups: any) => {
-          const groupOptions: Option[] = [
-            {
-              value: 999,
-              label: "Import into a new group",
-            },
-            {
-              value: 998,
-              label: "Import into all groups",
-            },
-          ];
-          groups.forEach((group: any) => {
-            groupOptions.push({
-              value: group.id,
-              label: group.title,
+      
+      if (!['google_ads', 'google_analytics', 'custom_api'].includes(connector)) {
+        MondayService.mondayGroups(sessionToken, selectedBoardOption.value)
+          .then((groups: any) => {
+            const groupOptions: Option[] = [
+              {
+                value: 999,
+                label: "Import into a new group",
+              },
+              {
+                value: 998,
+                label: "Import into all groups",
+              },
+            ];
+            groups.forEach((group: any) => {
+              groupOptions.push({
+                value: group.id,
+                label: group.title,
+              });
             });
+            setBoardGroups(groupOptions);
+          })
+          .catch((error: any) => {
+            console.log(error);
           });
-          setBoardGroups(groupOptions);
-        })
-        .catch((error: any) => {
-          console.log(error);
-        });
+      }
     }
   }, [selectedBoardOption]);
 
@@ -193,7 +198,8 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
             </div>
             <Dropdown
               options={boardGroups}
-              isLoading={boardGroups.length === 0}
+              value={selectedGroupOption}
+              isLoading={boardGroups.length === 0 && !['google_ads', 'google_analytics', 'custom_api'].includes(connector)}
               onOptionSelect={(e: Option) => handleGroupSelect(e)}
               placeholder="Select group"
               className="mb-2"
@@ -253,7 +259,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
                 <></>
             )
         }
-        {connector === "facebook" && selectedGroupOption?.value === 999  && setSplitByGrouping && (
+        {(connector === "facebook" || connector === "google_ads") && selectedGroupOption?.value === 999  && setSplitByGrouping && (
           <>
             <div className="flex items-center gap-1 mt-2">
               <p className="font-bold text-gray-500 text-sm">* Split by</p>
@@ -292,7 +298,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
               placeholder="Enter name"
               className="mb-2 !text-sm"
             />
-            {connector === "facebook"  && setSplitByGrouping && (
+            {(connector === "facebook" || connector === "google_ads") && setSplitByGrouping && (
           <>
             <div className="flex items-center gap-1 mt-2">
               <p className="font-bold text-gray-500 text-sm">* Split by</p>
