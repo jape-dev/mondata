@@ -138,6 +138,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
       board_name: boardName,
+      group_name: groupName,
       connector: "google_ads",
       period: period.value,
       step: step.value,
@@ -156,7 +157,8 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         MondayService.mondayItems(
           selectedBoardOption?.value,
           selectedColumnOption?.value,
-          sessionToken
+          sessionToken,
+          selectedGroupOption?.value
         ).then((items: MondayItem[]) => {
           const queryData: QueryData = {
             monday_items: items,
@@ -210,7 +212,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         selectedAccount &&
         selectedGrouping &&
         date &&
-        boardName
+        (boardName || groupName)
       ) {
         const queryData: QueryData = {
           account_id: selectedAccount.value,
@@ -344,30 +346,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
       });
     }
   }, [user]);
-
-
-  useEffect(() => {
-    if (
-      selectedBoardOption &&
-      selectedBoardOption?.value !== 999 &&
-      sessionToken
-    ) {
-      MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
-        .then((columns: BoardColumn[]) => {
-          const columnOptions: Option[] = columns.map(
-            (column: BoardColumn) => ({
-              value: column.id,
-              label: column.title,
-            })
-          );
-          setBoardColumns(columnOptions);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-  }, [selectedBoardOption]);
-
 
   return (
     <div className="mt-2">

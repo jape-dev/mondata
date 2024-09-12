@@ -142,6 +142,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
       board_name: boardName,
+      group_name: groupName,
       connector: "facebook_pages",
       period: period.value,
       step: step.value,

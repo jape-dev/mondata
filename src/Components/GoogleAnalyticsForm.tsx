@@ -24,6 +24,7 @@ import {
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
+import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
 
@@ -73,14 +74,13 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   const [selectedAccount, setSelectedAccount] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
   const [selectedFields, setSelectedFields] = useState<Option[]>([]);
-  const [boards, setBoards] = useState<Option[]>([
-    {
-      value: 999,
-      label: "Import into a new board",
-    },
-  ]);
+  const [boards, setBoards] = useState<Option[]>([]);
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
     label: "Import into a new board",
+    value: 999,
+  });
+  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+    label: "Import into a new group",
     value: 999,
   });
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
@@ -89,7 +89,8 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
-  const [boardName, setBoardName] = useState();
+  const [boardName, setBoardName] = useState<string>();
+  const [groupName, setGroupName] = useState<string>();
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showNoValuesModal, setShowNoValuesModal] = useState(false);
@@ -111,10 +112,6 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
       { value: "date", label: "Date" },
     ];
   }, []);
-
-  const getImageUrl = (imgPath: string) => {
-    return require(`../Static/images/${imgPath}.png`);
-  };
 
   useEffect(() => {
     if (isRunning === true) {
@@ -140,6 +137,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
       board_name: boardName,
+      group_name: groupName,
       connector: "google_analytics",
       period: period.value,
       step: step.value,
@@ -158,7 +156,8 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
         MondayService.mondayItems(
           selectedBoardOption?.value,
           selectedColumnOption?.value,
-          sessionToken
+          sessionToken,
+          selectedGroupOption?.value
         ).then((items: MondayItem[]) => {
           const queryData: QueryData = {
             monday_items: items,
@@ -210,7 +209,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
         selectedAccount &&
         selectedGrouping &&
         date &&
-        boardName
+        (boardName || groupName)
       ) {
         const queryData: QueryData = {
           account_id: selectedAccount.value,
@@ -227,7 +226,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
           .then((run: RunResponse) => {
             setSelectedBoardOption({
               value: run.run.board_id,
-              label: boardName,
+              label: boardName ?? `New Board ${run.run.board_id}`,
             });
             setBoardId(run.run.board_id);
             monday.execute("valueCreatedForUser");
@@ -304,14 +303,6 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
     });
   };
 
-  const handleBoardSelect = (selectedBoard: Option) => {
-    setSelectedColumnOption(undefined);
-    setSelectedGrouping(undefined);
-    setSelectedBoardOption(selectedBoard);
-    setBoardName(undefined);
-    setBoardId(selectedBoard.value);
-  };
-
   const dateOptions = useMemo(
     () => [
       { value: 1, label: "Last 1 Days" },
@@ -375,6 +366,22 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
         <div className="flex items-center gap-1">
+            <p className="font-bold text-gray-500 text-sm">* Account</p>
+            <Tooltip
+              content="The ad account to fetch data from."
+              position={Tooltip.positions.TOP}
+            >
+              <Icon icon={Info} className="text-gray-500" />
+            </Tooltip>
+          </div>
+          <Dropdown
+            placeholder="Select an account"
+            className="mb-2"
+            options={accountOptions}
+            isLoading={accountOptions.length === 0}
+            onOptionSelect={(e: Option) => setSelectedAccount(e)}
+          />
+        <div className="flex items-center gap-1">
           <p className="font-bold text-gray-500 text-sm">* Metrics</p>
           <Tooltip
             content="Fields to import. Each field will create a new column in your board."
@@ -412,102 +419,33 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
           value={date}
         />
       </div>
-      <div className="border-2 border-gray rounded-md p-5">
-        <div className="flex items-center gap-1">
-          <p className="font-bold text-gray-500 text-sm">* Board</p>
-          <Tooltip
-            content="The board to import metrics into. "
-            position={Tooltip.positions.TOP}
-          >
-            <Icon icon={Info} className="text-gray-500" />
-          </Tooltip>
-        </div>
-        <Dropdown
-          value={selectedBoardOption}
-          options={boards}
-          isLoading={boards.length === 0}
-          placeholder="Select a board"
-          className="mb-2"
-          onOptionSelect={(e: Option) => handleBoardSelect(e)}
-        />
-        {selectedBoardOption?.value === 999 ? (
-          <>
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Account</p>
-              <Tooltip
-                content="The ad account to fetch data from."
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              placeholder="Select an account"
-              className="mb-2"
-              options={accountOptions}
-              isLoading={accountOptions.length === 0}
-              onOptionSelect={(e: Option) => setSelectedAccount(e)}
-            />
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Split by</p>
-              <Tooltip
-                content="Choose how metrics should be split. This will be the first column in your board."
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              options={groupingOptions}
-              value={selectedGrouping}
-              onOptionSelect={(e: Option) => setSelectedGrouping(e)}
-              placeholder="Select column"
-              isLoading={groupingOptions.length === 0}
-              className="mb-2"
-              menuPlacement={"top"}
-            />
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Board Name</p>
-              <Tooltip
-                content="The name of your newly created board"
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <TextField
-              onChange={(e: any) => setBoardName(e)}
-              size={TextField.sizes.MEDIUM}
-              placeholder="Enter name"
-              className="mb-2 !text-sm"
-            />
-          </>
-        ) : selectedBoardOption && selectedBoardOption?.value !== 999 ? (
-          <>
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">
-                * Split by Column
-              </p>
-              <Tooltip
-                title="The column containing the Date to split metrics by."
-                content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Google Posts connector."
-                position={Tooltip.positions.TOP}
-                image={getImageUrl("ad-ids")}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              options={boardColumns}
-              value={selectedColumnOption}
-              onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-              placeholder="Select column"
-              className="mb-2"
-              menuPlacement={"top"}
-            />
-          </>
-        ) : null}
-      </div>
+      <BoardBlock
+        sessionToken={sessionToken}
+        workspaceId={workspaceId}
+        user={user}
+        boards={boards}
+        setBoards={setBoards}
+        boardId={boardId}
+        setBoardId={setBoardId}
+        connector="google_analytics"
+        selectedBoardOption={selectedBoardOption}
+        setSelectedBoardOption={setSelectedBoardOption}
+        selectedColumnOption={selectedColumnOption}
+        setSelectedColumnOption={setSelectedColumnOption}
+        boardName={boardName}
+        setBoardName={setBoardName}
+        groupName={groupName}
+        setGroupName={setGroupName}
+        selectedGroupOption={selectedGroupOption}
+        setSelectedGroupOption={setSelectedGroupOption}
+        columnTitle="Split by Column"
+        columnModalTitle="The column containing the Date to split metrics by."
+        columnModalDescription="(Example above). Each row containing a date will have imported metrics for it."
+        columnModalImage="ad-ids"
+        splitByGroupingOptions={groupingOptions}
+        splitByGrouping={selectedGrouping}
+        setSplitByGrouping={setSelectedGrouping}
+      />
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
       <BaseModal
         title={"Error: invalid name"}

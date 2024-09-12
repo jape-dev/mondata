@@ -122,6 +122,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
       board_name: boardName,
+      group_name: groupName,
       connector: "facebook",
       period: period.value,
       step: step.value,
