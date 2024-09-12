@@ -163,7 +163,7 @@ export const RunBlock: React.FC<RunBlockProps> = ({
       <UpgradeModal
         title={"Upgrade for unlimited access"}
         text={
-          "As you are currently on the free tier, you can only use Data Importer on three boards. \n To keep importing your data for unlimited boards, please upgrade to the Pro plan from the App Marketplace."
+          "As you are currently on the free tier, you can only use Data Importer into one board. \n To keep importing your data for unlimited boards, please upgrade to the Pro plan from the App Marketplace."
         }
         showModal={planModal}
         setShowModal={setPlanModal}
