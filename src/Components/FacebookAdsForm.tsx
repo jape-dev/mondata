@@ -20,19 +20,9 @@ import {
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
+import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
-
-interface Board {
-  id: string;
-  name: string;
-}
-
-interface BoardColumn {
-  id: string;
-  title: string;
-  type: string;
-}
 
 export interface FacebookAdFormProps {
   user: UserPublic;
@@ -78,14 +68,15 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     label: "Import into a new board",
     value: 999,
   });
-  const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
+  const [selectedGroupOption, setSelectedGroupOption] = useState<Option>();
+  const [groupName, setGroupName] = useState<string>();
   const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [boardName, setBoardName] = useState();
+  const [boardName, setBoardName] = useState<string>();
   const [showErrordModal, setShowErrorModal] = useState(false);
 
   useEffect(() => {
@@ -113,10 +104,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       { value: "ad", label: "Ad" },
     ];
   }, []);
-
-  const getImageUrl = (imgPath: string) => {
-    return require(`../Static/images/${imgPath}.png`);
-  };
 
   const handleRunClick = async () => {
     setLoading(true);
@@ -282,14 +269,6 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     });
   };
 
-  const handleBoardSelect = (selectedBoard: Option) => {
-    setSelectedColumnOption(undefined);
-    setSelectedGrouping(undefined);
-    setSelectedBoardOption(selectedBoard);
-    setBoardId(selectedBoard.value);
-    setBoardName(undefined);
-  };
-
   const dateOptions = useMemo(
     () => [
       { value: 1, label: "Last 1 Days" },
@@ -325,51 +304,25 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     }
   }, []);
 
-  useEffect(() => {
-    if (sessionToken) {
-      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
-        const boardOptions: Option[] = [
-          {
-            value: 999,
-            label: "Import into a new board",
-          },
-        ];
-        boards.forEach((board: Board) => {
-          boardOptions.push({
-            value: board.id,
-            label: board.name,
-          });
-        });
-        setBoards(boardOptions);
-      });
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (
-      selectedBoardOption &&
-      selectedBoardOption?.value !== 999 &&
-      sessionToken
-    ) {
-      MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
-        .then((columns: BoardColumn[]) => {
-          const columnOptions: Option[] = columns.map(
-            (column: BoardColumn) => ({
-              value: column.id,
-              label: column.title,
-            })
-          );
-          setBoardColumns(columnOptions);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-  }, [selectedBoardOption]);
-
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
+      <div className="flex items-center gap-1">
+          <p className="font-bold text-gray-500 text-sm">* Account</p>
+          <Tooltip
+            content="The ad account to fetch data from."
+            position={Tooltip.positions.TOP}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
+        <Dropdown
+          placeholder="Select an account"
+          className="mb-2"
+          options={accountOptions}
+          isLoading={accountOptions.length === 0}
+          onOptionSelect={(e: Option) => setSelectedAccount(e)}
+        />
         <div className="flex items-center gap-1">
           <p className="font-bold text-gray-500 text-sm">* Metrics</p>
           <Tooltip
@@ -407,117 +360,33 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
           value={date}
         />
       </div>
-      <div className="border-2 border-gray rounded-md p-5">
-        <div className="flex items-center gap-1">
-          <p className="font-bold text-gray-500 text-sm">* Board</p>
-          <Tooltip
-            content="The board to import metrics into. "
-            position={Tooltip.positions.TOP}
-          >
-            <Icon icon={Info} className="text-gray-500" />
-          </Tooltip>
-        </div>
-        <Dropdown
-          value={selectedBoardOption}
-          options={boards}
-          placeholder="Select a board"
-          className="mb-2"
-          isLoading={boards.length === 0}
-          onOptionSelect={(e: Option) => handleBoardSelect(e)}
-        />
-        {selectedBoardOption?.value === 999 ? (
-          <>
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Account</p>
-              <Tooltip
-                content="The ad account to fetch data from."
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              placeholder="Select an account"
-              className="mb-2"
-              options={accountOptions}
-              isLoading={accountOptions.length === 0}
-              onOptionSelect={(e: Option) => setSelectedAccount(e)}
-            />
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Split by</p>
-              <Tooltip
-                content="Choose whether metrics should be split by Facebook Ad Id, Adset Id or Campaign Id"
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              options={groupingOptions}
-              value={selectedGrouping}
-              onOptionSelect={(e: Option) => setSelectedGrouping(e)}
-              placeholder="Select column"
-              className="mb-2"
-              menuPlacement={"top"}
-            />
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Board Name</p>
-              <Tooltip
-                content="The name of your newly created board"
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <TextField
-              onChange={(e: any) => setBoardName(e)}
-              size={TextField.sizes.MEDIUM}
-              placeholder="Enter name"
-              className="mb-2 !text-sm"
-            />
-          </>
-        ) : selectedBoardOption && selectedBoardOption?.value !== 999 ? (
-          <>
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Account</p>
-              <Tooltip
-                content="The ad account to fetch data from."
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              placeholder="Select an account"
-              className="mb-2"
-              options={accountOptions}
-              isLoading={accountOptions.length === 0}
-              onOptionSelect={(e: Option) => setSelectedAccount(e)}
-            />
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">
-                * Split by Column
-              </p>
-              <Tooltip
-                title="The column containing the Facebook Ad Id, Adset Id or Campaign Id to split metrics by."
-                content="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Facebook Posts connector."
-                position={Tooltip.positions.TOP}
-                image={getImageUrl("ad-ids")}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              options={boardColumns}
-              value={selectedColumnOption}
-              onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-              placeholder="Select column"
-              className="mb-2"
-              menuPlacement={"top"}
-            />
-          </>
-        ) : null}
-      </div>
+      <BoardBlock
+        sessionToken={sessionToken}
+        workspaceId={workspaceId}
+        user={user}
+        boards={boards}
+        setBoards={setBoards}
+        boardId={boardId}
+        setBoardId={setBoardId}
+        connector="facebook"
+        selectedBoardOption={selectedBoardOption}
+        setSelectedBoardOption={setSelectedBoardOption}
+        selectedColumnOption={selectedColumnOption}
+        setSelectedColumnOption={setSelectedColumnOption}
+        boardName={boardName}
+        setBoardName={setBoardName}
+        groupName={groupName}
+        setGroupName={setGroupName}
+        selectedGroupOption={selectedGroupOption}
+        setSelectedGroupOption={setSelectedGroupOption}
+        columnTitle="Split by Column"
+        columnModalTitle="The column containing the Facebook Ad Id, Adset Id or Campaign Id to split metrics by."
+        columnModalDescription="(Example above). Each row containing an id will have imported metrics for it. If you want to use post urls instead, select the Facebook Posts connector."
+        columnModalImage="ad-ids"
+        splitByGroupingOptions={groupingOptions}
+        splitByGrouping={selectedGrouping}
+        setSplitByGrouping={setSelectedGrouping}
+      / >
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
       <BaseModal
         title={"Error: invalid name"}
