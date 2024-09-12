@@ -133,14 +133,14 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       sessionToken &&
       selectedBoardOption &&
       selectedAccount &&
-      date &&
-      boardName
+      date
     ) {
       if (selectedColumnOption) {
         MondayService.mondayItems(
           selectedBoardOption?.value,
           selectedColumnOption?.value,
-          sessionToken
+          sessionToken,
+          selectedGroupOption?.value
         )
           .then((items: MondayItem[]) => {
             const queryData: QueryData = {

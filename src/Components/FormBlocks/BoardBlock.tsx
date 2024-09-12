@@ -163,7 +163,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
           <p className="font-bold text-gray-500 text-sm">* Board</p>
           <Tooltip
             content="The board to import metrics into."
-            position={Tooltip.positions.TOP}
+            position={Tooltip.positions.TOP_START}
           >
             <Icon icon={Info} className="text-gray-500" />
           </Tooltip>
@@ -194,7 +194,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
             <Dropdown
               options={boardGroups}
               isLoading={boardGroups.length === 0}
-              onOptionSelect={(e: Option) => setSelectedGroupOption(e)}
+              onOptionSelect={(e: Option) => handleGroupSelect(e)}
               placeholder="Select group"
               className="mb-2"
               menuPlacement={"bottom"}
@@ -253,7 +253,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
                 <></>
             )
         }
-        {connector === "facebook" && (selectedGroupOption?.value === 999 || selectedBoardOption.value === 999) && setSplitByGrouping && (
+        {connector === "facebook" && selectedGroupOption?.value === 999  && setSplitByGrouping && (
           <>
             <div className="flex items-center gap-1 mt-2">
               <p className="font-bold text-gray-500 text-sm">* Split by</p>
@@ -267,7 +267,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
             <Dropdown
               options={splitByGroupingOptions}
               value={splitByGrouping}
-              onOptionSelect={(e: Option) => setSplitByGrouping(e)}
+              onOptionSelect={(e: Option) => setSplitByGrouping(e)}  
               placeholder="Select column"
               className="mb-2"
               menuPlacement={"top"}
@@ -292,6 +292,27 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
               placeholder="Enter name"
               className="mb-2 !text-sm"
             />
+            {connector === "facebook"  && setSplitByGrouping && (
+          <>
+            <div className="flex items-center gap-1 mt-2">
+              <p className="font-bold text-gray-500 text-sm">* Split by</p>
+              <Tooltip
+                content="Choose whether metrics should be split by Facebook Ad Id, Adset Id or Campaign Id"
+                position={Tooltip.positions.TOP}
+              >
+                <Icon icon={Info} className="text-gray-500" />
+              </Tooltip>
+            </div>
+            <Dropdown
+              options={splitByGroupingOptions}
+              value={splitByGrouping}
+              onOptionSelect={(e: Option) => setSplitByGrouping(e)}  
+              placeholder="Select column"
+              className="mb-2"
+              menuPlacement={"top"}
+            />
+          </>
+        )}
           </>
         )}
       </div>
