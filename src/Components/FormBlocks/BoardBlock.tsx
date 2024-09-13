@@ -84,6 +84,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
     setBoardId(selectedBoard.value);
     setSelectedColumnOption(undefined);
     setSelectedGroupOption(undefined);
+    setGroupName(undefined);
   };
 
   const handleGroupSelect = (selectedGroup: Option) => {
@@ -259,7 +260,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
                 <></>
             )
         }
-        {['google_ads', 'google_analytics', 'custom_api'].includes(connector) && selectedGroupOption?.value === 999  && setSplitByGrouping && (
+        {['google_ads', 'google_analytics', 'facebook'].includes(connector) && selectedGroupOption?.value === 999  && setSplitByGrouping && (
           <>
             <div className="flex items-center gap-1 mt-2">
               <p className="font-bold text-gray-500 text-sm">* Split by</p>
@@ -298,7 +299,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
               placeholder="Enter name"
               className="mb-2 !text-sm"
             />
-            {['google_ads', 'google_analytics', 'custom_api'].includes(connector) && setSplitByGrouping && (
+            {['google_ads', 'google_analytics', 'facebook'].includes(connector) && setSplitByGrouping && (
           <>
             <div className="flex items-center gap-1 mt-2">
               <p className="font-bold text-gray-500 text-sm">* Split by</p>

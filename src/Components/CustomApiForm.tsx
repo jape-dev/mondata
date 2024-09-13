@@ -110,7 +110,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       setHeaders(parsedData.headers || []);
       setBoardId(parsedData.boardId || 999);
       setBoardName(parsedData.boardName || "");
-      setGroupName(parsedData.groupName || "");
+      setGroupName(parsedData.groupName);
     }
   }, []);
 
