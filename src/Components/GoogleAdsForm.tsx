@@ -28,12 +28,6 @@ import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
 
-interface BoardColumn {
-  id: string;
-  title: string;
-  type: string;
-}
-
 export interface GoogleAdsFormProps {
   user: UserPublic;
   workspaceId: number;
@@ -88,6 +82,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [show2StepModal, setShow2StepModal] = useState(false);
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
   const [groupName, setGroupName] = useState<string>();
   const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
     label: "Import into a new group",
@@ -328,6 +323,10 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
               // Handle permission denied error
               console.log("Permission denied error");
               // You might want to show a different modal or message for this
+            } else if (errorDetail.includes("invalid_grant")) {
+              // Handle invalid grant error
+              setShowExpiredModal(true);
+              // You might want to show a different modal or message for this
             } else {
               // Handle other specific error messages here
               console.log("Unhandled error type");
@@ -461,6 +460,12 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         text={"Was unable to schedule your import. Please try again."}
         showModal={showScheduleModal}
         setShowModal={setShowScheduleModal}
+      />
+      <BaseModal
+        title={"Google Error: Access Token Expired "}
+        text={"Your Google access token has expired. Please press 'Connect to a different account to reauthenticate your access token."}
+        showModal={showExpiredModal}
+        setShowModal={setShowExpiredModal}
       />
     </div>
   );

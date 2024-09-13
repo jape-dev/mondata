@@ -94,6 +94,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showNoValuesModal, setShowNoValuesModal] = useState(false);
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -325,8 +326,20 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
           }));
           setAccountOptions(accountOptions);
         });
-      } catch (error) {
-        console.error(error);
+      } catch (error: any) {
+          if (error.body && error.body.detail) {
+            const errorDetail = error.body.detail;
+            console.log("Error detail:", errorDetail);
+            if (errorDetail.includes("invalid_grant")) {
+              setShowExpiredModal(true);
+            } else {
+              // Handle other specific error messages here
+              console.log("Unhandled error type");
+            }
+          } else {
+            // Handle cases where there's no expected error structure
+            console.log("Unexpected error structure:", error);
+          }
       }
       GoogleAnalyticsService.googleAnalyticsFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
@@ -468,6 +481,12 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
         text={"No data found for this Google Analytics account in the date range you selected. Please check your configuration and try again. If you think this is an error, please contact support at james@dataimporter.co"}
         showModal={showNoValuesModal}
         setShowModal={setShowNoValuesModal}
+      />
+      <BaseModal
+        title={"Google Error: Access Token Expired "}
+        text={"Your Google access token has expired. Please press 'Connect to a different account to reauthenticate your access token."}
+        showModal={showExpiredModal}
+        setShowModal={setShowExpiredModal}
       />
     </div>
   );
