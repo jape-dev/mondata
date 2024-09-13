@@ -18,6 +18,20 @@ const BaseScreen: React.FC = () => {
   const [user, setUser] = useState<UserPublic>();
   const [guideModal, setGuideModal] = useState<boolean>(false);
   const [upgradeModal, setUpgradeModal] = useState(false);
+  const [accountSlug, setAccountSlug] = useState<string>();
+
+  useEffect(() => {
+    monday.get("location").then((res: any) => {
+      if (res.data && res.data.href) {
+        const url = new URL(res.data.href);
+        const hostname = url.hostname;
+        const parts = hostname.split('.');
+        if (parts.length > 2) {
+          setAccountSlug(`${parts[0]}.monday.com/marketplace/v2/app/installed/10150307`);
+        }
+      }
+    });
+  }, []);
 
   
   async function getSessionToken() {
@@ -63,7 +77,7 @@ const BaseScreen: React.FC = () => {
   };
 
   const handleUpgradeClick = () => {
-    const link = "https://dataimporter.monday.com/apps/installed_apps/10150307";
+    const link = accountSlug ? `https://${accountSlug}` : "https://monday.com/marketplace/listing/10000557/data-importer";
     window.open(link, "_blank");
   };
 
