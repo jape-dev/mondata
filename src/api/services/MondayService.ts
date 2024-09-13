@@ -70,10 +70,60 @@ export class MondayService {
         });
     }
     /**
+     * Groups
+     * @param sessionToken
+     * @param boardId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static mondayGroups(
+        sessionToken: string,
+        boardId: number,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/monday/groups',
+            query: {
+                'session_token': sessionToken,
+                'board_id': boardId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Group
+     * @param boardId
+     * @param groupName
+     * @param sessionToken
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static mondayGroup(
+        boardId: number,
+        groupName: string,
+        sessionToken: string,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/monday/group',
+            query: {
+                'board_id': boardId,
+                'group_name': groupName,
+                'session_token': sessionToken,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
      * Items
      * @param boardId
      * @param columnId
      * @param sessionToken
+     * @param groupId
      * @returns any Successful Response
      * @throws ApiError
      */
@@ -81,6 +131,7 @@ export class MondayService {
         boardId: string,
         columnId: string,
         sessionToken: string,
+        groupId?: (string | null),
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -89,6 +140,7 @@ export class MondayService {
                 'board_id': boardId,
                 'column_id': columnId,
                 'session_token': sessionToken,
+                'group_id': groupId,
             },
             errors: {
                 422: `Validation Error`,

@@ -19,6 +19,7 @@ import {
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
+import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
 
@@ -77,13 +78,37 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     label: "Import into a new board",
     value: 999,
   });
-  const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [boardName, setBoardName] = useState();
+  const [boardName, setBoardName] = useState<string | undefined>();
   const [showErrordModal, setShowErrorModal] = useState(false);
+  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+    label: "Import into a new group",
+    value: 999,
+  });
+  const [groupName, setGroupName] = useState<string>();
+
+  useEffect(() => {
+    if (sessionToken) {
+      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
+        const boardOptions: Option[] = [
+          {
+            value: 999,
+            label: "Import into a new board",
+          },
+        ];
+        boards.forEach((board: Board) => {
+          boardOptions.push({
+            value: board.id,
+            label: board.name,
+          });
+        });
+        setBoards(boardOptions);
+      });
+    }
+  }, [user]);
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -95,10 +120,6 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     } else {
       return true;
     }
-  };
-
-  const getImageUrl = (imgPath: string) => {
-    return require(`../Static/images/${imgPath}.png`);
   };
 
   useEffect(() => {
@@ -121,6 +142,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
       board_name: boardName,
+      group_name: groupName,
       connector: "facebook_pages",
       period: period.value,
       step: step.value,
@@ -137,7 +159,8 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
       MondayService.mondayItems(
         selectedBoardOption?.value,
         selectedColumnOption?.value,
-        sessionToken
+        sessionToken,
+        selectedGroupOption?.value,
       )
         .then((items: MondayItem[]) => {
           const queryData: QueryData = {
@@ -182,7 +205,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           setShowErrorModal(true);
           setLoading(false);
         });
-    } else if (sessionToken && selectedBoardOption && boardName) {
+    } else if (sessionToken && selectedBoardOption &&  (boardName || groupName)) {
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
@@ -283,55 +306,6 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     }
   }, [user]);
 
-  useEffect(() => {
-    if (sessionToken) {
-      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
-        const boardOptions: Option[] = [
-          {
-            value: 999,
-            label: "Import into a new board",
-          },
-        ];
-        boards.forEach((board: Board) => {
-          boardOptions.push({
-            value: board.id,
-            label: board.name,
-          });
-        });
-        setBoards(boardOptions);
-      });
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (
-      selectedBoardOption &&
-      selectedBoardOption?.value !== 999 &&
-      sessionToken
-    ) {
-      MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
-        .then((columns: BoardColumn[]) => {
-          const columnOptions: Option[] = columns.map(
-            (column: BoardColumn) => ({
-              value: column.id,
-              label: column.title,
-            })
-          );
-          setBoardColumns(columnOptions);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-  }, [selectedBoardOption]);
-
-  const handleBoardSelect = (selectedBoard: Option) => {
-    setSelectedBoardOption(selectedBoard);
-    setSelectedColumnOption(undefined);
-    setBoardId(selectedBoard.value);
-    setBoardName(undefined);
-  };
-
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
@@ -370,74 +344,30 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
       </div>
-      <div className="border-2 border-gray rounded-md p-5">
-        <div className="flex items-center gap-1">
-          <p className="font-bold text-gray-500 text-sm">* Board</p>
-          <Tooltip
-            content="The board to import metrics into."
-            position={Tooltip.positions.TOP}
-          >
-            <Icon icon={Info} className="text-gray-500" />
-          </Tooltip>
-        </div>
-        <Dropdown
-          value={selectedBoardOption}
-          options={boards}
-          placeholder="Select a board"
-          className="mb-2"
-          isLoading={boards.length === 0}
-          onOptionSelect={(e: Option) => handleBoardSelect(e)}
-        />
-        {selectedBoardOption?.value && selectedBoardOption.value !== 999 ? (
-          <>
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">
-                * Post Url Column
-              </p>
-              <Tooltip
-                title="The column containing the url of post"
-                content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Facebook Ads application."
-                position={Tooltip.positions.TOP}
-                image={getImageUrl("post-urls")}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Tooltip
-                title="The column containing the url of post"
-                content="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Facebook Ads application."
-                position={Tooltip.positions.TOP_START}
-                image={getImageUrl("post-urls")}
-              >
-                <Dropdown
-                  options={boardColumns}
-                  onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-                  placeholder="Select column"
-                  className="mb-2"
-                  menuPlacement={"bottom"}
-                />
-              </Tooltip>
-          </>
-        ) : (
-          <>
-            <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">* Board Name</p>
-              <Tooltip
-                content="The name of your newly created board"
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <TextField
-              onChange={(e: any) => setBoardName(e)}
-              size={TextField.sizes.MEDIUM}
-              placeholder="Enter name"
-              className="mb-2 !text-sm"
-            />
-          </>
-        )}
-      </div>
+      <BoardBlock
+        sessionToken={sessionToken}
+        workspaceId={workspaceId}
+        user={user}
+        boards={boards}
+        setBoards={setBoards}
+        boardId={boardId}
+        setBoardId={setBoardId}
+        connector="facebook_pages"
+        selectedBoardOption={selectedBoardOption}
+        setSelectedBoardOption={setSelectedBoardOption}
+        selectedColumnOption={selectedColumnOption}
+        setSelectedColumnOption={setSelectedColumnOption}
+        boardName={boardName}
+        setBoardName={setBoardName}
+        groupName={groupName}
+        setGroupName={setGroupName}
+        selectedGroupOption={selectedGroupOption}
+        setSelectedGroupOption={setSelectedGroupOption}
+        columnTitle="Post Url Column"
+        columnModalTitle="The column containing the url of post"
+        columnModalDescription="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Facebook Ads application."
+        columnModalImage="post-urls"
+      />
       <FieldsRequiredModal
         showModal={showFieldsModal}
         setShowModal={setShowFieldsModal}

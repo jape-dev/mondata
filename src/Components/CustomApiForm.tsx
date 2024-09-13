@@ -25,6 +25,7 @@ import { PairValueComponent } from "./PairValue";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
+import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
 
@@ -82,8 +83,18 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [boardName, setBoardName] = useState();
+  const [boardName, setBoardName] = useState<string>();
   const [boards, setBoards] = useState<Option[]>([]);
+  const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
+    label: "Import into a new board",
+    value: 999,
+  });
+  const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
+  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+    label: "Import into a new group",
+    value: 999,
+  });
+  const [groupName, setGroupName] = useState<string>();
 
   useEffect(() => {
     // Retrieve data from localStorage
@@ -99,6 +110,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       setHeaders(parsedData.headers || []);
       setBoardId(parsedData.boardId || 999);
       setBoardName(parsedData.boardName || "");
+      setGroupName(parsedData.groupName);
     }
   }, []);
 
@@ -114,6 +126,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       headers,
       boardId,
       boardName,
+      groupName,
     };
     localStorage.setItem("customApiFormData", JSON.stringify(dataToStore));
   }, [
@@ -126,6 +139,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
     headers,
     boardId,
     boardName,
+    groupName,
   ]);
 
   useEffect(() => {
@@ -173,6 +187,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       account_id: user.monday_account_id,
       workspace_id: workspaceId,
       board_name: boardName,
+      group_name: groupName,
       connector: "custom_api",
       period: period.value,
       step: step.value,
@@ -180,7 +195,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       start_datetime: startTime,
       tz_offset: timezone.value,
     };
-    if (url && boardName && sessionToken) {
+    if (url && (boardName || groupName) && sessionToken) {
       setLoading(true);
       const queryData: CustomAPIRequest = {
         method: method.value,
@@ -353,24 +368,26 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
             />
           </div>
         )}
-        <div className="border-2 border-grey rounded-md p-5 mb-2">
-          <div className="flex items-center gap-1">
-            <p className="font-bold text-gray-500 text-sm">* Board Name</p>
-            <Tooltip
-              content="The name of your newly created board"
-              position={Tooltip.positions.TOP}
-            >
-              <Icon icon={Info} className="text-gray-500" />
-            </Tooltip>
-          </div>
-          <TextField
-            value={boardName}
-            onChange={(e: any) => setBoardName(e)}
-            size={TextField.sizes.MEDIUM}
-            placeholder="Enter name"
-            className="mb-2 !text-sm"
-          />
-        </div>
+        <BoardBlock
+          sessionToken={sessionToken}
+          workspaceId={workspaceId}
+          user={user}
+          boardId={boardId}
+          setBoardId={setBoardId}
+          boards={boards}
+          setBoards={setBoards}
+          connector="custom_api"
+          selectedBoardOption={selectedBoardOption}
+          setSelectedBoardOption={setSelectedBoardOption}
+          selectedColumnOption={selectedColumnOption}
+          setSelectedColumnOption={setSelectedColumnOption}
+          boardName={boardName}
+          setBoardName={setBoardName}
+          groupName={groupName}
+          setGroupName={setGroupName}
+          selectedGroupOption={selectedGroupOption}
+          setSelectedGroupOption={setSelectedGroupOption}
+        />
       </div>
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
       <BaseModal
