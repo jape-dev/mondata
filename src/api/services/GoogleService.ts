@@ -32,4 +32,28 @@ export class GoogleService {
             },
         });
     }
+    /**
+     * Google Sheets Login
+     * @param connectionId
+     * @param requestBody
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static googleGoogleSheetsLogin(
+        connectionId: string,
+        requestBody: HTTPAuthorizationCredentials,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/google/google-sheets/login',
+            query: {
+                'connection_id': connectionId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
 }

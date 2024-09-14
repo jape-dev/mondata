@@ -90,26 +90,6 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   });
   const [groupName, setGroupName] = useState<string>();
 
-  useEffect(() => {
-    if (sessionToken) {
-      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
-        const boardOptions: Option[] = [
-          {
-            value: 999,
-            label: "Import into a new board",
-          },
-        ];
-        boards.forEach((board: Board) => {
-          boardOptions.push({
-            value: board.id,
-            label: board.name,
-          });
-        });
-        setBoards(boardOptions);
-      });
-    }
-  }, [user]);
-
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
     if (boardName && currentNames.includes(boardName)) {

@@ -293,26 +293,6 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
     }
   }, [user]);
 
-  useEffect(() => {
-    if (sessionToken) {
-      MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
-        const boardOptions: Option[] = [
-          {
-            value: 999,
-            label: "Import into a new board",
-          },
-        ];
-        boards.forEach((board: Board) => {
-          boardOptions.push({
-            value: board.id,
-            label: board.name,
-          });
-        });
-        setBoards(boardOptions);
-      });
-    }
-  }, [user]);
-
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
