@@ -35,6 +35,11 @@ export interface GoogleSheetsFormProps {
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
   boardId: number;
   setBoardId: React.Dispatch<React.SetStateAction<number>>;
+  period: Option;
+  step: Option;
+  days: string[];
+  startTime: string;
+  timezone: Option;
 }
 
 export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
@@ -48,6 +53,11 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
   setSuccess,
   boardId,
   setBoardId,
+  period,
+  step,
+  days,
+  startTime,
+  timezone,
 }) => {
   const [url, setUrl] = useState<string>();
   const [showModal, setShowModal] = useState(false);
@@ -100,6 +110,11 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       board_name: boardName,
       group_name: groupName,
       connector: "google_sheets",
+      period: period.value,
+      step: step.value,
+      days: days,
+      start_datetime: startTime,
+      tz_offset: timezone.value,
     };
     if (url && (boardName || groupName) && sessionToken) {
       setLoading(true);

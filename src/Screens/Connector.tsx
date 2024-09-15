@@ -385,6 +385,11 @@ export const Connector: React.FC<{
                   setSuccess={setSuccess}
                   boardId={boardId}
                   setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
                 />
               ) : connector === "google_analytics" ? (
                 <GoogleAnalyticsForm

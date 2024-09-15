@@ -62,10 +62,11 @@ export const ScheduleTable: React.FC<ScheduleProps> = ({ sessionToken, user }) =
       'instagram': 'instagram-icon',
       'google_ads': 'google-ads-icon',
       'google_analytics': 'google-analytics-icon',
-      'custom_api': 'custom-api-icon'
+      'custom_api': 'custom-api-icon',
+      'google_sheets': 'google-sheets-icon'
     };
 
-    const iconName = iconMap[connector] || 'default-icon';
+    const iconName = iconMap[connector] || 'mondata-icon';
     return getImageUrl(iconName);
   };
 
@@ -76,7 +77,8 @@ export const ScheduleTable: React.FC<ScheduleProps> = ({ sessionToken, user }) =
       'instagram': 'Instagram',
       'google_ads': 'Google Ads',
       'google_analytics': 'Google Analytics',
-      'custom_api': 'Custom API'
+      'custom_api': 'Custom API',
+      'google_sheets': 'Google Sheets'
     };
 
     return nameMap[connector] || 'Unknown Connector';
