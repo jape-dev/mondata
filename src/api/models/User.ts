@@ -15,6 +15,7 @@ export type User = {
     nonce?: (Blob | null);
     facebook_token?: (string | null);
     google_token?: (string | null);
+    google_sheets_token?: (string | null);
     id?: (number | null);
     hashed_password: string;
 };

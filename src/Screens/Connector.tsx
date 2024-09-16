@@ -16,6 +16,7 @@ import { FacebookPagesForm } from "../Components/FacebookPagesForm";
 import { InstagramPostsForm } from "../Components/InstagramPostsForm";
 import { GoogleAdsForm } from "../Components/GoogleAdsForm";
 import { GoogleAnalyticsForm } from "../Components/GoogleAnalyticsForm";
+import { GoogleSheetsForm } from "../Components/GoogleSheetsForm";
 import { CustomApiForm } from "Components/CustomApiForm";
 import { SchedulerBlock } from "../Components/SchedulerBlock";
 import { RunBlock } from "Components/RunBlock";
@@ -145,6 +146,11 @@ export const Connector: React.FC<{
         label: "Google Analytics",
         leftAvatar: getIconUrl("google-analytics-icon"),
       },
+      {
+        value: "google_sheets",
+        label: "Google Sheets",
+        leftAvatar: getIconUrl("google-sheets-icon"),
+      },
     ],
     []
   );
@@ -167,9 +173,11 @@ export const Connector: React.FC<{
     ) {
       FacebookService.facebookLogin(connectionId, requestBody);
       // Need to make these set connected to true
-    } else {
+    } else if (connector === "google_ads" || connector === "google_analytics") {
       GoogleService.googleLogin(connectionId, requestBody);
-    }
+    } else if (connector === "google_sheets") {
+      GoogleService.googleGoogleSheetsLogin(connectionId, requestBody);
+    } 
   }
 
   const nango = new Nango({
@@ -196,6 +204,15 @@ export const Connector: React.FC<{
     } else if (connector === "google_ads" || connector === "google_analytics") {
       nango
         .auth("google", "google-prod")
+        .then((result) => {
+          updateUser(result.connectionId);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (connector === "google_sheets") {
+      nango
+        .auth("google-sheet", "google-sheets-prod")
         .then((result) => {
           updateUser(result.connectionId);
         })
@@ -343,6 +360,24 @@ export const Connector: React.FC<{
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
                   user={user}
+                  isScheduled={isScheduled}
+                  isRunning={isRunning}
+                  setIsRunning={setIsRunning}
+                  setLoading={setLoading}
+                  setSuccess={setSuccess}
+                  boardId={boardId}
+                  setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
+                />
+              ) : connector === "google_sheets" ? (
+                <GoogleSheetsForm
+                  user={user}
+                  sessionToken={sessionToken}
+                  workspaceId={workspaceId}
                   isScheduled={isScheduled}
                   isRunning={isRunning}
                   setIsRunning={setIsRunning}

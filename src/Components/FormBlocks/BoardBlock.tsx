@@ -113,7 +113,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
           console.log(error);
         });
       
-      if (!['google_ads', 'google_analytics', 'custom_api'].includes(connector)) {
+      if (!['google_ads', 'google_analytics', 'custom_api', 'google_sheets'].includes(connector)) {
         MondayService.mondayGroups(sessionToken, selectedBoardOption.value)
           .then((groups: any) => {
             const groupOptions: Option[] = [
@@ -200,7 +200,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
             <Dropdown
               options={boardGroups}
               value={selectedGroupOption}
-              isLoading={boardGroups.length === 0 && !['google_ads', 'google_analytics', 'custom_api'].includes(connector)}
+              isLoading={boardGroups.length === 0 && !['google_ads', 'google_analytics', 'custom_api', 'google_sheets'].includes(connector)}
               onOptionSelect={(e: Option) => handleGroupSelect(e)}
               placeholder="Select group"
               className="mb-2"
