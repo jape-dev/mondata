@@ -372,7 +372,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         setSelectedGroupOption={setSelectedGroupOption}
         columnTitle="Post Url Column"
         columnModalTitle="The column containing the url of post"
-        columnModalDescription="(Example above). Each row containing a url will have imported metrics for it. If you want to use ad ids instead, select the Instagram Ads application."
+        columnModalDescription="For importing into an existing group, each row will need a column containing an url for the post. If your board does not have this, please select the 'Import into a new group' option."
         columnModalImage="post-urls"
       />
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
