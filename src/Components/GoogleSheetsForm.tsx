@@ -6,6 +6,7 @@ import {
   Icon,
   Tooltip,
   TextField,
+  Toggle
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
@@ -21,6 +22,7 @@ import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
 import { BoardBlock } from "./FormBlocks/BoardBlock";
+import { getImageUrl } from "../Utils/image";
 
 const monday = mondaySdk();
 
@@ -76,6 +78,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
     value: 999,
   });
   const [groupName, setGroupName] = useState<string>();
+  const [firstColumnAsItemName, setFirstColumnAsItemName] = useState<boolean>(true);
 
   useEffect(() => {
     if (isRunning === true) {
@@ -121,6 +124,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       const queryData: CustomAPIRequest = {
         method: "get",
         url: url,
+        body: firstColumnAsItemName ? "true" : "false",
       };
       const requestBody: Body_run_run = {
         query: queryData,
@@ -170,20 +174,44 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
           <div className="flex items-center gap-1">
             <p className="font-bold text-gray-500 text-sm">* Google Sheets URL</p>
             <Tooltip
-              content="The url of the Google Sheet you want to import data from. Make sure public access is enabled for the sheet."
+              content="Make sure the first row of the sheet contains the column headers."
               position={Tooltip.positions.TOP}
+              title={"Google Sheet Url"}
+              image={getImageUrl("google-sheets-import")}
             >
               <Icon icon={Info} className="text-gray-500" />
             </Tooltip>
           </div>
-          <div className="mb-2">
+          <div className="mb-3">
+          <Tooltip
+              content="Make sure the first row of the sheet contains the column headers."
+              position={Tooltip.positions.BOTTOM}
+              title={"Google Sheet Url"}
+              image={getImageUrl("google-sheets-import")}
+              immediateShowDelay={0}
+            >
             <TextField
               value={url}
               placeholder="Url"
               size={TextField.sizes.MEDIUM}
               onChange={(e: string) => setUrl(e)}
             />
+          </Tooltip>
           </div>
+          <div className="flex items-center gap-1">
+            <p className="font-bold text-gray-500 text-sm">* First Column as Item Name</p>
+            <Tooltip
+              content="If selected, first column of the sheet will be used as the item name in your monday board/group."
+              position={Tooltip.positions.TOP}
+            >
+              <Icon icon={Info} className="text-gray-500" />
+            </Tooltip>
+          </div>
+          <Toggle
+            isSelected={firstColumnAsItemName}
+            onChange={() => setFirstColumnAsItemName(!firstColumnAsItemName)}
+            className="mt-1"
+          />
         </div>
         <BoardBlock
           sessionToken={sessionToken}

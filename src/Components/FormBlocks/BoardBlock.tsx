@@ -221,19 +221,20 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
                         </Tooltip>  
                   </div>
                   <Tooltip
-                  title={columnModalTitle}
-                  content={columnModalDescription}
-                  image={getImageUrl(columnModalImage)}
-                position={Tooltip.positions.TOP_START}
-              >
-                  <Dropdown
-                    options={boardColumns}
-                    isLoading={boardColumns.length === 0}
-                    onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-                    placeholder="Select column"
-                    className="mb-2"
-                    menuPlacement={"bottom"}
-                    />
+                    title={columnModalTitle}
+                    content={columnModalDescription}
+                    image={getImageUrl(columnModalImage)}
+                    position={Tooltip.positions.TOP_START}
+                    immediateShowDelay={0}
+                  >
+                    <Dropdown
+                      options={boardColumns}
+                      isLoading={boardColumns.length === 0}
+                      onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
+                      placeholder="Select column"
+                      className="mb-2"
+                      menuPlacement={"bottom"}
+                      />
                     </Tooltip>
                 </>
             ) : selectedGroupOption?.value && selectedGroupOption.value === 999 ? (
