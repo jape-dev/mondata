@@ -106,4 +106,33 @@ export class RunService {
             },
         });
     }
+    /**
+     * Schedule Run
+     * @param scheduleId
+     * @param query
+     * @param user
+     * @param accessToken
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static runScheduleRun(
+        scheduleId: number,
+        query: string,
+        user: string,
+        accessToken: string,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/run/schedule/run/',
+            query: {
+                'schedule_id': scheduleId,
+                'query': query,
+                'user': user,
+                'access_token': accessToken,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
 }

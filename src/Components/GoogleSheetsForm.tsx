@@ -6,7 +6,8 @@ import {
   Icon,
   Tooltip,
   TextField,
-  Toggle
+  Toggle,
+  Dropdown
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
@@ -17,6 +18,7 @@ import {
   Body_run_run,
   Body_run_schedule,
   RunResponse,
+  GoogleService
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
@@ -79,6 +81,8 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
   });
   const [groupName, setGroupName] = useState<string>();
   const [firstColumnAsItemName, setFirstColumnAsItemName] = useState<boolean>(true);
+  const [sheetNames, setSheetNames] = useState<Option[]>();
+  const [selectedSheet, setSelectedSheet] = useState<Option>();
 
   useEffect(() => {
     if (isRunning === true) {
@@ -97,6 +101,29 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       return true;
     }
   };
+
+  useEffect(() => {
+    if (url && sessionToken) {
+      GoogleService.googleGetSheetsSheets(sessionToken, url)
+        .then((sheets) => {
+          console.log("sheets:", sheets);
+          const sheetOptions = sheets.map((sheet) => ({ label: sheet.label, value: sheet.value }));
+          console.log("sheetOptions:", sheetOptions);
+          setSheetNames(sheetOptions);
+        })
+        .catch((error) => {
+          console.error("Error fetching Google Sheets:", error);
+        });
+    }
+  }, [url]);
+
+  useEffect(() => {
+    console.log("sheetNames:", sheetNames);
+    if (selectedSheet) {
+      console.log("Selected sheet:", selectedSheet);
+    }
+  }, [selectedSheet, sheetNames]);
+
 
   const handleRunClick = async () => {
     const isValidName = checkBoardName();
@@ -124,7 +151,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       const queryData: CustomAPIRequest = {
         method: "get",
         url: url,
-        body: firstColumnAsItemName ? "true" : "false",
+        body: JSON.stringify({'sheet_name': selectedSheet?.label,'first_column': firstColumnAsItemName }),
       };
       const requestBody: Body_run_run = {
         query: queryData,
@@ -198,6 +225,23 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
             />
           </Tooltip>
           </div>
+          <div className="flex items-center gap-1 mb-2">
+            <p className="font-bold text-gray-500 text-sm">* Sheet Name</p>
+            <Tooltip
+              content="Select the sheet you want to import from your Google Sheets document."
+              position={Tooltip.positions.TOP}
+            >
+              <Icon icon={Info} className="text-gray-500" />
+            </Tooltip>
+          </div>
+          <Dropdown
+            isLoading={sheetNames === undefined || sheetNames.length === 0}
+            placeholder="Select a sheet"
+            value={selectedSheet}
+            options={sheetNames}
+            onChange={(option: Option) => setSelectedSheet(option)}
+            className="mb-2"
+          />
           <div className="flex items-center gap-1">
             <p className="font-bold text-gray-500 text-sm">* First Column as Item Name</p>
             <Tooltip

@@ -56,4 +56,27 @@ export class GoogleService {
             },
         });
     }
+    /**
+     * Get Sheets Sheets
+     * @param sessionToken
+     * @param url
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static googleGetSheetsSheets(
+        sessionToken: string,
+        url: string,
+    ): CancelablePromise<Array<Record<string, any>>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/google/google-sheets/sheets',
+            query: {
+                'session_token': sessionToken,
+                'url': url,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
 }
