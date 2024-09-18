@@ -146,11 +146,11 @@ export const Connector: React.FC<{
         label: "Google Analytics",
         leftAvatar: getIconUrl("google-analytics-icon"),
       },
-      {
-        value: "google_sheets",
-        label: "Google Sheets",
-        leftAvatar: getIconUrl("google-sheets-icon"),
-      },
+      // {
+      //   value: "google_sheets",
+      //   label: "Google Sheets",
+      //   leftAvatar: getIconUrl("google-sheets-icon"),
+      // },
     ],
     []
   );
