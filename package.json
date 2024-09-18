@@ -10,7 +10,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "stop": "kill-port 8301 && kill-port 4049 && kill-port 4040",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org data-importer --project javascript-react build && sentry-cli sourcemaps upload --org data-importer --project javascript-react build"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org data-importer --project javascript-react build && sentry-cli sourcemaps upload --org data-importer --project react-front-end build"
   },
   "dependencies": {
     "@mondaycom/apps-sdk": "^2.1.2",
