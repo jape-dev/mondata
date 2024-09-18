@@ -159,7 +159,7 @@ export const Connector: React.FC<{
       },
       {
         value: "request_new",
-        label: "Request New Source",
+        label: "Request New Application",
         // leftAvatar: getIconUrl("google-calendar-icon"),
       },
     ],
