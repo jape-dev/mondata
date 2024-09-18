@@ -62,9 +62,6 @@ export const Connector: React.FC<{
     label: "(UTC+00:00) Western Europe Time, London, Lisbon, Casablanca",
   });
 
-  useEffect(() => {
-    const selectedOption = options.find((option) => option.value === connector);
-  }, [connector]);
 
   useEffect(() => {
     const storedConnector = localStorage.getItem("selectedConnector");
@@ -114,6 +111,15 @@ export const Connector: React.FC<{
     return require(`../Static/images/${imgPath}.png`);
   };
 
+  const handleConnectorSelect = (connector: string) => {
+    if (connector === "request_new") {
+      const url = "https://data-importer.canny.io/feature-requests";
+      window.open(url, "_blank");
+    } else {
+      setConnector(connector);
+    }
+  };
+
   const options = useMemo(
     () => [
       {
@@ -150,6 +156,11 @@ export const Connector: React.FC<{
         value: "google_sheets",
         label: "Google Sheets",
         leftAvatar: getIconUrl("google-sheets-icon"),
+      },
+      {
+        value: "request_new",
+        label: "Request New Source",
+        // leftAvatar: getIconUrl("google-calendar-icon"),
       },
     ],
     []
@@ -262,7 +273,7 @@ export const Connector: React.FC<{
                 // }
                 placeholder="Select an application"
                 options={options}
-                onOptionSelect={(e: any) => setConnector(e.value)}
+                onOptionSelect={(e: Option) => handleConnectorSelect(e.value)}
               />
               {connected === true && connector !== "custom_api" ? (
                 <Button
