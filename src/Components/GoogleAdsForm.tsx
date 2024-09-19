@@ -364,7 +364,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           className="mb-2"
           options={accountOptions}
           isLoading={accountOptions.length === 0 ? true : false}
-          loadingMessage={"Loading accounts. Please wait up to 10 seconds..."}
+          loadingMessage="Loading accounts. Please wait up to 10 seconds..."
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
         <div className="flex items-center gap-1">

@@ -246,7 +246,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
           </div>
           <Dropdown
             isLoading={sheetNames === undefined || sheetNames.length === 0}
-            loadingMessage={"Loading sheets. Please wait up to 10 seconds..."}
+            loadingMessage="Loading sheets. Please wait up to 10 seconds..."
             placeholder="Select a sheet"
             value={selectedSheet}
             options={sheetNames}
