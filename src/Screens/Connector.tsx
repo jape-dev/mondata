@@ -488,6 +488,7 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
+                  storeUrl={shopifyStoreUrl}
                 />
               ) : null}
               <SchedulerBlock

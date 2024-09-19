@@ -45,6 +45,7 @@ export interface ShopifyFormProps {
   days: string[];
   startTime: string;
   timezone: Option;
+  storeUrl: string;
 }
 
 export const ShopifyForm: React.FC<ShopifyFormProps> = ({
@@ -63,6 +64,7 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
   days,
   startTime,
   timezone,
+  storeUrl,
 }) => {
   const [selectedResource, setSelectedResource] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
@@ -81,7 +83,10 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
+  const [date, setDate] = useState<Option>({
+    value: 60,
+    label: "Last 60 days",
+  });
   const [showModal, setShowModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState<string>();
@@ -145,63 +150,6 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
     if (
       sessionToken &&
       selectedBoardOption &&
-      selectedGrouping &&
-      date &&
-      selectedColumnOption
-    ) {
-      MondayService.mondayItems(
-        selectedBoardOption?.value,
-        selectedColumnOption?.value,
-        sessionToken,
-        selectedGroupOption?.value
-      )
-        .then((items: MondayItem[]) => {
-          const queryData: QueryData = {
-            monday_items: items,
-            metrics: selectedFields.map((field) => field.value),
-            start_date: startDate.toISOString().split("T")[0],
-            end_date: endDate.toISOString().split("T")[0],
-          };
-          if (isScheduled) {
-            const scheduleRequestBody: Body_run_schedule = {
-              query: queryData,
-              schedule_input: scheduleInput,
-            };
-            RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
-              (err) => {
-                setLoading(false);
-                setShowScheduleModal(true);
-                setIsRunning(false);
-              }
-            );
-          }
-          const requestBody: Body_run_run = {
-            query: queryData,
-            schedule: scheduleInput,
-          };
-          console.log(requestBody);
-          RunService.runRun(sessionToken, requestBody, boardName)
-            .then((run: RunResponse) => {
-              setBoardId(run.run.board_id);
-              monday.execute("valueCreatedForUser");
-              setLoading(false);
-              setSuccess(true);
-              setIsRunning(false);
-            })
-            .catch((err) => {
-              setLoading(false);
-              setShowErrorModal(true);
-              setIsRunning(false);
-            });
-        })
-        .catch(() => {
-          setShowErrorModal(true);
-          setLoading(false);
-          setSuccess(false);
-        });
-    } else if (
-      sessionToken &&
-      selectedBoardOption &&
       selectedResource &&
       date &&
       (boardName || groupName)
@@ -210,6 +158,7 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
         metrics: selectedFields.map((field) => field.value),
         start_date: startDate.toISOString().split("T")[0],
         end_date: endDate.toISOString().split("T")[0],
+        manager_id: storeUrl,
       };
       const requestBody: Body_run_run = {
         query: queryData,
@@ -302,9 +251,7 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
       { value: 1, label: "Last 1 Days" },
       { value: 7, label: "Last 7 Days" },
       { value: 30, label: "Last 30 Days" },
-      { value: 90, label: "Last 90 Days" },
-      { value: 365, label: "Last 12 Months" },
-      { value: 730, label: "All time" },
+      { value: 90, label: "Last 60 days Days" },
     ],
     []
   );
