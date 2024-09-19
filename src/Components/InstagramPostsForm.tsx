@@ -313,7 +313,9 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           className="mb-2"
           options={pageOptions}
           isLoading={pageOptions.length === 0}
-          loadingMessage="Loading pages. Please wait up to 10 seconds..."
+          loadingMessage={(inputValue: string) =>
+            `Loading pages. Please wait up to 10 seconds...`
+          }
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
         <div className="flex items-center gap-1">

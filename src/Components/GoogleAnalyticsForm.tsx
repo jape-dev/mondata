@@ -389,7 +389,9 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
           className="mb-2"
           options={accountOptions}
           isLoading={accountOptions.length === 0}
-          loadingMessage="Loading accounts. Please wait up to 10 seconds..."
+          loadingMessage={(inputValue: string) =>
+            `Loading accounts. Please wait up to 10 seconds...`
+          }
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
         <div className="flex items-center gap-1">
