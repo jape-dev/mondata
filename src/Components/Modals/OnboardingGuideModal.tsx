@@ -5,7 +5,6 @@ import { Modal, ModalContent, Steps } from "monday-ui-react-core";
 import { getImageUrl } from "Utils/image";
 import { BaseModal } from "./BaseModal";
 
-
 const steps = [<div />, <div />, <div />, <div />, <div />];
 
 const titles = [
@@ -13,7 +12,7 @@ const titles = [
   "1) Select application ",
   "2) Choose options",
   "3) Set-up your board",
-  "4) Run"
+  "4) Run",
 ];
 
 const content = [
@@ -39,7 +38,7 @@ const content = [
     <a className="text-blue underline" href="mailto:james@dataimporter.co">
       james@dataimporter.co
     </a>
-  </div>
+  </div>,
 ];
 const images = ["", "applications", "options", "post-urls", "run-complete", ""];
 
@@ -52,11 +51,6 @@ export const GuideModal: React.FC<OnboardingGuideModalProps> = ({
   showModal,
   setShowModal,
 }) => {
-  console.log("GuideModal rendered with showModal:", showModal);
-  
-  useEffect(() => {
-    console.log("GuideModal useEffect, showModal:", showModal);
-  }, [showModal]);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
 
   useEffect(() => {
@@ -91,7 +85,7 @@ export const GuideModal: React.FC<OnboardingGuideModalProps> = ({
   };
 
   return (
-    <div className="z-100000"> 
+    <div className="z-100000">
       <Modal
         title={titles[activeStepIndex]}
         onClose={() => setShowModal(false)}

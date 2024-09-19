@@ -12,10 +12,10 @@ interface Board {
 }
 
 interface BoardColumn {
-    id: string;
-    title: string;
-    type: string;
-  }
+  id: string;
+  title: string;
+  type: string;
+}
 
 export interface BoardBlockProps {
   sessionToken?: string;
@@ -29,13 +29,17 @@ export interface BoardBlockProps {
   selectedBoardOption: Option;
   setSelectedBoardOption: React.Dispatch<React.SetStateAction<Option>>;
   selectedColumnOption?: Option;
-  setSelectedColumnOption: React.Dispatch<React.SetStateAction<Option | undefined>>;
+  setSelectedColumnOption: React.Dispatch<
+    React.SetStateAction<Option | undefined>
+  >;
   boardName?: string;
   setBoardName: React.Dispatch<React.SetStateAction<string | undefined>>;
   groupName?: string;
   setGroupName: React.Dispatch<React.SetStateAction<string | undefined>>;
   selectedGroupOption?: Option;
-  setSelectedGroupOption: React.Dispatch<React.SetStateAction<Option | undefined>>;
+  setSelectedGroupOption: React.Dispatch<
+    React.SetStateAction<Option | undefined>
+  >;
   columnTitle?: string;
   columnModalTitle?: string;
   columnModalDescription?: string;
@@ -72,10 +76,12 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
   splitByGrouping,
   setSplitByGrouping,
 }) => {
-  const [boardGroups, setBoardGroups] = useState<Option[]>([{
-    label: "Import into a new group",
-    value: 999,
-  }]);
+  const [boardGroups, setBoardGroups] = useState<Option[]>([
+    {
+      label: "Import into a new group",
+      value: 999,
+    },
+  ]);
   const [boardColumns, setBoardColumns] = useState<Option[]>([]);
 
   const handleBoardSelect = (selectedBoard: Option) => {
@@ -91,7 +97,6 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
     setSelectedGroupOption(selectedGroup);
     setGroupName(undefined);
   };
-
 
   useEffect(() => {
     if (
@@ -112,8 +117,15 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
         .catch((error: any) => {
           console.log(error);
         });
-      
-      if (!['google_ads', 'google_analytics', 'custom_api', 'google_sheets'].includes(connector)) {
+
+      if (
+        ![
+          "google_ads",
+          "google_analytics",
+          "custom_api",
+          "google_sheets",
+        ].includes(connector)
+      ) {
         MondayService.mondayGroups(sessionToken, selectedBoardOption.value)
           .then((groups: any) => {
             const groupOptions: Option[] = [
@@ -141,7 +153,6 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
     }
   }, [selectedBoardOption]);
 
-
   useEffect(() => {
     if (sessionToken) {
       MondayService.mondayBoards(sessionToken).then((boards: Board[]) => {
@@ -164,7 +175,7 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
 
   return (
     <>
-    <div className="border-2 border-gray rounded-md p-5">
+      <div className="border-2 border-gray rounded-md p-5">
         <div className="flex items-center gap-1">
           <p className="font-bold text-gray-500 text-sm">* Board</p>
           <Tooltip
@@ -185,13 +196,13 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
         {selectedBoardOption?.value && selectedBoardOption.value !== 999 ? (
           <>
             <div className="flex items-center gap-1">
-              <p className="font-bold text-gray-500 text-sm">
-                * Group
-              </p>
+              <p className="font-bold text-gray-500 text-sm">* Group</p>
               <Tooltip
                 title={columnModalTitle}
                 content={columnModalDescription}
-                image={columnModalImage ? getImageUrl(columnModalImage) : undefined}
+                image={
+                  columnModalImage ? getImageUrl(columnModalImage) : undefined
+                }
                 position={Tooltip.positions.TOP}
               >
                 <Icon icon={Info} className="text-gray-500" />
@@ -200,91 +211,110 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
             <Dropdown
               options={boardGroups}
               value={selectedGroupOption}
-              isLoading={boardGroups.length === 0 && !['google_ads', 'google_analytics', 'custom_api', 'google_sheets'].includes(connector)}
+              isLoading={
+                boardGroups.length === 0 &&
+                ![
+                  "google_ads",
+                  "google_analytics",
+                  "custom_api",
+                  "google_sheets",
+                ].includes(connector)
+              }
               onOptionSelect={(e: Option) => handleGroupSelect(e)}
               placeholder="Select group"
               className="mb-2"
               menuPlacement={"bottom"}
             />
-            {selectedGroupOption?.value && selectedGroupOption.value !== 999 && columnModalTitle && columnModalDescription && columnModalImage ? (
-                <>
-                    <div className="flex items-center gap-1">
-                        <p className="font-bold text-gray-500 text-sm">
-                            * {columnTitle}
-                        </p>
-                        <Tooltip
-                            title={columnModalTitle}
-                            content={columnModalDescription}
-                            image={getImageUrl(columnModalImage)}
-                        >
-                        <Icon icon={Info} className="text-gray-500" />
-                        </Tooltip>  
-                  </div>
+            {selectedGroupOption?.value &&
+            selectedGroupOption.value !== 999 &&
+            columnModalTitle &&
+            columnModalDescription &&
+            columnModalImage ? (
+              <>
+                <div className="flex items-center gap-1">
+                  <p className="font-bold text-gray-500 text-sm">
+                    * {columnTitle}
+                  </p>
                   <Tooltip
                     title={columnModalTitle}
                     content={columnModalDescription}
                     image={getImageUrl(columnModalImage)}
-                    position={Tooltip.positions.TOP_START}
-                    immediateShowDelay={0}
                   >
-                    <Dropdown
-                      options={boardColumns}
-                      isLoading={boardColumns.length === 0}
-                      onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
-                      placeholder="Select column"
-                      className="mb-2"
-                      menuPlacement={"bottom"}
-                      />
-                    </Tooltip>
-                </>
-            ) : selectedGroupOption?.value && selectedGroupOption.value === 999 ? (
-                <>
-                <div className="flex items-center gap-1">
-                <p className="font-bold text-gray-500 text-sm">
-                    * Group Name
-                </p>
+                    <Icon icon={Info} className="text-gray-500" />
+                  </Tooltip>
+                </div>
                 <Tooltip
+                  title={columnModalTitle}
+                  content={columnModalDescription}
+                  image={getImageUrl(columnModalImage)}
+                  position={Tooltip.positions.TOP_START}
+                  immediateShowDelay={0}
+                >
+                  <Dropdown
+                    options={boardColumns}
+                    isLoading={boardColumns.length === 0}
+                    onOptionSelect={(e: Option) => setSelectedColumnOption(e)}
+                    placeholder="Select column"
+                    className="mb-2"
+                    menuPlacement={"bottom"}
+                  />
+                </Tooltip>
+              </>
+            ) : selectedGroupOption?.value &&
+              selectedGroupOption.value === 999 ? (
+              <>
+                <div className="flex items-center gap-1">
+                  <p className="font-bold text-gray-500 text-sm">
+                    * Group Name
+                  </p>
+                  <Tooltip
                     content={"Name of new group to be created."}
                     position={Tooltip.positions.TOP}
-                >
-                <Icon icon={Info} className="text-gray-500" />
-                </Tooltip>
+                  >
+                    <Icon icon={Info} className="text-gray-500" />
+                  </Tooltip>
                 </div>
                 <TextField
-                    onChange={(e: any) => setGroupName(e)}
-                    size={TextField.sizes.MEDIUM}s
-                    placeholder="Enter name"
-                    className="mb-2 !text-sm"
+                  onChange={(e: any) => setGroupName(e)}
+                  size={TextField.sizes.MEDIUM}
+                  s
+                  placeholder="Enter name"
+                  className="mb-2 !text-sm"
                 />
-                </>
+              </>
             ) : (
-                <></>
-            )
-        }
-        {['google_ads', 'google_analytics', 'facebook'].includes(connector) && selectedGroupOption?.value === 999  && setSplitByGrouping && (
-          <>
-            <div className="flex items-center gap-1 mt-2">
-              <p className="font-bold text-gray-500 text-sm">* Split by</p>
-              <Tooltip
-                content="Choose whether metrics should be split by Facebook Ad Id, Adset Id or Campaign Id"
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              options={splitByGroupingOptions}
-              value={splitByGrouping}
-              onOptionSelect={(e: Option) => setSplitByGrouping(e)}  
-              placeholder="Select column"
-              className="mb-2"
-              menuPlacement={"top"}
-            />
+              <></>
+            )}
+            {["google_ads", "google_analytics", "facebook", "shopify"].includes(
+              connector
+            ) &&
+              selectedGroupOption?.value === 999 &&
+              setSplitByGrouping && (
+                <>
+                  <div className="flex items-center gap-1 mt-2">
+                    <p className="font-bold text-gray-500 text-sm">
+                      * Split by
+                    </p>
+                    <Tooltip
+                      content="Choose how to split the metrics."
+                      position={Tooltip.positions.TOP}
+                    >
+                      <Icon icon={Info} className="text-gray-500" />
+                    </Tooltip>
+                  </div>
+                  <Dropdown
+                    options={splitByGroupingOptions}
+                    value={splitByGrouping}
+                    onOptionSelect={(e: Option) => setSplitByGrouping(e)}
+                    placeholder="Select column"
+                    className="mb-2"
+                    menuPlacement={"top"}
+                  />
+                </>
+              )}
           </>
-        )}
-      </>
-      ) : (
-        <>
+        ) : (
+          <>
             <div className="flex items-center gap-1">
               <p className="font-bold text-gray-500 text-sm">* Board Name</p>
               <Tooltip
@@ -300,27 +330,32 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
               placeholder="Enter name"
               className="mb-2 !text-sm"
             />
-            {['google_ads', 'google_analytics', 'facebook'].includes(connector) && setSplitByGrouping && (
-          <>
-            <div className="flex items-center gap-1 mt-2">
-              <p className="font-bold text-gray-500 text-sm">* Split by</p>
-              <Tooltip
-                content="Choose whether metrics should be split by Facebook Ad Id, Adset Id or Campaign Id"
-                position={Tooltip.positions.TOP}
-              >
-                <Icon icon={Info} className="text-gray-500" />
-              </Tooltip>
-            </div>
-            <Dropdown
-              options={splitByGroupingOptions}
-              value={splitByGrouping}
-              onOptionSelect={(e: Option) => setSplitByGrouping(e)}  
-              placeholder="Select column"
-              className="mb-2"
-              menuPlacement={"top"}
-            />
-          </>
-        )}
+            {["google_ads", "google_analytics", "facebook", "shopify"].includes(
+              connector
+            ) &&
+              setSplitByGrouping && (
+                <>
+                  <div className="flex items-center gap-1 mt-2">
+                    <p className="font-bold text-gray-500 text-sm">
+                      * Split by
+                    </p>
+                    <Tooltip
+                      content="Choose how to split the metrics."
+                      position={Tooltip.positions.TOP}
+                    >
+                      <Icon icon={Info} className="text-gray-500" />
+                    </Tooltip>
+                  </div>
+                  <Dropdown
+                    options={splitByGroupingOptions}
+                    value={splitByGrouping}
+                    onOptionSelect={(e: Option) => setSplitByGrouping(e)}
+                    placeholder="Select column"
+                    className="mb-2"
+                    menuPlacement={"top"}
+                  />
+                </>
+              )}
           </>
         )}
       </div>

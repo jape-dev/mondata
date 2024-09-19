@@ -105,9 +105,8 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
 
   const groupingOptions = useMemo(() => {
     return [
-      { value: "date", label: "Date" },
-      { value: "product", label: "Product" },
-      { value: "customer", label: "Customer" },
+      { value: "order", label: "Order" },
+      { value: "item", label: "Item" },
     ];
   }, []);
 
@@ -311,15 +310,17 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
   );
 
   useEffect(() => {
-    if (selectedResource && sessionToken) {
-      ShopifyService.shopifyFields().then((fields) => {
+    ShopifyService.shopifyFields()
+      .then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
           label: field.label,
           value: field.value,
         }));
         setFields(fieldOptions);
+      })
+      .catch((error) => {
+        console.log(error);
       });
-    }
   }, [selectedResource]);
 
   useEffect(() => {
@@ -362,7 +363,7 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
           multi
           multiline
           options={fields}
-          isLoading={fields.length === 0}
+          isLoading={fields === undefined || fields.length === 0}
           onOptionSelect={(e: Option) => handleFieldSelect(e)}
           onOptionRemove={(e: Option) => handleFieldDeselect(e)}
         />
