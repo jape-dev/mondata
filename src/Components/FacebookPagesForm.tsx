@@ -84,7 +84,9 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState<string | undefined>();
   const [showErrordModal, setShowErrorModal] = useState(false);
-  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+  const [selectedGroupOption, setSelectedGroupOption] = useState<
+    Option | undefined
+  >({
     label: "Import into a new group",
     value: 999,
   });
@@ -140,7 +142,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
         selectedBoardOption?.value,
         selectedColumnOption?.value,
         sessionToken,
-        selectedGroupOption?.value,
+        selectedGroupOption?.value
       )
         .then((items: MondayItem[]) => {
           const queryData: QueryData = {
@@ -185,7 +187,11 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           setShowErrorModal(true);
           setLoading(false);
         });
-    } else if (sessionToken && selectedBoardOption &&  (boardName || groupName)) {
+    } else if (
+      sessionToken &&
+      selectedBoardOption &&
+      (boardName || groupName)
+    ) {
       const queryData: QueryData = {
         account_id: selectedAccount?.value,
         metrics: selectedFields.map((field) => field.value),
@@ -303,6 +309,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
           className="mb-2"
           options={pageOptions}
           isLoading={pageOptions.length === 0}
+          loadingMessage={"Loading pages. Please wait up to 10 seconds..."}
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
         <div className="flex items-center gap-1">

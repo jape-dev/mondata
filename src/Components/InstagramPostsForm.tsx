@@ -73,7 +73,9 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   });
   const [boards, setBoards] = useState<Option[]>([]);
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+  const [selectedGroupOption, setSelectedGroupOption] = useState<
+    Option | undefined
+  >({
     label: "Import into a new group",
     value: 999,
   });
@@ -136,7 +138,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         selectedBoardOption?.value,
         selectedColumnOption?.value,
         sessionToken,
-        selectedGroupOption?.value,
+        selectedGroupOption?.value
       )
         .then((items: MondayItem[]) => {
           const queryData: QueryData = {
@@ -199,10 +201,11 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
       RunService.runRun(sessionToken, requestBody, boardName)
         .then((run: RunResponse) => {
           if (boardName) {
-          setSelectedBoardOption({
-            value: run.run.board_id,
-            label: boardName,
-          })};
+            setSelectedBoardOption({
+              value: run.run.board_id,
+              label: boardName,
+            });
+          }
           setBoardId(run.run.board_id);
           monday.execute("valueCreatedForUser");
           setLoading(false);
@@ -310,6 +313,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           className="mb-2"
           options={pageOptions}
           isLoading={pageOptions.length === 0}
+          loadingMessage={"Loading pages. Please wait up to 10 seconds..."}
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
         <div className="flex items-center gap-1">

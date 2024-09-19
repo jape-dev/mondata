@@ -2,12 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import {
-  Dropdown,
-  Tooltip,
-  Icon,
-  TextField,
-} from "monday-ui-react-core";
+import { Dropdown, Tooltip, Icon, TextField } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
   GoogleAdsService,
@@ -84,7 +79,9 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [show2StepModal, setShow2StepModal] = useState(false);
   const [showExpiredModal, setShowExpiredModal] = useState(false);
   const [groupName, setGroupName] = useState<string>();
-  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+  const [selectedGroupOption, setSelectedGroupOption] = useState<
+    Option | undefined
+  >({
     label: "Import into a new group",
     value: 999,
   });
@@ -146,15 +143,16 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
       selectedBoardOption &&
       selectedGrouping &&
       selectedAccount &&
-      date && 
+      date &&
       selectedColumnOption
     ) {
-        MondayService.mondayItems(
-          selectedBoardOption?.value,
-          selectedColumnOption?.value,
-          sessionToken,
-          selectedGroupOption?.value
-        ).then((items: MondayItem[]) => {
+      MondayService.mondayItems(
+        selectedBoardOption?.value,
+        selectedColumnOption?.value,
+        sessionToken,
+        selectedGroupOption?.value
+      )
+        .then((items: MondayItem[]) => {
           const queryData: QueryData = {
             monday_items: items,
             account_id: selectedAccount?.value,
@@ -196,62 +194,63 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
               setShowErrorModal(true);
               setIsRunning(false);
             });
-        }).catch(() => {
-            setShowErrorModal(true);
-            setLoading(false);
-            setSuccess(false);
+        })
+        .catch(() => {
+          setShowErrorModal(true);
+          setLoading(false);
+          setSuccess(false);
+        });
+    } else if (
+      sessionToken &&
+      selectedBoardOption &&
+      selectedAccount &&
+      selectedGrouping &&
+      date &&
+      (boardName || groupName)
+    ) {
+      const queryData: QueryData = {
+        account_id: selectedAccount.value,
+        dimensions: selectedGrouping ? [selectedGrouping.value] : [],
+        metrics: selectedFields.map((field) => field.value),
+        start_date: startDate.toISOString().split("T")[0],
+        end_date: endDate.toISOString().split("T")[0],
+      };
+      const requestBody: Body_run_run = {
+        query: queryData,
+        schedule: scheduleInput,
+      };
+      RunService.runRun(sessionToken, requestBody, boardName)
+        .then((run: RunResponse) => {
+          setSelectedBoardOption({
+            value: run.run.board_id,
+            label: boardName ?? `New Board ${run.run.board_id}`,
           });
-      } else if (
-        sessionToken &&
-        selectedBoardOption &&
-        selectedAccount &&
-        selectedGrouping &&
-        date &&
-        (boardName || groupName)
-      ) {
-        const queryData: QueryData = {
-          account_id: selectedAccount.value,
-          dimensions: selectedGrouping ? [selectedGrouping.value] : [],
-          metrics: selectedFields.map((field) => field.value),
-          start_date: startDate.toISOString().split("T")[0],
-          end_date: endDate.toISOString().split("T")[0],
-        };
-        const requestBody: Body_run_run = {
-          query: queryData,
-          schedule: scheduleInput,
-        };
-        RunService.runRun(sessionToken, requestBody, boardName)
-          .then((run: RunResponse) => {
-            setSelectedBoardOption({
-              value: run.run.board_id,
-              label: boardName ?? `New Board ${run.run.board_id}`,
-            });
-            setBoardId(run.run.board_id);
-            monday.execute("valueCreatedForUser");
-            setLoading(false);
-            setSuccess(true);
-            setIsRunning(false);
-            if (isScheduled) {
-              scheduleInput.data = run.data;
-              const scheduleRequestBody: Body_run_schedule = {
-                query: queryData,
-                schedule_input: scheduleInput,
-              };
-              RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
-                (err) => {
-                  console.log(err);
-                  setLoading(false);
-                  setShowScheduleModal(true);
-                  setIsRunning(false);
-                }
-              );
-            }
-          })
-          .catch((err) => {
-            setLoading(false);
-            setShowErrorModal(true);
-            setIsRunning(false);
-          });
+          setBoardId(run.run.board_id);
+          monday.execute("valueCreatedForUser");
+          setLoading(false);
+          setSuccess(true);
+          setIsRunning(false);
+          if (isScheduled) {
+            scheduleInput.data = run.data;
+            const scheduleRequestBody: Body_run_schedule = {
+              query: queryData,
+              schedule_input: scheduleInput,
+            };
+            RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+              (err) => {
+                console.log(err);
+                setLoading(false);
+                setShowScheduleModal(true);
+                setIsRunning(false);
+              }
+            );
+          }
+        })
+        .catch((err) => {
+          setLoading(false);
+          setShowErrorModal(true);
+          setIsRunning(false);
+        });
     } else {
       setShowFieldsRequiredModal(true);
       setLoading(false);
@@ -306,17 +305,19 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
 
   useEffect(() => {
     if (sessionToken) {
-        GoogleAdsService.googleAdsAdAccounts(sessionToken).then((accounts) => {
+      GoogleAdsService.googleAdsAdAccounts(sessionToken)
+        .then((accounts) => {
           const accountOptions: Option[] = accounts.map((account) => ({
             label: account.label,
             value: account.value,
           }));
           setAccountOptions(accountOptions);
-        }).catch((error: any) => {
+        })
+        .catch((error: any) => {
           if (error.body && error.body.detail) {
             const errorDetail = error.body.detail;
             console.log("Error detail:", errorDetail);
-            
+
             if (errorDetail.includes("TWO_STEP_VERIFICATION_NOT_ENROLLED")) {
               setShow2StepModal(true);
             } else if (errorDetail.includes("PERMISSION_DENIED")) {
@@ -363,6 +364,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           className="mb-2"
           options={accountOptions}
           isLoading={accountOptions.length === 0 ? true : false}
+          loadingMessage={"Loading accounts. Please wait up to 10 seconds..."}
           onOptionSelect={(e: Option) => setSelectedAccount(e)}
         />
         <div className="flex items-center gap-1">
@@ -426,7 +428,10 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         splitByGrouping={selectedGrouping}
         setSplitByGrouping={setSelectedGrouping}
       />
-      <FieldsRequiredModal showModal={showFieldsRequiredModal} setShowModal={setShowFieldsRequiredModal} />
+      <FieldsRequiredModal
+        showModal={showFieldsRequiredModal}
+        setShowModal={setShowFieldsRequiredModal}
+      />
       <BaseModal
         title={"Error: invalid name"}
         text={"This board name already exists. Please choose a new name"}
@@ -445,8 +450,15 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         title={"Google Ads Error: 2 step verification not enrolled"}
         text={
           <>
-            Google Ads requires 2 step verification to be enabled on your account in order to use their API. If you don't see any accounts in the drop down menu, please{" "}
-            <a href="https://support.google.com/google-ads/answer/12864186" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+            Google Ads requires 2 step verification to be enabled on your
+            account in order to use their API. If you don't see any accounts in
+            the drop down menu, please{" "}
+            <a
+              href="https://support.google.com/google-ads/answer/12864186"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline"
+            >
               enable 2 step verification
             </a>{" "}
             and try again.
@@ -463,7 +475,9 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
       />
       <BaseModal
         title={"Google Error: Access Token Expired "}
-        text={"Your Google access token has expired. Please press 'Connect to a different account to reauthenticate your access token."}
+        text={
+          "Your Google access token has expired. Please press 'Connect to a different account to reauthenticate your access token."
+        }
         showModal={showExpiredModal}
         setShowModal={setShowExpiredModal}
       />

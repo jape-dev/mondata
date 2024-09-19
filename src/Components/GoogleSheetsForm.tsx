@@ -7,7 +7,7 @@ import {
   Tooltip,
   TextField,
   Toggle,
-  Dropdown
+  Dropdown,
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
@@ -18,7 +18,7 @@ import {
   Body_run_run,
   Body_run_schedule,
   RunResponse,
-  GoogleService
+  GoogleService,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
@@ -75,12 +75,15 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
     value: 999,
   });
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+  const [selectedGroupOption, setSelectedGroupOption] = useState<
+    Option | undefined
+  >({
     label: "Import into a new group",
     value: 999,
   });
   const [groupName, setGroupName] = useState<string>();
-  const [firstColumnAsItemName, setFirstColumnAsItemName] = useState<boolean>(true);
+  const [firstColumnAsItemName, setFirstColumnAsItemName] =
+    useState<boolean>(true);
   const [sheetNames, setSheetNames] = useState<Option[]>();
   const [selectedSheet, setSelectedSheet] = useState<Option>();
 
@@ -107,7 +110,10 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       GoogleService.googleGetSheetsSheets(sessionToken, url)
         .then((sheets) => {
           console.log("sheets:", sheets);
-          const sheetOptions = sheets.map((sheet) => ({ label: sheet.label, value: sheet.value }));
+          const sheetOptions = sheets.map((sheet) => ({
+            label: sheet.label,
+            value: sheet.value,
+          }));
           console.log("sheetOptions:", sheetOptions);
           setSheetNames(sheetOptions);
         })
@@ -123,7 +129,6 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       console.log("Selected sheet:", selectedSheet);
     }
   }, [selectedSheet, sheetNames]);
-
 
   const handleRunClick = async () => {
     const isValidName = checkBoardName();
@@ -151,7 +156,10 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       const queryData: CustomAPIRequest = {
         method: "get",
         url: url,
-        body: JSON.stringify({'sheet_name': selectedSheet?.label,'first_column': firstColumnAsItemName }),
+        body: JSON.stringify({
+          sheet_name: selectedSheet?.label,
+          first_column: firstColumnAsItemName,
+        }),
       };
       const requestBody: Body_run_run = {
         query: queryData,
@@ -199,7 +207,9 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       <div className="mt-2">
         <div className="border-2 border-grey rounded-md p-5 mb-2">
           <div className="flex items-center gap-1">
-            <p className="font-bold text-gray-500 text-sm">* Google Sheets URL</p>
+            <p className="font-bold text-gray-500 text-sm">
+              * Google Sheets URL
+            </p>
             <Tooltip
               content="Make sure the first row of the sheet contains the column headers."
               position={Tooltip.positions.TOP}
@@ -210,20 +220,20 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
             </Tooltip>
           </div>
           <div className="mb-3">
-          <Tooltip
+            <Tooltip
               content="Make sure the first row of the sheet contains the column headers."
               position={Tooltip.positions.BOTTOM}
               title={"Google Sheet Url"}
               image={getImageUrl("google-sheets-import")}
               immediateShowDelay={0}
             >
-            <TextField
-              value={url}
-              placeholder="Url"
-              size={TextField.sizes.MEDIUM}
-              onChange={(e: string) => setUrl(e)}
-            />
-          </Tooltip>
+              <TextField
+                value={url}
+                placeholder="Url"
+                size={TextField.sizes.MEDIUM}
+                onChange={(e: string) => setUrl(e)}
+              />
+            </Tooltip>
           </div>
           <div className="flex items-center gap-1 mb-2">
             <p className="font-bold text-gray-500 text-sm">* Sheet Name</p>
@@ -236,6 +246,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
           </div>
           <Dropdown
             isLoading={sheetNames === undefined || sheetNames.length === 0}
+            loadingMessage={"Loading sheets. Please wait up to 10 seconds..."}
             placeholder="Select a sheet"
             value={selectedSheet}
             options={sheetNames}
@@ -243,7 +254,9 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
             className="mb-2"
           />
           <div className="flex items-center gap-1">
-            <p className="font-bold text-gray-500 text-sm">* First Column as Item Name</p>
+            <p className="font-bold text-gray-500 text-sm">
+              * First Column as Item Name
+            </p>
             <Tooltip
               content="If selected, first column of the sheet will be used as the item name in your monday board/group."
               position={Tooltip.positions.TOP}

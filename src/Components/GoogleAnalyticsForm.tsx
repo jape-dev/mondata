@@ -2,12 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import {
-  Dropdown,
-  Tooltip,
-  Icon,
-  TextField,
-} from "monday-ui-react-core";
+import { Dropdown, Tooltip, Icon, TextField } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
   GoogleAnalyticsService,
@@ -27,7 +22,6 @@ import { Option } from "../Utils/models";
 import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
-
 
 interface BoardColumn {
   id: string;
@@ -79,7 +73,9 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
     label: "Import into a new board",
     value: 999,
   });
-  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+  const [selectedGroupOption, setSelectedGroupOption] = useState<
+    Option | undefined
+  >({
     label: "Import into a new group",
     value: 999,
   });
@@ -109,9 +105,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   };
 
   const groupingOptions = useMemo(() => {
-    return [
-      { value: "date", label: "Date" },
-    ];
+    return [{ value: "date", label: "Date" }];
   }, []);
 
   useEffect(() => {
@@ -151,15 +145,16 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
       selectedBoardOption &&
       selectedGrouping &&
       selectedAccount &&
-      date && 
+      date &&
       selectedColumnOption
     ) {
-        MondayService.mondayItems(
-          selectedBoardOption?.value,
-          selectedColumnOption?.value,
-          sessionToken,
-          selectedGroupOption?.value
-        ).then((items: MondayItem[]) => {
+      MondayService.mondayItems(
+        selectedBoardOption?.value,
+        selectedColumnOption?.value,
+        sessionToken,
+        selectedGroupOption?.value
+      )
+        .then((items: MondayItem[]) => {
           const queryData: QueryData = {
             monday_items: items,
             account_id: selectedAccount?.value,
@@ -199,77 +194,79 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
               setShowErrorModal(true);
               setIsRunning(false);
             });
-        }).catch(() => {
-            setShowErrorModal(true);
-            setLoading(false);
-            setSuccess(false);
+        })
+        .catch(() => {
+          setShowErrorModal(true);
+          setLoading(false);
+          setSuccess(false);
+        });
+    } else if (
+      sessionToken &&
+      selectedBoardOption &&
+      selectedAccount &&
+      selectedGrouping &&
+      date &&
+      (boardName || groupName)
+    ) {
+      const queryData: QueryData = {
+        account_id: selectedAccount.value,
+        dimensions: [selectedGrouping.value],
+        metrics: selectedFields.map((field) => field.value),
+        start_date: startDate.toISOString().split("T")[0],
+        end_date: endDate.toISOString().split("T")[0],
+      };
+      const requestBody: Body_run_run = {
+        query: queryData,
+        schedule: scheduleInput,
+      };
+      RunService.runRun(sessionToken, requestBody, boardName)
+        .then((run: RunResponse) => {
+          setSelectedBoardOption({
+            value: run.run.board_id,
+            label: boardName ?? `New Board ${run.run.board_id}`,
           });
-      } else if (
-        sessionToken &&
-        selectedBoardOption &&
-        selectedAccount &&
-        selectedGrouping &&
-        date &&
-        (boardName || groupName)
-      ) {
-        const queryData: QueryData = {
-          account_id: selectedAccount.value,
-          dimensions: [selectedGrouping.value],
-          metrics: selectedFields.map((field) => field.value),
-          start_date: startDate.toISOString().split("T")[0],
-          end_date: endDate.toISOString().split("T")[0],
-        };
-        const requestBody: Body_run_run = {
-          query: queryData,
-          schedule: scheduleInput,
-        };
-        RunService.runRun(sessionToken, requestBody, boardName)
-          .then((run: RunResponse) => {
-            setSelectedBoardOption({
-              value: run.run.board_id,
-              label: boardName ?? `New Board ${run.run.board_id}`,
-            });
-            setBoardId(run.run.board_id);
-            monday.execute("valueCreatedForUser");
-            setLoading(false);
-            setSuccess(true);
-            setIsRunning(false);
-            if (isScheduled) {
-              scheduleInput.data = run.data;
-              const scheduleRequestBody: Body_run_schedule = {
-                query: queryData,
-                schedule_input: scheduleInput,
-              };
-              RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
-                (err) => {
-                  console.log(err);
-                  setLoading(false);
-                  setShowScheduleModal(true);
-                  setIsRunning(false);
-                }
-              );
-            }
-          })
-          .catch((error: any) => {
-            if (error.body && error.body.detail) {
-              const errorDetail = error.body.detail;
-              console.log("Error detail:", errorDetail);
-              if (errorDetail.includes("NO_GOOGLE_ANALYTICS_VALUES")) {
-                setShowNoValuesModal(true);
+          setBoardId(run.run.board_id);
+          monday.execute("valueCreatedForUser");
+          setLoading(false);
+          setSuccess(true);
+          setIsRunning(false);
+          if (isScheduled) {
+            scheduleInput.data = run.data;
+            const scheduleRequestBody: Body_run_schedule = {
+              query: queryData,
+              schedule_input: scheduleInput,
+            };
+            RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
+              (err) => {
+                console.log(err);
+                setLoading(false);
+                setShowScheduleModal(true);
+                setIsRunning(false);
+              }
+            );
+          }
+        })
+        .catch((error: any) => {
+          if (error.body && error.body.detail) {
+            const errorDetail = error.body.detail;
+            console.log("Error detail:", errorDetail);
+            if (errorDetail.includes("NO_GOOGLE_ANALYTICS_VALUES")) {
+              setShowNoValuesModal(true);
             } else {
               // Handle cases where there's no expected error structure
               console.log("Unexpected error structure:", error);
               setShowErrorModal(true);
-            }}
-            setLoading(false);
-            setIsRunning(false);
-          });
-      } else {
-        setShowModal(true);
-        setLoading(false);
-        setSuccess(false);
-        setIsRunning(false);
-      }
+            }
+          }
+          setLoading(false);
+          setIsRunning(false);
+        });
+    } else {
+      setShowModal(true);
+      setLoading(false);
+      setSuccess(false);
+      setIsRunning(false);
+    }
   };
 
   const handleFieldSelect = (selectedField: Option) => {
@@ -319,27 +316,29 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   useEffect(() => {
     if (sessionToken) {
       try {
-        GoogleAnalyticsService.googleAnalyticsProperties(sessionToken).then((accounts) => {
-          const accountOptions: Option[] = accounts.map((account) => ({
-            label: account.label,
-            value: account.value,
-          }));
-          setAccountOptions(accountOptions);
-        });
-      } catch (error: any) {
-          if (error.body && error.body.detail) {
-            const errorDetail = error.body.detail;
-            console.log("Error detail:", errorDetail);
-            if (errorDetail.includes("invalid_grant")) {
-              setShowExpiredModal(true);
-            } else {
-              // Handle other specific error messages here
-              console.log("Unhandled error type");
-            }
-          } else {
-            // Handle cases where there's no expected error structure
-            console.log("Unexpected error structure:", error);
+        GoogleAnalyticsService.googleAnalyticsProperties(sessionToken).then(
+          (accounts) => {
+            const accountOptions: Option[] = accounts.map((account) => ({
+              label: account.label,
+              value: account.value,
+            }));
+            setAccountOptions(accountOptions);
           }
+        );
+      } catch (error: any) {
+        if (error.body && error.body.detail) {
+          const errorDetail = error.body.detail;
+          console.log("Error detail:", errorDetail);
+          if (errorDetail.includes("invalid_grant")) {
+            setShowExpiredModal(true);
+          } else {
+            // Handle other specific error messages here
+            console.log("Unhandled error type");
+          }
+        } else {
+          // Handle cases where there's no expected error structure
+          console.log("Unexpected error structure:", error);
+        }
       }
       GoogleAnalyticsService.googleAnalyticsFields().then((fields) => {
         const fieldOptions: Option[] = fields.map((field) => ({
@@ -350,7 +349,6 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
       });
     }
   }, [user]);
-
 
   useEffect(() => {
     if (
@@ -374,26 +372,26 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
     }
   }, [selectedBoardOption]);
 
-
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
         <div className="flex items-center gap-1">
-            <p className="font-bold text-gray-500 text-sm">* Account</p>
-            <Tooltip
-              content="The ad account to fetch data from."
-              position={Tooltip.positions.TOP}
-            >
-              <Icon icon={Info} className="text-gray-500" />
-            </Tooltip>
-          </div>
-          <Dropdown
-            placeholder="Select an account"
-            className="mb-2"
-            options={accountOptions}
-            isLoading={accountOptions.length === 0}
-            onOptionSelect={(e: Option) => setSelectedAccount(e)}
-          />
+          <p className="font-bold text-gray-500 text-sm">* Account</p>
+          <Tooltip
+            content="The ad account to fetch data from."
+            position={Tooltip.positions.TOP}
+          >
+            <Icon icon={Info} className="text-gray-500" />
+          </Tooltip>
+        </div>
+        <Dropdown
+          placeholder="Select an account"
+          className="mb-2"
+          options={accountOptions}
+          isLoading={accountOptions.length === 0}
+          loadingMessage={"Loading accounts. Please wait up to 10 seconds..."}
+          onOptionSelect={(e: Option) => setSelectedAccount(e)}
+        />
         <div className="flex items-center gap-1">
           <p className="font-bold text-gray-500 text-sm">* Metrics</p>
           <Tooltip
@@ -478,13 +476,17 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
       />
       <BaseModal
         title={"Error: No Data Found"}
-        text={"No data found for this Google Analytics account in the date range you selected. Please check your configuration and try again. If you think this is an error, please contact support at james@dataimporter.co"}
+        text={
+          "No data found for this Google Analytics account in the date range you selected. Please check your configuration and try again. If you think this is an error, please contact support at james@dataimporter.co"
+        }
         showModal={showNoValuesModal}
         setShowModal={setShowNoValuesModal}
       />
       <BaseModal
         title={"Google Error: Access Token Expired "}
-        text={"Your Google access token has expired. Please press 'Connect to a different account to reauthenticate your access token."}
+        text={
+          "Your Google access token has expired. Please press 'Connect to a different account to reauthenticate your access token."
+        }
         showModal={showExpiredModal}
         setShowModal={setShowExpiredModal}
       />
