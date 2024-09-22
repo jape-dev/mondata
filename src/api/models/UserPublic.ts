@@ -7,6 +7,7 @@ export type UserPublic = {
     id: number;
     monday_user_id: number;
     monday_account_id: number;
+    shopify_store_url?: (string | null);
     plan: Plan;
 };
 

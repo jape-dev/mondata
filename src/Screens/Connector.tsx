@@ -2,7 +2,14 @@ import { useState, useMemo, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import { Dropdown, Button } from "monday-ui-react-core";
+import {
+  Dropdown,
+  Button,
+  TextField,
+  Tooltip,
+  Icon,
+} from "monday-ui-react-core";
+import { Info } from "monday-ui-react-core/icons";
 import Nango from "@nangohq/frontend";
 import {
   FacebookService,
@@ -10,6 +17,7 @@ import {
   HTTPAuthorizationCredentials,
   UserPublic,
   UsersService,
+  ShopifyService,
 } from "../api";
 import { FacebookAdsForm } from "../Components/FacebookAdsForm";
 import { FacebookPagesForm } from "../Components/FacebookPagesForm";
@@ -18,6 +26,7 @@ import { GoogleAdsForm } from "../Components/GoogleAdsForm";
 import { GoogleAnalyticsForm } from "../Components/GoogleAnalyticsForm";
 import { GoogleSheetsForm } from "../Components/GoogleSheetsForm";
 import { CustomApiForm } from "Components/CustomApiForm";
+import { ShopifyForm } from "../Components/ShopifyForm";
 import { SchedulerBlock } from "../Components/SchedulerBlock";
 import { RunBlock } from "Components/RunBlock";
 import { Option } from "../Utils/models";
@@ -25,7 +34,7 @@ import { getNextScheduledDate } from "../Utils/datetime";
 
 const monday = mondaySdk();
 
-export const Connector: React.FC<{ 
+export const Connector: React.FC<{
   sessionToken: string | undefined;
   user: UserPublic | undefined;
 }> = ({ sessionToken, user }) => {
@@ -56,12 +65,14 @@ export const Connector: React.FC<{
     "Sa",
     "Su",
   ]);
-  const [startTime, setStartTime] = useState<string>(getNextScheduledDate([], "09:00"));
+  const [startTime, setStartTime] = useState<string>(
+    getNextScheduledDate([], "09:00")
+  );
   const [timezone, setTimezone] = useState<Option>({
     value: 0,
     label: "(UTC+00:00) Western Europe Time, London, Lisbon, Casablanca",
   });
-
+  const [shopifyStoreUrl, setShopifyStoreUrl] = useState<string>();
 
   useEffect(() => {
     const storedConnector = localStorage.getItem("selectedConnector");
@@ -158,16 +169,19 @@ export const Connector: React.FC<{
         leftAvatar: getIconUrl("google-sheets-icon"),
       },
       {
+        value: "shopify",
+        label: "Shopify",
+        leftAvatar: getIconUrl("shopify-icon"),
+      },
+      {
         value: "request_new",
         label: "Request New Application",
-        // leftAvatar: getIconUrl("google-calendar-icon"),
       },
     ],
     []
   );
 
   async function updateUser(connectionId: string) {
-
     if (!sessionToken) {
       return;
     }
@@ -188,7 +202,9 @@ export const Connector: React.FC<{
       GoogleService.googleLogin(connectionId, requestBody);
     } else if (connector === "google_sheets") {
       GoogleService.googleGoogleSheetsLogin(connectionId, requestBody);
-    } 
+    } else if (connector === "shopify") {
+      ShopifyService.shopifyLogin(connectionId, requestBody);
+    }
   }
 
   const nango = new Nango({
@@ -224,6 +240,27 @@ export const Connector: React.FC<{
     } else if (connector === "google_sheets") {
       nango
         .auth("google-sheet", "google-sheets-prod")
+        .then((result) => {
+          updateUser(result.connectionId);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else if (connector === "shopify") {
+      const storeUrl = shopifyStoreUrl
+        ? shopifyStoreUrl
+        : user?.shopify_store_url;
+
+      if (!storeUrl) {
+        alert("Please enter your Shopify store URL");
+        return;
+      }
+
+      const subdomain = storeUrl.replace(/^https?:\/\//, "").split(".")[0];
+      nango
+        .auth("shopify", "shopify-prod", {
+          params: { subdomain: subdomain },
+        })
         .then((result) => {
           updateUser(result.connectionId);
         })
@@ -268,9 +305,6 @@ export const Connector: React.FC<{
             <>
               <p className="font-bold text-gray-500 text-sm">* Application</p>
               <Dropdown
-                // value={() =>
-                //   options.find((option) => option.value == connector)
-                // }
                 placeholder="Select an application"
                 options={options}
                 onOptionSelect={(e: Option) => handleConnectorSelect(e.value)}
@@ -283,6 +317,30 @@ export const Connector: React.FC<{
                 >
                   Connect to different account?
                 </Button>
+              ) : connector === "shopify" ? (
+                <>
+                  <div className="flex items-center gap-1 mt-2">
+                    <p className="font-bold text-gray-500 text-sm">
+                      * Your Shopify store URL
+                    </p>
+                    <Tooltip
+                      content="Must be in the format https://yourstore.myshopify.com"
+                      position={Tooltip.positions.TOP}
+                    >
+                      <Icon icon={Info} className="text-gray-500" />
+                    </Tooltip>
+                  </div>
+                  <TextField
+                    placeholder="https://yourstore.myshopify.com"
+                    value={shopifyStoreUrl}
+                    onChange={(value: string) => setShopifyStoreUrl(value)}
+                    className="mb-5"
+                    size={TextField.sizes.MEDIUM}
+                  />
+                  <Button onClick={() => connect()} className="mt-5">
+                    Connect
+                  </Button>
+                </>
               ) : connector !== "custom_api" ? (
                 <Button onClick={() => connect()} className="mt-2">
                   Connect
@@ -404,6 +462,24 @@ export const Connector: React.FC<{
                 />
               ) : connector === "google_analytics" ? (
                 <GoogleAnalyticsForm
+                  user={user}
+                  sessionToken={sessionToken}
+                  workspaceId={workspaceId}
+                  isScheduled={isScheduled}
+                  isRunning={isRunning}
+                  setIsRunning={setIsRunning}
+                  setLoading={setLoading}
+                  setSuccess={setSuccess}
+                  boardId={boardId}
+                  setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
+                />
+              ) : connector === "shopify" ? (
+                <ShopifyForm
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}
