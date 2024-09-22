@@ -72,7 +72,7 @@ export const Connector: React.FC<{
     value: 0,
     label: "(UTC+00:00) Western Europe Time, London, Lisbon, Casablanca",
   });
-  const [shopifyStoreUrl, setShopifyStoreUrl] = useState<string>("");
+  const [shopifyStoreUrl, setShopifyStoreUrl] = useState<string>();
 
   useEffect(() => {
     const storedConnector = localStorage.getItem("selectedConnector");
@@ -247,9 +247,16 @@ export const Connector: React.FC<{
           console.log(err);
         });
     } else if (connector === "shopify") {
-      const subdomain = shopifyStoreUrl
-        .replace(/^https?:\/\//, "")
-        .split(".")[0];
+      const storeUrl = shopifyStoreUrl
+        ? shopifyStoreUrl
+        : user?.shopify_store_url;
+
+      if (!storeUrl) {
+        alert("Please enter your Shopify store URL");
+        return;
+      }
+
+      const subdomain = storeUrl.replace(/^https?:\/\//, "").split(".")[0];
       nango
         .auth("shopify", "shopify-prod", {
           params: { subdomain: subdomain },
@@ -488,7 +495,6 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
-                  storeUrl={shopifyStoreUrl}
                 />
               ) : null}
               <SchedulerBlock

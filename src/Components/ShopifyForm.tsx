@@ -6,9 +6,7 @@ import { Dropdown, Tooltip, Icon } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
   ShopifyService,
-  MondayService,
   QueryData,
-  MondayItem,
   RunService,
   UserPublic,
   ScheduleInput,
@@ -45,7 +43,6 @@ export interface ShopifyFormProps {
   days: string[];
   startTime: string;
   timezone: Option;
-  storeUrl: string;
 }
 
 export const ShopifyForm: React.FC<ShopifyFormProps> = ({
@@ -64,7 +61,6 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
   days,
   startTime,
   timezone,
-  storeUrl,
 }) => {
   const [selectedResource, setSelectedResource] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
@@ -80,7 +76,6 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
     label: "Import into a new group",
     value: 999,
   });
-  const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [date, setDate] = useState<Option>({
@@ -149,16 +144,18 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
     };
     if (
       sessionToken &&
+      selectedFields.length > 0 &&
       selectedBoardOption &&
-      selectedResource &&
       date &&
+      selectedGrouping &&
       (boardName || groupName)
     ) {
       const queryData: QueryData = {
         metrics: selectedFields.map((field) => field.value),
+        dimensions: [selectedGrouping.value],
         start_date: startDate.toISOString().split("T")[0],
         end_date: endDate.toISOString().split("T")[0],
-        manager_id: storeUrl,
+        manager_id: user.shopify_store_url,
       };
       const requestBody: Body_run_run = {
         query: queryData,
@@ -269,28 +266,6 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
         console.log(error);
       });
   }, [selectedResource]);
-
-  useEffect(() => {
-    if (
-      selectedBoardOption &&
-      selectedBoardOption?.value !== 999 &&
-      sessionToken
-    ) {
-      MondayService.mondayBoardColumns(selectedBoardOption.value, sessionToken)
-        .then((columns: BoardColumn[]) => {
-          const columnOptions: Option[] = columns.map(
-            (column: BoardColumn) => ({
-              value: column.id,
-              label: column.title,
-            })
-          );
-          setBoardColumns(columnOptions);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
-  }, [selectedBoardOption]);
 
   return (
     <div className="mt-2">

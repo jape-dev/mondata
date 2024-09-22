@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { TabList, Tab } from "monday-ui-react-core";
 import { UserPublic, UsersService, Plan } from "../api";
 import mondaySdk from "monday-sdk-js";
 import { ScheduleTable } from "./Schedule";
 import { Connector } from "./Connector";
 import { GuideModal } from "../Components/Modals/OnboardingGuideModal";
-import { UpgradeModal } from 'Components/Modals/UpgradeModal';
-import longLogo from '../Static/images/long-logo.png';
+import { UpgradeModal } from "Components/Modals/UpgradeModal";
+import longLogo from "../Static/images/long-logo.png";
 import { Button } from "monday-ui-react-core";
-
 
 const monday = mondaySdk();
 
@@ -25,15 +24,16 @@ const BaseScreen: React.FC = () => {
       if (res.data && res.data.href) {
         const url = new URL(res.data.href);
         const hostname = url.hostname;
-        const parts = hostname.split('.');
+        const parts = hostname.split(".");
         if (parts.length > 2) {
-          setAccountSlug(`${parts[0]}.monday.com/marketplace/v2/app/installed/10150307`);
+          setAccountSlug(
+            `${parts[0]}.monday.com/marketplace/v2/app/installed/10150307`
+          );
         }
       }
     });
   }, []);
 
-  
   async function getSessionToken() {
     return (await monday.get("sessionToken")).data;
   }
@@ -77,10 +77,11 @@ const BaseScreen: React.FC = () => {
   };
 
   const handleUpgradeClick = () => {
-    const link = accountSlug ? `https://${accountSlug}` : "https://monday.com/marketplace/listing/10000557/data-importer";
+    const link = accountSlug
+      ? `https://${accountSlug}`
+      : "https://monday.com/marketplace/listing/10000557/data-importer";
     window.open(link, "_blank");
   };
-
 
   return (
     <div>
@@ -88,13 +89,18 @@ const BaseScreen: React.FC = () => {
         <div className="col-span-8 border-b-2 border-gray-250 h-10">
           <div className="flex justify-start h-10 items-center pl-4">
             <img src={longLogo} alt="Logo" className="h-6 !m-0" />
-            <Button onClick={handleUpgradeClick}  size={Button.sizes.SMALL} className="!h-6 ml-3 !text-xs" kind={Button.kinds.SECONDARY}>
-            {user?.plan === Plan.FREE ? "Upgrade" : "Pro"}
-          </Button>
+            <Button
+              onClick={handleUpgradeClick}
+              size={Button.sizes.SMALL}
+              className="!h-6 ml-3 !text-xs"
+              kind={Button.kinds.SECONDARY}
+            >
+              {user?.plan === Plan.FREE ? "Upgrade" : "Pro"}
+            </Button>
           </div>
         </div>
         <div className="col-span-4 flex justify-end border-b-2 border-gray-250 h-10">
-          <TabList activeTabId={activeTab} >
+          <TabList activeTabId={activeTab}>
             <Tab onClick={() => setActiveTab(0)}>New Import</Tab>
             <Tab onClick={handleScheduleTabClick}>Schedule</Tab>
             <Tab onClick={() => setGuideModal(true)}>How to use</Tab>
@@ -109,7 +115,12 @@ const BaseScreen: React.FC = () => {
         )}
       </div>
       <GuideModal showModal={guideModal} setShowModal={setGuideModal} />
-      <UpgradeModal showModal={upgradeModal} setShowModal={setUpgradeModal} title="Upgrade to schedule imports" text="Scheduled imports run automatically, even if you are not logged into monday.com or do not have Data Importer open." />
+      <UpgradeModal
+        showModal={upgradeModal}
+        setShowModal={setUpgradeModal}
+        title="Upgrade to schedule imports"
+        text="Scheduled imports run automatically, even if you are not logged into monday.com or do not have Data Importer open."
+      />
     </div>
   );
 };
