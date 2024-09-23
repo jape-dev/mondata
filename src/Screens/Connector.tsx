@@ -168,11 +168,16 @@ export const Connector: React.FC<{
         label: "Google Sheets",
         leftAvatar: getIconUrl("google-sheets-icon"),
       },
-      // {
-      //   value: "shopify",
-      //   label: "Shopify",
-      //   leftAvatar: getIconUrl("shopify-icon"),
-      // },
+      ...(user?.shopify_store_url ===
+      "https://quickstart-8fce547c.myshopify.com"
+        ? [
+            {
+              value: "shopify",
+              label: "Shopify",
+              leftAvatar: getIconUrl("shopify-icon"),
+            },
+          ]
+        : []),
       {
         value: "request_new",
         label: "Request New Application",
