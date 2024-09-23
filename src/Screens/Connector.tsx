@@ -131,60 +131,65 @@ export const Connector: React.FC<{
     }
   };
 
-  const options = useMemo(
-    () => [
-      {
-        value: "custom_api",
-        label: "Custom API",
-        leftAvatar: getIconUrl("custom-api-icon"),
-      },
-      {
-        value: "facebook",
-        label: "Facebook Ads",
-        leftAvatar: getIconUrl("facebook-icon"),
-      },
-      {
-        value: "facebook_pages",
-        label: "Facebook Posts ",
-        leftAvatar: getIconUrl("facebook-icon"),
-      },
-      {
-        value: "instagram",
-        label: "Instagram Posts",
-        leftAvatar: getIconUrl("instagram-icon"),
-      },
-      {
-        value: "google_ads",
-        label: "Google Ads",
-        leftAvatar: getIconUrl("google-ads-icon"),
-      },
-      {
-        value: "google_analytics",
-        label: "Google Analytics",
-        leftAvatar: getIconUrl("google-analytics-icon"),
-      },
-      {
-        value: "google_sheets",
-        label: "Google Sheets",
-        leftAvatar: getIconUrl("google-sheets-icon"),
-      },
-      ...(user?.shopify_store_url ===
-      "https://quickstart-8fce547c.myshopify.com"
-        ? [
+  const [options, setOptions] = useState([
+    {
+      value: "custom_api",
+      label: "Custom API",
+      leftAvatar: getIconUrl("custom-api-icon"),
+    },
+    {
+      value: "facebook",
+      label: "Facebook Ads",
+      leftAvatar: getIconUrl("facebook-icon"),
+    },
+    {
+      value: "facebook_pages",
+      label: "Facebook Posts ",
+      leftAvatar: getIconUrl("facebook-icon"),
+    },
+    {
+      value: "instagram",
+      label: "Instagram Posts",
+      leftAvatar: getIconUrl("instagram-icon"),
+    },
+    {
+      value: "google_ads",
+      label: "Google Ads",
+      leftAvatar: getIconUrl("google-ads-icon"),
+    },
+    {
+      value: "google_analytics",
+      label: "Google Analytics",
+      leftAvatar: getIconUrl("google-analytics-icon"),
+    },
+    {
+      value: "google_sheets",
+      label: "Google Sheets",
+      leftAvatar: getIconUrl("google-sheets-icon"),
+    },
+    {
+      value: "request_new",
+      label: "Request New Application",
+    },
+  ]);
+
+  useEffect(() => {
+    if (user?.monday_account_id === 25104519) {
+      setOptions((prevOptions) => {
+        if (!prevOptions.some((option) => option.value === "shopify")) {
+          return [
+            ...prevOptions,
             {
               value: "shopify",
               label: "Shopify",
               leftAvatar: getIconUrl("shopify-icon"),
             },
-          ]
-        : []),
-      {
-        value: "request_new",
-        label: "Request New Application",
-      },
-    ],
-    []
-  );
+          ];
+        }
+        return prevOptions;
+      });
+    }
+  }, [user]);
 
   async function updateUser(connectionId: string) {
     if (!sessionToken) {
