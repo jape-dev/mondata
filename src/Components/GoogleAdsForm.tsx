@@ -74,6 +74,9 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [showFieldsRequiredModal, setShowFieldsRequiredModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState<string>();
+  const [errorMessage, setErrorMessage] = useState<string>(
+    "Could not fetch data from Google Ads API. The developer (james@dataimporter.co) has been notified to investigate and will be in touch shortly."
+  );
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [show2StepModal, setShow2StepModal] = useState(false);
@@ -165,7 +168,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
             query: queryData,
             schedule: scheduleInput,
           };
-          console.log(requestBody);
           RunService.runRun(sessionToken, requestBody, boardName)
             .then((run: RunResponse) => {
               setBoardId(run.run.board_id);
@@ -189,9 +191,39 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
                 );
               }
             })
-            .catch((err) => {
+            .catch((error) => {
+              if (error.body && error.body.detail) {
+                let errorMessage =
+                  "Could not fetch data from Google Ads API. The developer (james@dataimporter.co) has been notified to investigate and will be in touch shortly.";
+                try {
+                  const errorDetail = error.body.detail;
+                  if (Array.isArray(errorDetail) && errorDetail.length > 0) {
+                    const firstError = errorDetail[0];
+                    if (
+                      firstError.error &&
+                      firstError.error.details &&
+                      firstError.error.details.length > 0
+                    ) {
+                      const googleAdsFailure = firstError.error.details[0];
+                      if (
+                        googleAdsFailure.errors &&
+                        googleAdsFailure.errors.length > 0
+                      ) {
+                        errorMessage = googleAdsFailure.errors[0].message;
+                      }
+                    }
+                  }
+                } catch (parseError) {
+                  console.error("Error parsing error detail:", parseError);
+                }
+                setErrorMessage(errorMessage);
+                setShowErrorModal(true);
+              } else {
+                // Handle cases where there's no expected error structure
+                console.log("Unexpected error structure:", error);
+                setShowErrorModal(true);
+              }
               setLoading(false);
-              setShowErrorModal(true);
               setIsRunning(false);
             });
         })
@@ -246,9 +278,39 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
             );
           }
         })
-        .catch((err) => {
+        .catch((error) => {
+          if (error.body && error.body.detail) {
+            let errorMessage =
+              "Could not fetch data from Google Ads API. The developer (james@dataimporter.co) has been notified to investigate and will be in touch shortly.";
+            try {
+              const errorDetail = error.body.detail;
+              if (Array.isArray(errorDetail) && errorDetail.length > 0) {
+                const firstError = errorDetail[0];
+                if (
+                  firstError.error &&
+                  firstError.error.details &&
+                  firstError.error.details.length > 0
+                ) {
+                  const googleAdsFailure = firstError.error.details[0];
+                  if (
+                    googleAdsFailure.errors &&
+                    googleAdsFailure.errors.length > 0
+                  ) {
+                    errorMessage = googleAdsFailure.errors[0].message;
+                  }
+                }
+              }
+            } catch (parseError) {
+              console.error("Error parsing error detail:", parseError);
+            }
+            setErrorMessage(errorMessage);
+            setShowErrorModal(true);
+          } else {
+            // Handle cases where there's no expected error structure
+            console.log("Unexpected error structure:", error);
+            setShowErrorModal(true);
+          }
           setLoading(false);
-          setShowErrorModal(true);
           setIsRunning(false);
         });
     } else {
@@ -441,14 +503,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         setShowModal={setShowNameModal}
       />
       <BaseModal
-        title={"Error: could not fetch data. "}
-        text={
-          "There was an error trying to fetch your data. Please check your configuation and try again."
-        }
-        showModal={showErrordModal}
-        setShowModal={setShowErrorModal}
-      />
-      <BaseModal
         title={"Google Ads Error: 2 step verification not enrolled"}
         text={
           <>
@@ -482,6 +536,12 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         }
         showModal={showExpiredModal}
         setShowModal={setShowExpiredModal}
+      />
+      <BaseModal
+        title={"Google Error: Could not fetch data"}
+        text={`${errorMessage}\n\nIf you need more support with this, please email james@dataimporter.co and add the above message to the email body.`}
+        showModal={showErrordModal}
+        setShowModal={setShowErrorModal}
       />
     </div>
   );
