@@ -75,7 +75,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
   const [showNameModal, setShowNameModal] = useState(false);
   const [boardName, setBoardName] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>(
-    "Could not fetch data from Google Ads API. The developer (james@dataimporter.co) has been notified to investigate and will be in touch shortly."
+    "Could not fetch data from Google Ads API. Please check your configuration and try again."
   );
   const [showErrordModal, setShowErrorModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -194,7 +194,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
             .catch((error) => {
               if (error.body && error.body.detail) {
                 let errorMessage =
-                  "Could not fetch data from Google Ads API. The developer (james@dataimporter.co) has been notified to investigate and will be in touch shortly.";
+                  "Could not fetch data from Google Ads API. Please check your configuration and try again.";
                 try {
                   const errorDetail = error.body.detail;
                   if (Array.isArray(errorDetail) && errorDetail.length > 0) {
@@ -281,7 +281,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
         .catch((error) => {
           if (error.body && error.body.detail) {
             let errorMessage =
-              "Could not fetch data from Google Ads API. The developer (james@dataimporter.co) has been notified to investigate and will be in touch shortly.";
+              "Could not fetch data from Google Ads API. Please check your configuration and try again.";
             try {
               const errorDetail = error.body.detail;
               if (Array.isArray(errorDetail) && errorDetail.length > 0) {
