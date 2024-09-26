@@ -80,6 +80,9 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   const [boardName, setBoardName] = useState<string>();
   const [groupName, setGroupName] = useState<string>();
   const [showErrordModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>(
+    "Could not fetch data from Instagram. Please check your configuration and try again."
+  );
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -168,7 +171,23 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
                 );
               }
             })
-            .catch((err) => {
+            .catch((error) => {
+              let errorMessage =
+                "Could not fetch data from Instagram. Please check your configuration and try again.";
+              if (error.body && error.body.detail) {
+                const errorBody = error.body.detail.error;
+                if (errorBody.error_user_msg) {
+                  errorMessage = errorBody.error_user_msg;
+                } else if (errorBody.message) {
+                  errorMessage = errorBody.message;
+                } else {
+                  console.log(
+                    "Could not parse error_user_msg Error body",
+                    errorBody
+                  );
+                }
+              }
+              setErrorMessage(errorMessage);
               setLoading(false);
               setShowErrorModal(true);
               setIsRunning(false);
@@ -222,7 +241,23 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
             );
           }
         })
-        .catch((err) => {
+        .catch((error) => {
+          let errorMessage =
+            "Could not fetch data from Instagram. Please check your configuration and try again.";
+          if (error.body && error.body.detail) {
+            const errorBody = error.body.detail.error;
+            if (errorBody.error_user_msg) {
+              errorMessage = errorBody.error_user_msg;
+            } else if (errorBody.message) {
+              errorMessage = errorBody.message;
+            } else {
+              console.log(
+                "Could not parse error_user_msg Error body",
+                errorBody
+              );
+            }
+          }
+          setErrorMessage(errorMessage);
           setLoading(false);
           setShowErrorModal(true);
           setIsRunning(false);
@@ -364,10 +399,8 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
         setShowModal={setShowNameModal}
       />
       <BaseModal
-        title={"Error: could not fetch data. "}
-        text={
-          "There was an error trying to fetch your data. Please check your configuation and try again."
-        }
+        title={"Error: could not fetch data"}
+        text={`${errorMessage}\n\nIf you need more support with this, please email james@dataimporter.co and include the above message in your email.`}
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
       />
