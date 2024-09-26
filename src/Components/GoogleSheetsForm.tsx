@@ -86,6 +86,9 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
     useState<boolean>(true);
   const [sheetNames, setSheetNames] = useState<Option[]>();
   const [selectedSheet, setSelectedSheet] = useState<Option>();
+  const [errorMessage, setErrorMessage] = useState<string>(
+    "There was an error trying to fetch your data. The developer (james@dataimporter.co) has been notified to investigate and will be in touch shortly."
+  );
 
   useEffect(() => {
     if (isRunning === true) {
@@ -122,13 +125,6 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
         });
     }
   }, [url]);
-
-  useEffect(() => {
-    console.log("sheetNames:", sheetNames);
-    if (selectedSheet) {
-      console.log("Selected sheet:", selectedSheet);
-    }
-  }, [selectedSheet, sheetNames]);
 
   const handleRunClick = async () => {
     const isValidName = checkBoardName();
@@ -188,10 +184,26 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
             );
           }
         })
-        .catch((err) => {
-          console.log(err);
+        .catch((error: any) => {
+          console.log(error.body.detail);
+          let errorMessage =
+            "There was an error trying to fetch your data. Please check your configuration and try again.";
+          if (error.body && error.body.detail) {
+            try {
+              const errorDetail = error.body.detail;
+              if (errorDetail.error && errorDetail.error.message) {
+                errorMessage = errorDetail.error.message;
+              }
+            } catch (parseError) {
+              console.error("Error parsing error detail:", parseError);
+            }
+            setErrorMessage(errorMessage);
+            setShowErrorModal(true);
+          } else {
+            console.log("Unexpected error structure:", error);
+            setShowErrorModal(true);
+          }
           setLoading(false);
-          setShowErrorModal(true);
           setIsRunning(false);
         });
     } else {
@@ -299,6 +311,12 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
         text={
           "Could not fetch any data from this API. Please check your configuration and try again."
         }
+        showModal={showErrorModal}
+        setShowModal={setShowErrorModal}
+      />
+      <BaseModal
+        title={"Error: could not fetch data"}
+        text={`${errorMessage}\n\n. If you need more support with this, please email james@dataimporter.co and add the above message to the email body.`}
         showModal={showErrorModal}
         setShowModal={setShowErrorModal}
       />
