@@ -91,6 +91,9 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showNoValuesModal, setShowNoValuesModal] = useState(false);
   const [showExpiredModal, setShowExpiredModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>(
+    "There was an error trying to fetch your data. Please check your configuration and try again"
+  );
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -189,9 +192,36 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
               setSuccess(true);
               setIsRunning(false);
             })
-            .catch((err) => {
+            .catch((error: any) => {
+              let errorMessage =
+                "There was an error trying to fetch your data. Please check your configuration and try again.";
+              if (error.body && error.body.detail) {
+                try {
+                  const errorDetail = error.body.detail;
+                  if (errorDetail.includes("NO_GOOGLE_ANALYTICS_VALUES")) {
+                    setShowNoValuesModal(true);
+                  } else if (
+                    typeof errorDetail === "object" &&
+                    errorDetail.error
+                  ) {
+                    const gaError = errorDetail.error;
+                    if (gaError.message) {
+                      errorMessage = gaError.message;
+                    } else if (gaError.errors && gaError.errors.length > 0) {
+                      errorMessage = gaError.errors[0].message;
+                    }
+                    setErrorMessage(errorMessage);
+                    setShowErrorModal(true);
+                  }
+                } catch (parseError) {
+                  console.error("Error parsing error detail:", parseError);
+                  setShowErrorModal(true);
+                }
+              } else {
+                console.log("Unexpected error structure:", error);
+                setShowErrorModal(true);
+              }
               setLoading(false);
-              setShowErrorModal(true);
               setIsRunning(false);
             });
         })
@@ -247,16 +277,30 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
           }
         })
         .catch((error: any) => {
+          let errorMessage =
+            "There was an error trying to fetch your data. Please check your configuration and try again";
           if (error.body && error.body.detail) {
-            const errorDetail = error.body.detail;
-            console.log("Error detail:", errorDetail);
-            if (errorDetail.includes("NO_GOOGLE_ANALYTICS_VALUES")) {
-              setShowNoValuesModal(true);
-            } else {
-              // Handle cases where there's no expected error structure
-              console.log("Unexpected error structure:", error);
+            try {
+              const errorDetail = error.body.detail;
+              if (errorDetail.includes("NO_GOOGLE_ANALYTICS_VALUES")) {
+                setShowNoValuesModal(true);
+              } else if (typeof errorDetail === "object" && errorDetail.error) {
+                const gaError = errorDetail.error;
+                if (gaError.message) {
+                  errorMessage = gaError.message;
+                } else if (gaError.errors && gaError.errors.length > 0) {
+                  errorMessage = gaError.errors[0].message;
+                }
+                setErrorMessage(errorMessage);
+                setShowErrorModal(true);
+              }
+            } catch (parseError) {
+              console.error("Error parsing error detail:", parseError);
               setShowErrorModal(true);
             }
+          } else {
+            console.log("Unexpected error structure:", error);
+            setShowErrorModal(true);
           }
           setLoading(false);
           setIsRunning(false);
@@ -463,10 +507,8 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
         setShowModal={setShowNameModal}
       />
       <BaseModal
-        title={"Error: could not fetch data. "}
-        text={
-          "There was an error trying to fetch your data. Please check your configuation and try again."
-        }
+        title={"Google Error: could not fetch data"}
+        text={`${errorMessage}\n\nIf you need more support with this, please email james@dataimporter.co and add the above message to the email body.`}
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
       />
