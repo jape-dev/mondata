@@ -43,4 +43,48 @@ export class ShopifyService {
             url: '/api/v1/shopify/fields',
         });
     }
+    /**
+     * Customer Request
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static shopifyCustomerRequest(): CancelablePromise<boolean> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/shopify/customer-request',
+        });
+    }
+    /**
+     * Customer Erase
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static shopifyCustomerErase(): CancelablePromise<boolean> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/shopify/customer-erase',
+        });
+    }
+    /**
+     * Shop Erase
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static shopifyShopErase(): CancelablePromise<boolean> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/shopify/shop-erase',
+        });
+    }
+    /**
+     * Charge Approval
+     * @returns boolean Successful Response
+     * @throws ApiError
+     */
+    public static shopifyChargeApproval(): CancelablePromise<boolean> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/shopify/charge-approval',
+        });
+    }
 }

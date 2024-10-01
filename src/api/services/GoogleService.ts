@@ -45,7 +45,7 @@ export class GoogleService {
     ): CancelablePromise<any> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/google/google-sheets/login',
+            url: '/api/v1/google/sheets/login',
             query: {
                 'connection_id': connectionId,
             },
@@ -69,10 +69,36 @@ export class GoogleService {
     ): CancelablePromise<Array<Record<string, any>>> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/google/google-sheets/sheets',
+            url: '/api/v1/google/sheets',
             query: {
                 'session_token': sessionToken,
                 'url': url,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Get Sheet Headers
+     * @param sessionToken
+     * @param url
+     * @param sheetName
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static googleGetSheetHeaders(
+        sessionToken: string,
+        url: string,
+        sheetName: string,
+    ): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/google/sheets/headers',
+            query: {
+                'session_token': sessionToken,
+                'url': url,
+                'sheet_name': sheetName,
             },
             errors: {
                 422: `Validation Error`,

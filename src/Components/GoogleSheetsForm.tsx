@@ -8,6 +8,7 @@ import {
   TextField,
   Toggle,
   Dropdown,
+  Button,
 } from "monday-ui-react-core";
 import { Info } from "monday-ui-react-core/icons";
 import {
@@ -19,12 +20,14 @@ import {
   Body_run_schedule,
   RunResponse,
   GoogleService,
+  ColumnData,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
 import { Option } from "../Utils/models";
 import { BoardBlock } from "./FormBlocks/BoardBlock";
 import { getImageUrl } from "../Utils/image";
+import { ColumnTypeModal } from "./Modals/ColumnTypeModal";
 
 const monday = mondaySdk();
 
@@ -68,6 +71,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showColumnTypesModal, setShowColumnTypesModal] = useState(false);
   const [boardName, setBoardName] = useState<string>();
   const [boards, setBoards] = useState<Option[]>([]);
   const [selectedBoardOption, setSelectedBoardOption] = useState<Option>({
@@ -85,6 +89,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
   const [firstColumnAsItemName, setFirstColumnAsItemName] =
     useState<boolean>(true);
   const [sheetNames, setSheetNames] = useState<Option[]>();
+  const [sheetHeaders, setSheetHeaders] = useState<ColumnData[]>([]);
   const [selectedSheet, setSelectedSheet] = useState<Option>();
   const [errorMessage, setErrorMessage] = useState<string>(
     "There was an error trying to fetch your data. The developer (james@dataimporter.co) has been notified to investigate and will be in touch shortly."
@@ -112,12 +117,10 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
     if (url && sessionToken) {
       GoogleService.googleGetSheetsSheets(sessionToken, url)
         .then((sheets) => {
-          console.log("sheets:", sheets);
           const sheetOptions = sheets.map((sheet) => ({
             label: sheet.label,
             value: sheet.value,
           }));
-          console.log("sheetOptions:", sheetOptions);
           setSheetNames(sheetOptions);
         })
         .catch((error) => {
@@ -125,6 +128,23 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
         });
     }
   }, [url]);
+
+  const handleSheetNameSelect = (option: Option) => {
+    setSelectedSheet(option);
+    if (url && sessionToken) {
+      GoogleService.googleGetSheetHeaders(sessionToken, url, option.label)
+        .then((headers: string[]) => {
+          const columnHeaders: ColumnData[] = headers.map((header) => ({
+            column_name: header,
+            items: [],
+          }));
+          setSheetHeaders(columnHeaders);
+        })
+        .catch((error) => {
+          console.error("Error fetching Google Sheets headers:", error.body);
+        });
+    }
+  };
 
   const handleRunClick = async () => {
     const isValidName = checkBoardName();
@@ -156,6 +176,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
           sheet_name: selectedSheet?.label,
           first_column: firstColumnAsItemName,
         }),
+        columns: sheetHeaders,
       };
       const requestBody: Body_run_run = {
         query: queryData,
@@ -169,6 +190,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
           setSuccess(true);
           setIsRunning(false);
           if (isScheduled) {
+            scheduleInput.board_id = run.run.board_id;
             scheduleInput.data = run.data;
             const scheduleRequestBody: Body_run_schedule = {
               query: queryData,
@@ -214,6 +236,10 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
     }
   };
 
+  useEffect(() => {
+    console.log(sheetHeaders);
+  }, [sheetHeaders]);
+
   return (
     <>
       <div className="mt-2">
@@ -247,7 +273,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
               />
             </Tooltip>
           </div>
-          <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center gap-1">
             <p className="font-bold text-gray-500 text-sm">* Sheet Name</p>
             <Tooltip
               content="Select the sheet you want to import from your Google Sheets document."
@@ -264,7 +290,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
             placeholder="Select a sheet"
             value={selectedSheet}
             options={sheetNames}
-            onChange={(option: Option) => setSelectedSheet(option)}
+            onChange={(option: Option) => handleSheetNameSelect(option)}
             className="mb-2"
           />
           <div className="flex items-center gap-1">
@@ -281,8 +307,28 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
           <Toggle
             isSelected={firstColumnAsItemName}
             onChange={() => setFirstColumnAsItemName(!firstColumnAsItemName)}
-            className="mt-1"
+            className="mt-1 mb-2"
           />
+          <div className="flex items-center gap-1">
+            <p className="font-bold text-gray-500 text-sm">
+              * Update column types
+            </p>
+            <Tooltip
+              content="Map the column types from your Google Sheet to the corresponding column types in your Monday board."
+              position={Tooltip.positions.TOP}
+            >
+              <Icon icon={Info} className="text-gray-500" />
+            </Tooltip>
+          </div>
+          <Button
+            disabled={sheetHeaders === undefined || sheetHeaders.length === 0}
+            onClick={() => setShowColumnTypesModal(true)}
+            size={Button.sizes.SMALL}
+            kind={Button.kinds.SECONDARY}
+            className="mt-1"
+          >
+            Column Types
+          </Button>
         </div>
         <BoardBlock
           sessionToken={sessionToken}
@@ -331,6 +377,12 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
         text={"Was unable to schedule your import. Please try again."}
         showModal={showScheduleModal}
         setShowModal={setShowScheduleModal}
+      />
+      <ColumnTypeModal
+        isOpen={showColumnTypesModal}
+        onClose={() => setShowColumnTypesModal(false)}
+        columns={sheetHeaders}
+        setColumns={setSheetHeaders}
       />
     </>
   );

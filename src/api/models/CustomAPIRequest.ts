@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ColumnData } from './ColumnData';
 import type { PairValue } from './PairValue';
 export type CustomAPIRequest = {
     method?: string;
@@ -10,5 +11,6 @@ export type CustomAPIRequest = {
     headers?: (Array<PairValue> | null);
     params?: (Array<PairValue> | null);
     body?: (string | null);
+    columns?: (Array<ColumnData> | null);
 };
 
