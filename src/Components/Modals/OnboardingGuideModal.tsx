@@ -88,7 +88,7 @@ export const GuideModal: React.FC<OnboardingGuideModalProps> = ({
     <div className="z-100000">
       <Modal
         title={titles[activeStepIndex]}
-        onClose={() => setShowModal(false)}
+        onClose={() => handleFinish()}
         show={showModal}
       >
         <ModalContent>
