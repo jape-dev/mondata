@@ -72,6 +72,11 @@ export const ColumnTypeModal: React.FC<ColumnTypeModalProps> = ({
   return (
     <Modal title="Update Column Types" onClose={onClose} show={isOpen}>
       <ModalContent className="">
+        <p className="text-sm text-gray-600 mb-4 mt-4">
+          Optionally set monday.com column types to import as. If column type is
+          left blank, it will import as the default type (text or number) based
+          on the column content.
+        </p>
         <div className="space-y-2 border-grey rounded-md p-5 mb-2 mt-5">
           {columns.map((column) => (
             <div

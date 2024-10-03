@@ -311,7 +311,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
           />
           <div className="flex items-center gap-1">
             <p className="font-bold text-gray-500 text-sm">
-              * Update column types
+              Update column types
             </p>
             <Tooltip
               content="Map the column types from your Google Sheet to the corresponding column types in your Monday board."
