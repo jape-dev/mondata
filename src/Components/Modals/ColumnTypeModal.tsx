@@ -20,7 +20,7 @@ const mondayColumnTypes = [
   //   { value: "file", label: "File" },
   //   { value: "formula", label: "Formula" },
   { value: "link", label: "Link" },
-  { value: "location", label: "Location" },
+  //   { value: "location", label: "Location" },
   { value: "long-text", label: "Long Text" },
   { value: "number", label: "Number" },
   //   { value: "people", label: "People" },
