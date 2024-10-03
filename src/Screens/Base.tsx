@@ -99,11 +99,17 @@ const BaseScreen: React.FC = () => {
             </Button>
           </div>
         </div>
-        <div className="col-span-4 flex justify-end border-b-2 border-gray-250 h-10">
+        <div className="col-span-4 flex justify-end border-b-2 border-gray-250 h-10 text-sm">
           <TabList activeTabId={activeTab}>
             <Tab onClick={() => setActiveTab(0)}>New Import</Tab>
             <Tab onClick={handleScheduleTabClick}>Schedule</Tab>
-            <Tab onClick={() => setGuideModal(true)}>How to use</Tab>
+            <Tab
+              onClick={() =>
+                window.open("https://dataimporter.co/blog", "_blank")
+              }
+            >
+              Tutorials
+            </Tab>
           </TabList>
         </div>
       </div>
