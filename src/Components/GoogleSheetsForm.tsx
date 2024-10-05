@@ -257,6 +257,9 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
               <Icon icon={Info} className="text-gray-500" />
             </Tooltip>
           </div>
+          <p className="text-xs text-gray-400 mt-1 mb-2">
+            Make sure the first row of the sheet contains the column headers.
+          </p>
           <div className="mb-3">
             <Tooltip
               content="Make sure the first row of the sheet contains the column headers."

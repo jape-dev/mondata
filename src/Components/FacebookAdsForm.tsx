@@ -70,7 +70,9 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   });
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+  const [selectedGroupOption, setSelectedGroupOption] = useState<
+    Option | undefined
+  >({
     value: 999,
     label: "Import into a new group",
   });
@@ -81,6 +83,9 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [boardName, setBoardName] = useState<string>();
   const [showErrordModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>(
+    "Could not fetch data from Facebook. Please check your configuration and try again."
+  );
 
   useEffect(() => {
     if (isRunning === true) {
@@ -133,12 +138,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - date.value);
-    if (
-      sessionToken &&
-      selectedBoardOption &&
-      selectedAccount &&
-      date
-    ) {
+    if (sessionToken && selectedBoardOption && selectedAccount && date) {
       if (selectedColumnOption) {
         MondayService.mondayItems(
           selectedBoardOption?.value,
@@ -172,17 +172,32 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
                     query: queryData,
                     schedule_input: scheduleInput,
                   };
-                  RunService.runSchedule(sessionToken, scheduleRequestBody).catch(
-                    (err) => {
-                      console.log(err);
-                      setLoading(false);
-                      setShowScheduleModal(true);
-                      setIsRunning(false);
-                    }
-                  );
+                  RunService.runSchedule(
+                    sessionToken,
+                    scheduleRequestBody
+                  ).catch((err) => {
+                    console.log(err);
+                    setLoading(false);
+                    setShowScheduleModal(true);
+                    setIsRunning(false);
+                  });
                 }
               })
-              .catch((err) => {
+              .catch((error) => {
+                let errorMessage =
+                  "Could not fetch data from Facebook. Please check your configuration and try again.";
+                if (error.body && error.body.detail) {
+                  const errorBody = error.body.detail.error;
+                  if (errorBody.message) {
+                    errorMessage = errorBody.message;
+                  } else {
+                    console.log(
+                      "Could not parse error message Error body",
+                      errorBody
+                    );
+                  }
+                }
+                setErrorMessage(errorMessage);
                 setLoading(false);
                 setShowErrorModal(true);
                 setIsRunning(false);
@@ -227,7 +242,21 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
               );
             }
           })
-          .catch((err) => {
+          .catch((error) => {
+            let errorMessage =
+              "Could not fetch data from Facebook. Please check your configuration and try again.";
+            if (error.body && error.body.detail) {
+              const errorBody = error.body.detail.error;
+              if (errorBody.message) {
+                errorMessage = errorBody.message;
+              } else {
+                console.log(
+                  "Could not parse error message Error body",
+                  errorBody
+                );
+              }
+            }
+            setErrorMessage(errorMessage);
             setLoading(false);
             setShowErrorModal(true);
             setIsRunning(false);
@@ -311,7 +340,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
   return (
     <div className="mt-2">
       <div className="border-2 border-grey rounded-md p-5 mb-2">
-      <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1">
           <p className="font-bold text-gray-500 text-sm">* Account</p>
           <Tooltip
             content="The ad account to fetch data from."
@@ -390,7 +419,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
         splitByGroupingOptions={groupingOptions}
         splitByGrouping={selectedGrouping}
         setSplitByGrouping={setSelectedGrouping}
-      / >
+      />
       <FieldsRequiredModal showModal={showModal} setShowModal={setShowModal} />
       <BaseModal
         title={"Error: invalid name"}
@@ -400,9 +429,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
       />
       <BaseModal
         title={"Error: could not fetch data. "}
-        text={
-          "There was an error trying to fetch your data. Please check your configuation and try again."
-        }
+        text={`${errorMessage}\n\nIf you need more support with this, please email james@dataimporter.co and include the above message in your email.`}
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
       />

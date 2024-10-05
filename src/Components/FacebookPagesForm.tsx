@@ -23,17 +23,6 @@ import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
 
-interface Board {
-  id: string;
-  name: string;
-}
-
-interface BoardColumn {
-  id: string;
-  title: string;
-  type: string;
-}
-
 export interface FacebookPagesFormProps {
   user: UserPublic;
   workspaceId: number;
@@ -91,6 +80,9 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
     value: 999,
   });
   const [groupName, setGroupName] = useState<string>();
+  const [errorMessage, setErrorMessage] = useState<string>(
+    "Could not fetch data from Facebook. Please check your configuration and try again."
+  );
 
   const checkBoardName = () => {
     const currentNames = boards.map((board) => board.label);
@@ -177,7 +169,21 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
                 );
               }
             })
-            .catch((err) => {
+            .catch((error) => {
+              let errorMessage =
+                "Could not fetch data from Facebook. Please check your configuration and try again.";
+              if (error.body && error.body.detail) {
+                const errorBody = error.body.detail.error;
+                if (errorBody.message) {
+                  errorMessage = errorBody.message;
+                } else {
+                  console.log(
+                    "Could not parse error message Error body",
+                    errorBody
+                  );
+                }
+              }
+              setErrorMessage(errorMessage);
               setLoading(false);
               setShowErrorModal(true);
               setIsRunning(false);
@@ -223,7 +229,21 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
             );
           }
         })
-        .catch((err) => {
+        .catch((error) => {
+          let errorMessage =
+            "Could not fetch data from Facebook. Please check your configuration and try again.";
+          if (error.body && error.body.detail) {
+            const errorBody = error.body.detail.error;
+            if (errorBody.message) {
+              errorMessage = errorBody.message;
+            } else {
+              console.log(
+                "Could not parse error message Error body",
+                errorBody
+              );
+            }
+          }
+          setErrorMessage(errorMessage);
           setLoading(false);
           setShowErrorModal(true);
           setIsRunning(false);
@@ -369,9 +389,7 @@ export const FacebookPagesForm: React.FC<FacebookPagesFormProps> = ({
       />
       <BaseModal
         title={"Error: could not fetch data. "}
-        text={
-          "There was an error trying to fetch your data. Please check your configuation and try again."
-        }
+        text={`${errorMessage}\n\nIf you need more support with this, please email james@dataimporter.co and include the above message in your email.`}
         showModal={showErrordModal}
         setShowModal={setShowErrorModal}
       />
