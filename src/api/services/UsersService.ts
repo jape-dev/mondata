@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Contact } from '../models/Contact';
 import type { UserPublic } from '../models/UserPublic';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -46,6 +47,49 @@ export class UsersService {
                 'user_id': userId,
                 'connector': connector,
             },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Update Contact
+     * @param requestBody
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static usersUpdateContact(
+        requestBody: Contact,
+    ): CancelablePromise<Record<string, any>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/email/update_contact',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * First Connector
+     * @param mondayUserId
+     * @param requestBody
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static usersFirstConnector(
+        mondayUserId: number,
+        requestBody: Contact,
+    ): CancelablePromise<Record<string, any>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/users/email/first_connector',
+            query: {
+                'monday_user_id': mondayUserId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
             errors: {
                 422: `Validation Error`,
             },

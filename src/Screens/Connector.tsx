@@ -18,6 +18,7 @@ import {
   UserPublic,
   UsersService,
   ShopifyService,
+  Contact,
 } from "../api";
 import { FacebookAdsForm } from "../Components/FacebookAdsForm";
 import { FacebookPagesForm } from "../Components/FacebookPagesForm";
@@ -31,6 +32,7 @@ import { SchedulerBlock } from "../Components/SchedulerBlock";
 import { RunBlock } from "Components/RunBlock";
 import { Option } from "../Utils/models";
 import { getNextScheduledDate } from "../Utils/datetime";
+import { getConnectorName } from "../Utils/connector";
 
 const monday = mondaySdk();
 
@@ -223,6 +225,18 @@ export const Connector: React.FC<{
   });
 
   const connect = () => {
+    if (connector === undefined) {
+      return;
+    }
+
+    if (user?.monday_user_id) {
+      const contact: Contact = {
+        email: "placeholder@gmail.com",
+        first_connector: getConnectorName(connector),
+      };
+      UsersService.usersFirstConnector(user?.monday_user_id, contact);
+    }
+
     if (
       connector === "facebook" ||
       connector === "facebook_pages" ||
