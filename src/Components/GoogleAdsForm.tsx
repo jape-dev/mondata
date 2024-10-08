@@ -380,17 +380,21 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
             const errorDetail = error.body.detail;
             console.log("Error detail:", errorDetail);
 
-            if (errorDetail.includes("TWO_STEP_VERIFICATION_NOT_ENROLLED")) {
+            if (
+              errorDetail.error.includes("TWO_STEP_VERIFICATION_NOT_ENROLLED")
+            ) {
               setShow2StepModal(true);
-            } else if (errorDetail.includes("PERMISSION_DENIED")) {
+            } else if (errorDetail.error.includes("PERMISSION_DENIED")) {
               // Handle permission denied error
               console.log("Permission denied error");
               // You might want to show a different modal or message for this
-            } else if (errorDetail.includes("invalid_grant")) {
+            } else if (errorDetail.error.includes("invalid_grant")) {
               // Handle invalid grant error
               setShowExpiredModal(true);
               // You might want to show a different modal or message for this
             } else {
+              // setErrorMessage(errorMessage);
+              setShowErrorModal(true);
               // Handle other specific error messages here
               console.log("Unhandled error type");
             }
