@@ -90,7 +90,9 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
     value: 999,
   });
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
-  const [selectedGroupOption, setSelectedGroupOption] = useState<Option | undefined>({
+  const [selectedGroupOption, setSelectedGroupOption] = useState<
+    Option | undefined
+  >({
     label: "Import into a new group",
     value: 999,
   });
@@ -218,6 +220,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
           setIsRunning(false);
           if (isScheduled) {
             scheduleInput.data = run.data;
+            scheduleInput.board_id = run.run.board_id;
             const scheduleRequestBody: Body_run_schedule = {
               query: queryData,
               schedule_input: scheduleInput,

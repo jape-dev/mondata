@@ -167,6 +167,8 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
             end_date: endDate.toISOString().split("T")[0],
           };
           if (isScheduled) {
+            // scheduleInput.board_id = run.run.board_id;
+            // scheduleInput.data = run.data;
             const scheduleRequestBody: Body_run_schedule = {
               query: queryData,
               schedule_input: scheduleInput,
@@ -262,6 +264,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
           setIsRunning(false);
           if (isScheduled) {
             scheduleInput.data = run.data;
+            scheduleInput.board_id = run.run.board_id;
             const scheduleRequestBody: Body_run_schedule = {
               query: queryData,
               schedule_input: scheduleInput,

@@ -168,6 +168,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
                 setIsRunning(false);
                 if (isScheduled) {
                   scheduleInput.data = run.data;
+                  scheduleInput.board_id = run.run.board_id;
                   const scheduleRequestBody: Body_run_schedule = {
                     query: queryData,
                     schedule_input: scheduleInput,
@@ -228,6 +229,7 @@ export const FacebookAdsForm: React.FC<FacebookAdFormProps> = ({
             setIsRunning(false);
             if (isScheduled) {
               scheduleInput.data = run.data;
+              scheduleInput.board_id = run.run.board_id;
               const scheduleRequestBody: Body_run_schedule = {
                 query: queryData,
                 schedule_input: scheduleInput,

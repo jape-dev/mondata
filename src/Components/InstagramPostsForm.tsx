@@ -156,6 +156,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
               setSuccess(true);
               setIsRunning(false);
               if (isScheduled) {
+                scheduleInput.board_id = run.run.board_id;
                 scheduleInput.data = run.data;
                 const scheduleRequestBody: Body_run_schedule = {
                   query: queryData,
@@ -227,6 +228,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           setIsRunning(false);
           if (isScheduled) {
             scheduleInput.data = run.data;
+            scheduleInput.board_id = run.run.board_id;
             const scheduleRequestBody: Body_run_schedule = {
               query: queryData,
               schedule_input: scheduleInput,
