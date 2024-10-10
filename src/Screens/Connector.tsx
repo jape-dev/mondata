@@ -19,6 +19,7 @@ import {
   UsersService,
   ShopifyService,
   Contact,
+  ColumnData,
 } from "../api";
 import { FacebookAdsForm } from "../Components/FacebookAdsForm";
 import { FacebookPagesForm } from "../Components/FacebookPagesForm";
@@ -82,6 +83,7 @@ export const Connector: React.FC<{
       setConnector(storedConnector);
     }
   }, []);
+  const [data, setData] = useState<ColumnData[]>([]);
 
   // Save connector to localStorage whenever it changes
   useEffect(() => {
@@ -393,6 +395,7 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
+                  setData={setData}
                 />
               ) : connector === "facebook_pages" ? (
                 <FacebookPagesForm
@@ -411,6 +414,7 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
+                  setData={setData}
                 />
               ) : connector === "instagram" ? (
                 <InstagramPostsForm
@@ -429,6 +433,7 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
+                  setData={setData}
                 />
               ) : connector === "google_ads" ? (
                 <GoogleAdsForm
@@ -447,6 +452,7 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
+                  setData={setData}
                 />
               ) : connector === "custom_api" ? (
                 <CustomApiForm
@@ -465,6 +471,7 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
+                  setData={setData}
                 />
               ) : connector === "google_sheets" ? (
                 <GoogleSheetsForm
@@ -483,6 +490,7 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
+                  setData={setData}
                 />
               ) : connector === "google_analytics" ? (
                 <GoogleAnalyticsForm
@@ -501,6 +509,7 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
+                  setData={setData}
                 />
               ) : connector === "shopify" ? (
                 <ShopifyForm
@@ -519,6 +528,7 @@ export const Connector: React.FC<{
                   days={days}
                   startTime={startTime}
                   timezone={timezone}
+                  setData={setData}
                 />
               ) : null}
               <SchedulerBlock
@@ -540,8 +550,6 @@ export const Connector: React.FC<{
               />
               <RunBlock
                 user={user}
-                workspaceId={workspaceId}
-                sessionToken={sessionToken}
                 setIsRunning={setIsRunning}
                 isScheduled={isScheduled}
                 loading={loading}
@@ -549,12 +557,7 @@ export const Connector: React.FC<{
                 success={success}
                 setSuccess={setSuccess}
                 boardId={boardId}
-                connector={connector}
-                period={period}
-                step={step}
-                days={days}
-                startTime={startTime}
-                timezone={timezone}
+                data={data}
               />
             </>
           )}

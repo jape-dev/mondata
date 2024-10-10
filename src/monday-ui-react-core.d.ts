@@ -18,4 +18,5 @@ declare module "monday-ui-react-core" {
   export const Label: any;
   export const Tab: any;
   export const TabList: any;
+  export const LinearProgressBar: any;
 }

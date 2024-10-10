@@ -15,6 +15,7 @@ import {
   Body_run_schedule,
   Body_run_run,
   RunResponse,
+  ColumnData,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
@@ -45,6 +46,7 @@ export interface GoogleAnalyticsFormProps {
   days: string[];
   startTime: string;
   timezone: Option;
+  setData: React.Dispatch<React.SetStateAction<ColumnData[]>>;
 }
 
 export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
@@ -63,6 +65,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
   days,
   startTime,
   timezone,
+  setData,
 }) => {
   const [accountOptions, setAccountOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -188,6 +191,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
           console.log(requestBody);
           RunService.runRun(sessionToken, requestBody, boardName)
             .then((run: RunResponse) => {
+              setData(run.data);
               setBoardId(run.run.board_id);
               monday.execute("valueCreatedForUser");
               setLoading(false);
@@ -253,6 +257,7 @@ export const GoogleAnalyticsForm: React.FC<GoogleAnalyticsFormProps> = ({
       };
       RunService.runRun(sessionToken, requestBody, boardName)
         .then((run: RunResponse) => {
+          setData(run.data);
           setSelectedBoardOption({
             value: run.run.board_id,
             label: boardName ?? `New Board ${run.run.board_id}`,

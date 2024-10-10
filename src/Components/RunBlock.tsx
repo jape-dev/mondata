@@ -2,52 +2,40 @@ import { useState, useEffect } from "react";
 import "../App.css";
 import mondaySdk from "monday-sdk-js";
 import "monday-ui-react-core/dist/main.css";
-import { Button } from "monday-ui-react-core";
-import { UserPublic, BillingService } from "../api";
+import { Button, LinearProgressBar } from "monday-ui-react-core";
+import { UserPublic, BillingService, ColumnData } from "../api";
 import { Option } from "../Utils/models";
 import { UpgradeModal } from "./Modals/UpgradeModal";
 
 const monday = mondaySdk();
 
 export interface RunBlockProps {
-  sessionToken?: string;
-  workspaceId: number;
   user: UserPublic;
   boardId: number;
-  connector: string;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   isScheduled: boolean;
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   success: boolean;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
-  period: Option;
-  step: Option;
-  days: string[];
-  startTime: string;
-  timezone: Option;
+  data: ColumnData[];
 }
 
 export const RunBlock: React.FC<RunBlockProps> = ({
-  sessionToken,
-  workspaceId,
   user,
   boardId,
-  connector,
   setIsRunning,
   isScheduled,
   loading,
   setLoading,
   success,
   setSuccess,
-  period,
-  step,
-  days,
-  startTime,
-  timezone,
+  data,
 }) => {
   const [subdomain, setSubdomain] = useState("");
   const [planModal, setPlanModal] = useState(false);
+  const [estimatedTime, setEstimatedTime] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const getSubdomain = () => {
@@ -113,6 +101,10 @@ export const RunBlock: React.FC<RunBlockProps> = ({
     return;
   };
 
+  const calculateTotalRunTime = () => {
+    const totalRows = data[0].items.length;
+  };
+
   return (
     <>
       <div className="border-2 border-gray rounded-md p-5 mb-2 mt-2">
@@ -148,14 +140,28 @@ export const RunBlock: React.FC<RunBlockProps> = ({
                 Run Complete - Go to Board
               </Button>
             ) : (
-              <Button
-                onClick={handleRunClick}
-                loading={loading}
-                success={success}
-                className="mt-2"
-              >
-                Run
-              </Button>
+              <>
+                {!loading ? (
+                  <Button
+                    onClick={handleRunClick}
+                    loading={loading}
+                    success={success}
+                    className="mt-2"
+                  >
+                    Run
+                  </Button>
+                ) : (
+                  <div className="mt-2">
+                    <LinearProgressBar
+                      indicateProgress={true}
+                      value={progress}
+                    />
+                    <p className="text-xs text-gray-400 mt-1 mb-2">
+                      Estimated run time: {estimatedTime}
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

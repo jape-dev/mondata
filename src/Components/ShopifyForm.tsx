@@ -13,6 +13,7 @@ import {
   Body_run_schedule,
   Body_run_run,
   RunResponse,
+  ColumnData,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
@@ -20,12 +21,6 @@ import { Option } from "../Utils/models";
 import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
-
-interface BoardColumn {
-  id: string;
-  title: string;
-  type: string;
-}
 
 export interface ShopifyFormProps {
   user: UserPublic;
@@ -43,6 +38,7 @@ export interface ShopifyFormProps {
   days: string[];
   startTime: string;
   timezone: Option;
+  setData: React.Dispatch<React.SetStateAction<ColumnData[]>>;
 }
 
 export const ShopifyForm: React.FC<ShopifyFormProps> = ({
@@ -61,6 +57,7 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
   days,
   startTime,
   timezone,
+  setData,
 }) => {
   const [selectedResource, setSelectedResource] = useState<Option>();
   const [fields, setFields] = useState<Option[]>([]);
@@ -163,6 +160,7 @@ export const ShopifyForm: React.FC<ShopifyFormProps> = ({
       };
       RunService.runRun(sessionToken, requestBody, boardName)
         .then((run: RunResponse) => {
+          setData(run.data);
           setSelectedBoardOption({
             value: run.run.board_id,
             label: boardName ?? `New Board ${run.run.board_id}`,

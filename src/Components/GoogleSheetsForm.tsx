@@ -47,6 +47,7 @@ export interface GoogleSheetsFormProps {
   days: string[];
   startTime: string;
   timezone: Option;
+  setData: React.Dispatch<React.SetStateAction<ColumnData[]>>;
 }
 
 export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
@@ -65,6 +66,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
   days,
   startTime,
   timezone,
+  setData,
 }) => {
   const [url, setUrl] = useState<string>();
   const [showModal, setShowModal] = useState(false);
@@ -184,6 +186,7 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       };
       RunService.runRun(sessionToken, requestBody, boardName)
         .then((run: RunResponse) => {
+          setData(run.data);
           setBoardId(run.run.board_id);
           monday.execute("valueCreatedForUser");
           setLoading(false);

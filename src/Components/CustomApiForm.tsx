@@ -12,7 +12,6 @@ import {
 import { Info } from "monday-ui-react-core/icons";
 import {
   CustomAPIRequest,
-  MondayService,
   PairValue,
   RunService,
   UserPublic,
@@ -20,6 +19,7 @@ import {
   Body_run_run,
   Body_run_schedule,
   RunResponse,
+  ColumnData,
 } from "../api";
 import { PairValueComponent } from "./PairValue";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
@@ -28,11 +28,6 @@ import { Option } from "../Utils/models";
 import { BoardBlock } from "./FormBlocks/BoardBlock";
 
 const monday = mondaySdk();
-
-interface Board {
-  id: string;
-  name: string;
-}
 
 export interface CustomApiFormProps {
   sessionToken?: string;
@@ -50,6 +45,7 @@ export interface CustomApiFormProps {
   days: string[];
   startTime: string;
   timezone: Option;
+  setData: React.Dispatch<React.SetStateAction<ColumnData[]>>;
 }
 
 export const CustomApiForm: React.FC<CustomApiFormProps> = ({
@@ -68,6 +64,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
   days,
   startTime,
   timezone,
+  setData,
 }) => {
   const [method, setMethod] = useState<Option>({ value: "get", label: "GET" });
   const [url, setUrl] = useState<string>();
@@ -213,6 +210,7 @@ export const CustomApiForm: React.FC<CustomApiFormProps> = ({
       };
       RunService.runRun(sessionToken, requestBody, boardName)
         .then((run: RunResponse) => {
+          setData(run.data);
           setBoardId(run.run.board_id);
           monday.execute("valueCreatedForUser");
           setLoading(false);

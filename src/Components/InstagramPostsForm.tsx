@@ -15,6 +15,7 @@ import {
   Body_run_schedule,
   ScheduleInput,
   RunResponse,
+  ColumnData,
 } from "../api";
 import { FieldsRequiredModal } from "./Modals/FieldsRequiredModal";
 import { BaseModal } from "./Modals/BaseModal";
@@ -39,6 +40,7 @@ export interface InstagramPostsForm {
   days: string[];
   startTime: string;
   timezone: Option;
+  setData: React.Dispatch<React.SetStateAction<ColumnData[]>>;
 }
 
 export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
@@ -57,6 +59,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
   days,
   startTime,
   timezone,
+  setData,
 }) => {
   const [pageOptions, setPageOptions] = useState<Option[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Option>();
@@ -150,6 +153,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
           };
           RunService.runRun(sessionToken, requestBody)
             .then((run: RunResponse) => {
+              setData(run.data);
               setBoardId(run.run.board_id);
               monday.execute("valueCreatedForUser");
               setLoading(false);
@@ -215,6 +219,7 @@ export const InstagramPostsForm: React.FC<InstagramPostsForm> = ({
 
       RunService.runRun(sessionToken, requestBody, boardName)
         .then((run: RunResponse) => {
+          setData(run.data);
           if (boardName) {
             setSelectedBoardOption({
               value: run.run.board_id,
