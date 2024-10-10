@@ -207,7 +207,6 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
           }
         })
         .catch((error: any) => {
-          console.log(error.body.detail);
           let errorMessage =
             "There was an error trying to fetch your data. Please check your configuration and try again.";
           if (error.body && error.body.detail) {
