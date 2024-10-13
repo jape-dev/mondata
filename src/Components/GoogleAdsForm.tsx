@@ -67,7 +67,6 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     label: "Import into a new board",
     value: 999,
   });
-  const [boardColumns, setBoardColumns] = useState<Option[]>([]);
   const [selectedGrouping, setSelectedGrouping] = useState<Option>();
   const [selectedColumnOption, setSelectedColumnOption] = useState<Option>();
   const [date, setDate] = useState<Option>({ value: 730, label: "All time" });
@@ -159,6 +158,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           const queryData: QueryData = {
             monday_items: items,
             account_id: selectedAccount?.value,
+            manager_id: selectedAccount?.manager_id,
             dimensions: selectedGrouping?.value,
             metrics: selectedFields.map((field) => field.value),
             start_date: startDate.toISOString().split("T")[0],
@@ -243,6 +243,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
     ) {
       const queryData: QueryData = {
         account_id: selectedAccount.value,
+        manager_id: selectedAccount.manager_id,
         dimensions: selectedGrouping ? [selectedGrouping.value] : [],
         metrics: selectedFields.map((field) => field.value),
         start_date: startDate.toISOString().split("T")[0],
@@ -374,6 +375,7 @@ export const GoogleAdsForm: React.FC<GoogleAdsFormProps> = ({
           const accountOptions: Option[] = accounts.map((account) => ({
             label: account.label,
             value: account.value,
+            manager_id: account.manager_id,
           }));
           setAccountOptions(accountOptions);
         })
