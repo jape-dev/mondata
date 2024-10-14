@@ -176,7 +176,10 @@ export const Connector: React.FC<{
   ]);
 
   useEffect(() => {
-    if (user?.monday_account_id === 25104519) {
+    if (
+      user?.monday_account_id === 25104519 ||
+      user?.monday_account_id === 67338364
+    ) {
       setOptions((prevOptions) => {
         if (!prevOptions.some((option) => option.value === "shopify")) {
           return [
