@@ -22,7 +22,7 @@ const mondayColumnTypes = [
   { value: "link", label: "Link" },
   //   { value: "location", label: "Location" },
   { value: "long-text", label: "Long Text" },
-  { value: "number", label: "Number" },
+  { value: "numbers", label: "Number" },
   //   { value: "people", label: "People" },
   { value: "phone", label: "Phone" },
   //   { value: "progress", label: "Progress" },
