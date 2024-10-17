@@ -19,6 +19,7 @@ import {
   UsersService,
   ShopifyService,
   Contact,
+  LinkedinService,
 } from "../api";
 import { FacebookAdsForm } from "../Components/FacebookAdsForm";
 import { FacebookPagesForm } from "../Components/FacebookPagesForm";
@@ -28,6 +29,7 @@ import { GoogleAnalyticsForm } from "../Components/GoogleAnalyticsForm";
 import { GoogleSheetsForm } from "../Components/GoogleSheetsForm";
 import { CustomApiForm } from "Components/CustomApiForm";
 import { ShopifyForm } from "../Components/ShopifyForm";
+import { LinkedInForm } from "../Components/LinkedInForm";
 import { SchedulerBlock } from "../Components/SchedulerBlock";
 import { RunBlock } from "Components/RunBlock";
 import { Option } from "../Utils/models";
@@ -170,6 +172,11 @@ export const Connector: React.FC<{
       leftAvatar: getIconUrl("google-sheets-icon"),
     },
     {
+      value: "linkedin_ads",
+      label: "LinkedIn Ads",
+      leftAvatar: getIconUrl("linkedin-icon"),
+    },
+    {
       value: "request_new",
       label: "Request New Application",
     },
@@ -219,12 +226,14 @@ export const Connector: React.FC<{
       GoogleService.googleGoogleSheetsLogin(connectionId, requestBody);
     } else if (connector === "shopify") {
       ShopifyService.shopifyLogin(connectionId, requestBody);
+    } else if (connector === "linkedin_ads") {
+      LinkedinService.linkedinLogin(connectionId, requestBody);
     }
   }
 
   const nango = new Nango({
     publicKey:
-      process.env.REACT_APP_NANGO_KEY || "7b73b776-3a10-41c0-a5ee-feef16d372d4",
+      process.env.REACT_APP_NANGO_KEY || "2a32c004-ded6-47ae-9d68-d69f36c9f6d0",
   });
 
   const connect = () => {
@@ -292,6 +301,16 @@ export const Connector: React.FC<{
           updateUser(result.connectionId);
         })
         .catch((err) => {
+          console.log(err);
+        });
+    } else if (connector === "linkedin_ads") {
+      nango
+        .auth("linkedin", "linkedin-prod")
+        .then((result) => {
+          updateUser(result.connectionId);
+        })
+        .catch((err) => {
+          console.log("linkedin error", err);
           console.log(err);
         });
     }
@@ -507,6 +526,24 @@ export const Connector: React.FC<{
                 />
               ) : connector === "shopify" ? (
                 <ShopifyForm
+                  user={user}
+                  sessionToken={sessionToken}
+                  workspaceId={workspaceId}
+                  isScheduled={isScheduled}
+                  isRunning={isRunning}
+                  setIsRunning={setIsRunning}
+                  setLoading={setLoading}
+                  setSuccess={setSuccess}
+                  boardId={boardId}
+                  setBoardId={setBoardId}
+                  period={period}
+                  step={step}
+                  days={days}
+                  startTime={startTime}
+                  timezone={timezone}
+                />
+              ) : connector === "linkedin_ads" ? (
+                <LinkedInForm
                   user={user}
                   sessionToken={sessionToken}
                   workspaceId={workspaceId}

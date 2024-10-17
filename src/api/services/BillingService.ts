@@ -20,10 +20,29 @@ export class BillingService {
     ): CancelablePromise<boolean> {
         return __request(OpenAPI, {
             method: 'POST',
-            url: '/api/v1/billing/valid_plan',
+            url: '/api/v1/billing/valid-plan',
             query: {
                 'board_id': boardId,
             },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Remaining Runs
+     * @param requestBody
+     * @returns number Successful Response
+     * @throws ApiError
+     */
+    public static billingRemainingRuns(
+        requestBody: UserPublic,
+    ): CancelablePromise<number> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/billing/remaining-runs',
             body: requestBody,
             mediaType: 'application/json',
             errors: {

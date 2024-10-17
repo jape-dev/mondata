@@ -94,6 +94,7 @@ export const ScheduleTable: React.FC<ScheduleProps> = ({
       custom_api: "Custom API",
       google_sheets: "Google Sheets",
       shopify: "Shopify",
+      linkedin_ads: "LinkedIn Ads",
     };
 
     return nameMap[connector] || "Unknown Connector";

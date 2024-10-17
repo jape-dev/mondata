@@ -35,6 +35,7 @@ export { GoogleService } from './services/GoogleService';
 export { GoogleAdsService } from './services/GoogleAdsService';
 export { GoogleAnalyticsService } from './services/GoogleAnalyticsService';
 export { InstagramService } from './services/InstagramService';
+export { LinkedinService } from './services/LinkedinService';
 export { MondayService } from './services/MondayService';
 export { RunService } from './services/RunService';
 export { ShopifyService } from './services/ShopifyService';

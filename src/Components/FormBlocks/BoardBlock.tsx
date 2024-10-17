@@ -285,9 +285,13 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
             ) : (
               <></>
             )}
-            {["google_ads", "google_analytics", "facebook", "shopify"].includes(
-              connector
-            ) &&
+            {[
+              "google_ads",
+              "google_analytics",
+              "facebook",
+              "shopify",
+              "linkedin_ads",
+            ].includes(connector) &&
               selectedGroupOption?.value === 999 &&
               setSplitByGrouping && (
                 <>
@@ -330,9 +334,13 @@ export const BoardBlock: React.FC<BoardBlockProps> = ({
               placeholder="Enter name"
               className="mb-2 !text-sm"
             />
-            {["google_ads", "google_analytics", "facebook", "shopify"].includes(
-              connector
-            ) &&
+            {[
+              "google_ads",
+              "google_analytics",
+              "facebook",
+              "shopify",
+              "linkedin_ads",
+            ].includes(connector) &&
               setSplitByGrouping && (
                 <>
                   <div className="flex items-center gap-1 mt-2">

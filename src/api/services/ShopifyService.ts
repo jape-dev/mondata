@@ -9,6 +9,17 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ShopifyService {
     /**
+     * Install
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static shopifyInstall(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/shopify/install',
+        });
+    }
+    /**
      * Login
      * @param connectionId
      * @param requestBody
@@ -30,6 +41,17 @@ export class ShopifyService {
             errors: {
                 422: `Validation Error`,
             },
+        });
+    }
+    /**
+     * Login
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static shopifyLogin1(): CancelablePromise<any> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/shopify/app/login',
         });
     }
     /**

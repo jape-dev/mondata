@@ -18,6 +18,7 @@ export type User = {
     google_sheets_token?: (string | null);
     shopify_token?: (string | null);
     shopify_store_url?: (string | null);
+    linkedin_token?: (string | null);
     id?: (number | null);
     hashed_password: string;
 };
