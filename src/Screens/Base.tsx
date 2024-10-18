@@ -8,6 +8,7 @@ import { GuideModal } from "../Components/Modals/OnboardingGuideModal";
 import { UpgradeModal } from "Components/Modals/UpgradeModal";
 import longLogo from "../Static/images/long-logo.png";
 import { Button } from "monday-ui-react-core";
+import { RunsRemainingBar } from "../Components/Nav/RunsRemainingBar";
 
 const monday = mondaySdk();
 
@@ -85,8 +86,12 @@ const BaseScreen: React.FC = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-12 ">
-        <div className="col-span-8 border-b-2 border-gray-250 h-10">
+      <div className="grid grid-cols-12 flex">
+        <div
+          className={`${
+            user?.plan === Plan.PRO ? "col-span-8" : "col-span-3"
+          } border-b-2 border-gray-250 h-10`}
+        >
           <div className="flex justify-start h-10 items-center pl-4">
             <img src={longLogo} alt="Logo" className="h-6 !m-0" />
             <Button
@@ -99,7 +104,18 @@ const BaseScreen: React.FC = () => {
             </Button>
           </div>
         </div>
-        <div className="col-span-4 flex justify-end border-b-2 border-gray-250 h-10 text-sm">
+        {user?.plan === Plan.FREE && (
+          <div className="col-span-5 border-b-2 border-gray-250 h-9 mt-1">
+            <div className="self-center !w-1/3 justify-self-end">
+              <RunsRemainingBar
+                sessionToken={sessionToken}
+                user={user}
+                className="justify-self-end"
+              />
+            </div>
+          </div>
+        )}
+        <div className="flex col-span-4 justify-end border-b-2 border-gray-250 h-10 text-sm">
           <TabList activeTabId={activeTab}>
             <Tab onClick={() => setActiveTab(0)}>New Import</Tab>
             <Tab onClick={handleScheduleTabClick}>Schedule</Tab>
