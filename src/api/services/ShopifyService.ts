@@ -105,7 +105,7 @@ export class ShopifyService {
      */
     public static shopifyChargeApproval(): CancelablePromise<boolean> {
         return __request(OpenAPI, {
-            method: 'POST',
+            method: 'GET',
             url: '/api/v1/shopify/charge-approval',
         });
     }

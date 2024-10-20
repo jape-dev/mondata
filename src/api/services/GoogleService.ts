@@ -91,7 +91,7 @@ export class GoogleService {
         sessionToken: string,
         url: string,
         sheetName: string,
-    ): CancelablePromise<any> {
+    ): CancelablePromise<Array<Record<string, any>>> {
         return __request(OpenAPI, {
             method: 'POST',
             url: '/api/v1/google/sheets/headers',

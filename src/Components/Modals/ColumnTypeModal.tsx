@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, ModalContent, Dropdown, Button } from "monday-ui-react-core";
 import { ColumnData } from "api";
 import { Option } from "../../Utils/models";
@@ -45,15 +45,19 @@ export const ColumnTypeModal: React.FC<ColumnTypeModalProps> = ({
 }) => {
   const [columnTypes, setColumnTypes] = useState<{
     [key: string]: string | undefined;
-  }>(
-    columns.reduce(
-      (acc, column) => ({
-        ...acc,
-        [column.column_name]: column.column_type || undefined,
-      }),
-      {}
-    )
-  );
+  }>({}); // Initialize with an empty object
+
+  useEffect(() => {
+    setColumnTypes(
+      columns.reduce(
+        (acc, column) => ({
+          ...acc,
+          [column.column_name]: column.column_type || undefined,
+        }),
+        {}
+      )
+    );
+  }, [columns]);
 
   const handleTypeChange = (column: string, type: string | undefined) => {
     setColumnTypes((prev) => ({ ...prev, [column]: type }));
@@ -87,7 +91,7 @@ export const ColumnTypeModal: React.FC<ColumnTypeModalProps> = ({
               <Dropdown
                 className="w-48"
                 value={{
-                  value: columnTypes[column.column_name],
+                  value: columnTypes[column.column_type || "text"],
                   label: columnTypes[column.column_name],
                 }}
                 onChange={(option: Option | null) =>

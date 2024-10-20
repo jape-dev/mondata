@@ -133,9 +133,10 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
     setSelectedSheet(option);
     if (url && sessionToken) {
       GoogleService.googleGetSheetHeaders(sessionToken, url, option.label)
-        .then((headers: string[]) => {
+        .then((headers: Record<string, any>[]) => {
           const columnHeaders: ColumnData[] = headers.map((header) => ({
-            column_name: header,
+            column_name: header.column_name,
+            column_type: header.column_type,
             items: [],
           }));
           setSheetHeaders(columnHeaders);
@@ -234,10 +235,6 @@ export const GoogleSheetsForm: React.FC<GoogleSheetsFormProps> = ({
       setIsRunning(false);
     }
   };
-
-  useEffect(() => {
-    console.log(sheetHeaders);
-  }, [sheetHeaders]);
 
   return (
     <>
