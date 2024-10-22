@@ -9,5 +9,6 @@ export type UserPublic = {
     monday_account_id: number;
     shopify_store_url?: (string | null);
     plan: Plan;
+    email?: (string | null);
 };
 
