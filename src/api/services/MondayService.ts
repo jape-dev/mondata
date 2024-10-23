@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ColumnData } from '../models/ColumnData';
+import type { MondayItem } from '../models/MondayItem';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
@@ -124,7 +125,7 @@ export class MondayService {
      * @param columnId
      * @param sessionToken
      * @param groupId
-     * @returns any Successful Response
+     * @returns MondayItem Successful Response
      * @throws ApiError
      */
     public static mondayItems(
@@ -132,7 +133,7 @@ export class MondayService {
         columnId: string,
         sessionToken: string,
         groupId?: (string | null),
-    ): CancelablePromise<any> {
+    ): CancelablePromise<Array<MondayItem>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/monday/items',
