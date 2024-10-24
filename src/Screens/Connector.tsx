@@ -184,7 +184,7 @@ export const Connector: React.FC<{
 
   useEffect(() => {
     if (
-      user?.email?.includes("shopify.com") ||
+      user?.email?.includes("shopify") ||
       user?.monday_account_id === 25104519
     ) {
       setOptions((prevOptions) => {
