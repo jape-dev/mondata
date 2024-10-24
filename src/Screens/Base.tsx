@@ -86,10 +86,12 @@ const BaseScreen: React.FC = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-12 flex">
+      <div className="grid grid-cols-12 flex flex-wrap">
         <div
           className={`${
-            user?.plan === Plan.PRO ? "col-span-8" : "col-span-3"
+            user?.plan === Plan.PRO
+              ? "col-span-12 lg:col-span-8"
+              : "col-span-12 sm:col-span-6 lg:col-span-3"
           } border-b-2 border-gray-250 h-10`}
         >
           <div className="flex justify-start h-10 items-center pl-4">
@@ -105,8 +107,8 @@ const BaseScreen: React.FC = () => {
           </div>
         </div>
         {user?.plan === Plan.FREE && (
-          <div className="col-span-5 border-b-2 border-gray-250 h-9 mt-1">
-            <div className="self-center !w-1/3 justify-self-end">
+          <div className="hidden sm:block col-span-6 lg:col-span-5 border-b-2 border-gray-250 h-9 mt-1">
+            <div className="self-center w-full sm:w-2/3 lg:w-1/3 ml-auto mr-4">
               <RunsRemainingBar
                 sessionToken={sessionToken}
                 user={user}
@@ -115,7 +117,7 @@ const BaseScreen: React.FC = () => {
             </div>
           </div>
         )}
-        <div className="flex col-span-4 justify-end border-b-2 border-gray-250 h-10 text-sm">
+        <div className="col-span-12 sm:col-span-12 lg:col-span-4 flex justify-end border-b-2 border-gray-250 h-10 text-sm">
           <TabList activeTabId={activeTab}>
             <Tab onClick={() => setActiveTab(0)}>New Import</Tab>
             <Tab onClick={handleScheduleTabClick}>Schedule</Tab>
